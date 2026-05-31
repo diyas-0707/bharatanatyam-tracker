@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#6B1E1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bharatanatyam Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+--maroon:#6B1E1E;--maroon-deep:#4A1010;--maroon-soft:#8B3030;
+--gold:#C9922A;--gold-light:#E8B84B;--gold-pale:#FDF3DC;
+--cream:#FDF8F0;--warm-white:#FFFCF5;
+--text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;
+--card-bg:#FFFFFF;--surface:#FDF8F2;
+--success:#2D6A4F;--success-bg:#D8F3DC;
+--border:rgba(107,30,30,0.12);
+--shadow:0 2px 16px rgba(107,30,30,0.10);
+}
+html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark)}
+#app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
+.screen{flex:1;overflow-y:auto;padding-bottom:80px;display:none}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{width:3px}
+.screen::-webkit-scrollbar-track{background:transparent}
+.screen::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Bottom Nav */
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:72px;background:var(--card-bg);border-top:0.5px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s;padding:8px 0;border:none;background:none}
+.nav-tab svg{width:22px;height:22px;stroke:var(--text-soft);transition:stroke .2s;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-tab span{font-size:10px;color:var(--text-soft);font-weight:400;letter-spacing:.3px;transition:color .2s}
+.nav-tab.active svg{stroke:var(--maroon)}
+.nav-tab.active span{color:var(--maroon);font-weight:500}
+
+/* Header */
+.page-header{padding:20px 20px 0;background:var(--warm-white)}
+.page-header h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
+.page-header p{font-size:13px;color:var(--text-soft);margin-top:4px;font-weight:300}
+.header-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;margin-bottom:6px;opacity:.8}
+
+/* Cards */
+.card{background:var(--card-bg);border-radius:16px;padding:18px 20px;margin:14px 16px 0;border:0.5px solid var(--border);box-shadow:var(--shadow)}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-soft);font-weight:500;margin-bottom:10px}
+.card h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text-dark);margin-bottom:6px}
+
+/* Home */
+.greeting-section{padding:24px 20px 8px}
+.greeting-sub{font-size:13px;color:var(--text-soft);font-weight:300;margin-bottom:4px}
+.greeting-name{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--maroon-deep);line-height:1.1}
+.greeting-name em{font-style:italic;color:var(--gold)}
+.today-card{background:linear-gradient(135deg,var(--maroon-deep) 0%,var(--maroon-soft) 100%);color:#fff;border:none}
+.today-card .card-title{color:rgba(255,255,255,0.6)}
+.today-card h2{color:#fff;font-size:22px}
+.today-card p{font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-top:6px}
+.gold-dot{display:inline-block;width:6px;height:6px;background:var(--gold-light);border-radius:50%;margin-right:8px;vertical-align:middle}
+.streak-row{display:flex;gap:10px;margin:14px 16px 0}
+.streak-card{flex:1;background:var(--gold-pale);border:0.5px solid rgba(201,146,42,0.25);border-radius:14px;padding:14px 16px;text-align:center}
+.streak-num{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep)}
+.streak-label{font-size:11px;color:var(--text-soft);margin-top:2px;font-weight:400}
+.feedback-pill{display:inline-block;background:var(--success-bg);color:var(--success);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;margin-bottom:10px}
+.feedback-text{font-size:16px;color:var(--text-mid);line-height:1.6;font-style:italic;font-family:'Cormorant Garamond',serif}
+.feedback-meta{font-size:12px;color:var(--text-soft);margin-top:8px}
+.practice-btn{display:block;width:calc(100% - 32px);margin:18px 16px;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s;letter-spacing:.2px}
+.practice-btn:active{transform:scale(0.97);background:var(--maroon-deep)}
+.practice-btn.done{background:var(--success)}
+
+/* Log */
+.log-filter{padding:16px 16px 8px;display:flex;gap:10px;align-items:center}
+.log-filter select{flex:1;appearance:none;background:var(--card-bg);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-dark);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.log-stats{display:flex;gap:6px;padding:0 16px 12px}
+.log-stat{flex:1;background:var(--surface);border-radius:10px;padding:10px;text-align:center}
+.log-stat-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--maroon)}
+.log-stat-label{font-size:10px;color:var(--text-soft);letter-spacing:.5px}
+.entry-list{padding:0 16px}
+.entry{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:0.5px solid var(--border);display:flex;gap:14px;align-items:flex-start}
+.entry-date-col{text-align:center;min-width:38px}
+.entry-day{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--maroon);line-height:1}
+.entry-month{font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px}
+.entry-body{flex:1}
+.entry-title{font-size:14px;font-weight:500;color:var(--text-dark);line-height:1.4}
+.entry-sub{font-size:12px;color:var(--text-soft);margin-top:4px;line-height:1.5}
+.entry-badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:6px}
+.badge-done{background:var(--success-bg);color:var(--success)}
+.badge-miss{background:#FFF0F0;color:#C0392B}
+
+/* Teacher */
+.student-select-wrap{padding:16px}
+.student-select-wrap label{font-size:12px;color:var(--text-soft);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px}
+.student-select-wrap select{width:100%;appearance:none;background:var(--card-bg);border:0.5px solid var(--border);border-radius:12px;padding:12px 16px;font-size:15px;color:var(--text-dark);font-family:'DM Sans',sans-serif;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.field-group{padding:0 16px;margin-bottom:14px}
+.field-group label{font-size:12px;color:var(--text-soft);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px}
+.field-wrap{position:relative}
+.field-wrap textarea{width:100%;background:var(--card-bg);border:0.5px solid var(--border);border-radius:12px;padding:12px 48px 12px 14px;font-size:14px;color:var(--text-dark);font-family:'DM Sans',sans-serif;resize:none;min-height:100px;line-height:1.6;outline:none;transition:border-color .2s}
+.field-wrap textarea:focus{border-color:var(--maroon)}
+.mic-btn{position:absolute;right:12px;bottom:12px;width:32px;height:32px;background:var(--gold-pale);border:0.5px solid rgba(201,146,42,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s}
+.mic-btn:hover{background:var(--gold-light)}
+.mic-btn.recording{background:var(--maroon);animation:pulse 1s infinite}
+.mic-btn svg{width:16px;height:16px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mic-btn.recording svg{stroke:#fff}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
+.save-btn{display:block;width:calc(100% - 32px);margin:6px 16px 20px;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
+.save-btn:active{transform:scale(0.97)}
+.saved-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.saved-toast.show{opacity:1}
+.ornament-divider{text-align:center;padding:10px 0;font-size:12px;color:var(--gold);letter-spacing:6px;opacity:.6}
+
+/* Modal */
+.modal-overlay{display:none;position:absolute;inset:0;background:rgba(26,10,10,.5);z-index:200;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--warm-white);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto}
+.modal-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.modal-sheet h3{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--maroon-deep);margin-bottom:16px}
+.modal-field{margin-bottom:14px}
+.modal-field label{font-size:12px;color:var(--text-soft);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px}
+.modal-field input,.modal-field textarea,.modal-field select{width:100%;background:var(--card-bg);border:0.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-dark);font-family:'DM Sans',sans-serif;outline:none}
+.modal-field textarea{min-height:80px;resize:none;line-height:1.5}
+.modal-btns{display:flex;gap:10px}
+.modal-btn-cancel{flex:1;padding:13px;background:var(--surface);border:0.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer}
+.modal-btn-save{flex:2;padding:13px;background:var(--maroon);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
+.fab{position:absolute;bottom:84px;right:16px;width:52px;height:52px;background:var(--maroon);border-radius:16px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(107,30,30,0.35);z-index:99;transition:transform .18s}
+.fab:active{transform:scale(0.93)}
+.fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="screen active" id="screen-home">
+    <div class="greeting-section">
+      <div class="ornament-divider">✦ ✦ ✦</div>
+      <p class="greeting-sub">Hi</p>
+      <h1 class="greeting-name"><em>Sahana</em></h1>
+    </div>
+    <div class="card today-card">
+      <div class="card-title">Today's Practice</div>
+      <h2>Alarippu & Jathiswaram</h2>
+      <p><span class="gold-dot"></span>Focus on aramandi transitions</p>
+      <p><span class="gold-dot"></span>Nattadavu footwork — 8 counts</p>
+      <p><span class="gold-dot"></span>Review tattu mettu adavus</p>
+    </div>
+    <div class="streak-row">
+      <div class="streak-card"><div class="streak-num" id="streak-count">0</div><div class="streak-label">Day Streak</div></div>
+      <div class="streak-card"><div class="streak-num" id="total-sessions">0</div><div class="streak-label">Total Sessions</div></div>
+      <div class="streak-card"><div class="streak-num" id="this-month">0</div><div class="streak-label">This Month</div></div>
+    </div>
+    <div class="card feedback-card">
+      <div class="card-title">Latest Teacher Feedback</div>
+      <div class="feedback-pill" id="feedback-student-name">From Deepa Rajamani</div>
+      <div class="feedback-text" id="home-feedback-text">No feedback yet. Practice and check back!</div>
+      <div class="feedback-meta" id="home-feedback-date"></div>
+    </div>
+    <button class="practice-btn" id="mark-practiced-btn" onclick="markPracticed()">✓ &nbsp; Mark Today as Practiced</button>
+    <div style="height:10px"></div>
+  </div>
+
+  <div class="screen" id="screen-log">
+    <div class="page-header">
+      <h1>Practice Log</h1>
+      <p>Your journey, session by session</p>
+    </div>
+    <div class="log-filter">
+      <select id="month-filter" onchange="renderLog()">
+        <option value="2026-05">May 2026</option>
+        <option value="2026-04">April 2026</option>
+        <option value="2026-03">March 2026</option>
+        <option value="2026-02">February 2026</option>
+      </select>
+    </div>
+    <div class="log-stats">
+      <div class="log-stat"><div class="log-stat-num" id="stat-completed">0</div><div class="log-stat-label">Completed</div></div>
+      <div class="log-stat"><div class="log-stat-num" id="stat-missed">0</div><div class="log-stat-label">Missed</div></div>
+      <div class="log-stat"><div class="log-stat-num" id="stat-pct">0%</div><div class="log-stat-label">Rate</div></div>
+    </div>
+    <div class="ornament-divider">✦</div>
+    <div class="entry-list" id="entry-list"></div>
+    <div style="height:10px"></div>
+  </div>
+
+  <div class="screen" id="screen-teacher">
+    <div class="page-header">
+      <div class="header-ornament">✦ Deepa Rajamani ✦</div>
+      <h1>Teacher Portal</h1>
+      <p>Set practice & give feedback</p>
+    </div>
+    <div class="student-select-wrap">
+      <label>Select Student</label>
+      <select id="teacher-student-select" onchange="loadTeacherData()">
+        <option value="Sahana Pattabi">Sahana Pattabi</option>
+        <option value="Aditi Srinivas">Aditi Srinivas</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Practice for Next Class</label>
+      <div class="field-wrap">
+        <textarea id="practice-text" placeholder="e.g. Alarippu full sequence, focus on eye movements and mudras..." rows="4"></textarea>
+        <button class="mic-btn" id="mic-practice" onclick="toggleVoice('practice-text','mic-practice')" title="Voice input">
+          <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Feedback & Corrections</label>
+      <div class="field-wrap">
+        <textarea id="feedback-text" placeholder="e.g. Work on aramandi posture — keep knees aligned..." rows="4"></textarea>
+        <button class="mic-btn" id="mic-feedback" onclick="toggleVoice('feedback-text','mic-feedback')" title="Voice input">
+          <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveTeacherData()">Save Feedback</button>
+    <div style="height:10px"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tab-home" onclick="navigate('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-tab" id="tab-log" onclick="navigate('log')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>Practice Log</span>
+    </button>
+    <button class="nav-tab" id="tab-teacher" onclick="navigate('teacher')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Teacher</span>
+    </button>
+  </nav>
+
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3>Log Practice Session</h3>
+      <div class="modal-field"><label>Date</label><input type="date" id="new-entry-date"></div>
+      <div class="modal-field"><label>Practice Content</label><textarea id="new-entry-practice" placeholder="What did you practice today?"></textarea></div>
+      <div class="modal-field"><label>Status</label><select id="new-entry-status"><option value="completed">Completed</option><option value="partial">Partially Completed</option><option value="missed">Not Completed</option></select></div>
+      <div class="modal-btns">
+        <button class="modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn-save" onclick="saveEntry()">Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab-add" style="display:none" onclick="openModal()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <div class="saved-toast" id="toast">Saved successfully ✓</div>
+</div>
+
+<script>
+const STORAGE_KEYS={entries:'entries',feedback:'feedback',practiced:'practiced'};
+function getEntries(){try{return JSON.parse(localStorage.getItem(STORAGE_KEYS.entries)||'[]')}catch{return[]}}
+function saveEntries(e){localStorage.setItem(STORAGE_KEYS.entries,JSON.stringify(e))}
+function getFeedback(){try{return JSON.parse(localStorage.getItem(STORAGE_KEYS.feedback)||'{}')}catch{return{}}}
+function saveFeedback(f){localStorage.setItem(STORAGE_KEYS.feedback,JSON.stringify(f))}
+function getPracticed(){try{return JSON.parse(localStorage.getItem(STORAGE_KEYS.practiced)||'[]')}catch{return[]}}
+function savePracticed(p){localStorage.setItem(STORAGE_KEYS.practiced,JSON.stringify(p))}
+
+function seedData(){
+  if(getEntries().length>0)return;
+  const demos=[
+    {id:1,date:'2026-05-22',studentName:'Sahana Pattabi',practiceText:'Alarippu full sequence, eye movements and mudras',feedbackText:'',completed:true},
+    {id:2,date:'2026-05-20',studentName:'Sahana Pattabi',practiceText:'Jathiswaram: first two speeds',feedbackText:'',completed:true},
+    {id:3,date:'2026-05-18',studentName:'Sahana Pattabi',practiceText:'Tattu adavu variations 1–4',feedbackText:'',completed:false},
+    {id:4,date:'2026-05-15',studentName:'Sahana Pattabi',practiceText:'Practice the beginning Natanam without rushing',feedbackText:'',completed:true},
+    {id:5,date:'2026-05-12',studentName:'Sahana Pattabi',practiceText:'Mathura full revision',feedbackText:'',completed:true},
+    {id:6,date:'2026-04-28',studentName:'Sahana Pattabi',practiceText:'Pushpanjali steps review',feedbackText:'',completed:true},
+    {id:7,date:'2026-04-22',studentName:'Sahana Pattabi',practiceText:'Kuditta Mettu Adavu practice',feedbackText:'',completed:false},
+  ];
+  saveEntries(demos);
+  const fb={'Sahana Pattabi':{practiceText:'Alarippu & Jathihswaram — focus on aramandi depth',feedbackText:'Great posture, Sahana. Work on keeping your spine straight in aramandi. Your nattu adavu timing is improving.',studentName:'Sahana Pattabi',savedAt:'2026-05-22T18:30:00'}};
+  saveFeedback(fb);
+}
+
+let currentScreen='home';
+function navigate(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.getElementById('tab-'+screen).classList.add('active');
+  document.getElementById('fab-add').style.display=screen==='log'?'flex':'none';
+  currentScreen=screen;
+  if(screen==='log')renderLog();
+  if(screen==='home')renderHome();
+  if(screen==='teacher')loadTeacherData();
+}
+
+function renderHome(){
+  const entries=getEntries();
+  const today=new Date().toISOString().split('T')[0];
+  const practiced=getPracticed();
+  const todayDone=practiced.includes(today);
+  const btn=document.getElementById('mark-practiced-btn');
+  if(todayDone){btn.textContent='✓  Practiced Today';btn.classList.add('done')}
+  else{btn.innerHTML='✓ &nbsp; Mark Today as Practiced';btn.classList.remove('done')}
+  const myEntries=entries.filter(e=>e.studentName==='Sahana Pattabi');
+  const completed=myEntries.filter(e=>e.completed).length;
+  document.getElementById('total-sessions').textContent=completed;
+  const now=new Date();
+  const monthStr=now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
+  const thisMonth=myEntries.filter(e=>e.date.startsWith(monthStr)&&e.completed).length;
+  document.getElementById('this-month').textContent=thisMonth+(todayDone?1:0);
+  const allDates=[...new Set([...practiced,...myEntries.filter(e=>e.completed).map(e=>e.date)])].sort().reverse();
+  let streak=0;const d=new Date();
+  for(let i=0;i<60;i++){const ds=d.toISOString().split('T')[0];if(allDates.includes(ds)||(ds===today&&todayDone)){streak++}else break;d.setDate(d.getDate()-1);}
+  document.getElementById('streak-count').textContent=streak;
+  const fb=getFeedback();const myFb=fb['Sahana Pattabi'];
+  if(myFb&&myFb.feedbackText){
+    document.getElementById('home-feedback-text').textContent=myFb.feedbackText;
+    document.getElementById('feedback-student-name').textContent='From Deepa Rajamani';
+    if(myFb.savedAt){const dt=new Date(myFb.savedAt);document.getElementById('home-feedback-date').textContent=dt.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}
+  }
+}
+
+function markPracticed(){
+  const practiced=getPracticed();const today=new Date().toISOString().split('T')[0];
+  if(!practiced.includes(today)){practiced.push(today);savePracticed(practiced);showToast('Practice marked for today! 🙏');renderHome();}
+}
+
+function renderLog(){
+  const entries=getEntries();const month=document.getElementById('month-filter').value;
+  const filtered=entries.filter(e=>e.studentName==='Sahana Pattabi'&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+  const completed=filtered.filter(e=>e.completed).length;const missed=filtered.filter(e=>!e.completed).length;
+  const pct=filtered.length?Math.round(completed/filtered.length*100):0;
+  document.getElementById('stat-completed').textContent=completed;
+  document.getElementById('stat-missed').textContent=missed;
+  document.getElementById('stat-pct').textContent=pct+'%';
+  const list=document.getElementById('entry-list');
+  if(!filtered.length){list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-soft);font-size:14px;">No entries this month</div>';return}
+  list.innerHTML=filtered.map(e=>{
+    const d=new Date(e.date+'T00:00:00');const day=d.getDate();const mon=d.toLocaleString('en',{month:'short'}).toUpperCase();
+    return`<div class="entry"><div class="entry-date-col"><div class="entry-day">${day}</div><div class="entry-month">${mon}</div></div><div class="entry-body"><div class="entry-title">${e.practiceText||'Practice session'}</div>${e.feedbackText?`<div class="entry-sub">${e.feedbackText}</div>`:''}<span class="entry-badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div></div>`
+  }).join('');
+}
+
+function openModal(){document.getElementById('new-entry-date').value=new Date().toISOString().split('T')[0];document.getElementById('new-entry-practice').value='';document.getElementById('new-entry-status').value='completed';document.getElementById('add-modal').classList.add('open')}
+function closeModal(){document.getElementById('add-modal').classList.remove('open')}
+function saveEntry(){
+  const date=document.getElementById('new-entry-date').value;const pt=document.getElementById('new-entry-practice').value.trim();const status=document.getElementById('new-entry-status').value;
+  if(!date||!pt){alert('Please fill in date and practice content');return}
+  const entries=getEntries();entries.push({id:Date.now(),date,studentName:'Sahana Pattabi',practiceText:pt,feedbackText:'',completed:status==='completed'});
+  saveEntries(entries);closeModal();renderLog();showToast('Session logged ✓');
+}
+
+function loadTeacherData(){
+  const student=document.getElementById('teacher-student-select').value;const fb=getFeedback();const data=fb[student]||{};
+  document.getElementById('practice-text').value=data.practiceText||'';document.getElementById('feedback-text').value=data.feedbackText||'';
+}
+function saveTeacherData(){
+  const student=document.getElementById('teacher-student-select').value;const practiceText=document.getElementById('practice-text').value.trim();const feedbackText=document.getElementById('feedback-text').value.trim();
+  const fb=getFeedback();fb[student]={studentName:student,practiceText,feedbackText,savedAt:new Date().toISOString()};saveFeedback(fb);showToast('Feedback saved for '+student+' ✓');
+}
+
+let activeRecognition=null,activeMicId=null;
+function toggleVoice(fieldId,micId){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Voice not supported in this browser');return}
+  if(activeRecognition&&activeMicId===micId){activeRecognition.stop();activeRecognition=null;document.getElementById(micId).classList.remove('recording');activeMicId=null;return}
+  if(activeRecognition){activeRecognition.stop();document.getElementById(activeMicId).classList.remove('recording')}
+  const rec=new SR();rec.lang='en-IN';rec.continuous=true;rec.interimResults=true;
+  const field=document.getElementById(fieldId);const base=field.value;
+  rec.onresult=evt=>{let interim='',final='';for(let i=evt.resultIndex;i<evt.results.length;i++){if(evt.results[i].isFinal)final+=evt.results[i][0].transcript;else interim+=evt.results[i][0].transcript;}field.value=(base+(base?'\n':'')+final+interim).trim()};
+  rec.onerror=()=>{document.getElementById(micId).classList.remove('recording');activeRecognition=null;activeMicId=null};
+  rec.onend=()=>{document.getElementById(micId).classList.remove('recording');activeRecognition=null;activeMicId=null};
+  rec.start();activeRecognition=rec;activeMicId=micId;document.getElementById(micId).classList.add('recording');
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+seedData();
+renderHome();
+document.getElementById('month-filter').value='2026-05';
+document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+</script>
+</body>
+</html>
