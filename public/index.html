@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#6B1E1E">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Bharatanatyam Tracker</title>
@@ -18,13 +19,14 @@
   --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;
   --card-bg:#FFFFFF;--surface:#FDF8F2;
   --success:#2D6A4F;--success-bg:#D8F3DC;
+  --danger:#C0392B;--danger-bg:#FFF0F0;
   --border:rgba(107,30,30,0.12);
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark)}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
 
-/* ── AUTH SCREEN ── */
+/* AUTH */
 #auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:40px 24px;background:linear-gradient(160deg,var(--cream) 0%,var(--gold-pale) 100%)}
 .auth-ornament{font-size:12px;color:var(--gold);letter-spacing:6px;margin-bottom:24px;opacity:.8}
 .auth-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--maroon-deep);text-align:center;line-height:1.2;margin-bottom:8px}
@@ -34,7 +36,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .google-btn svg{width:20px;height:20px;flex-shrink:0}
 .auth-note{font-size:11px;color:var(--text-soft);margin-top:20px;text-align:center;line-height:1.6}
 
-/* ── ROLE PICKER ── */
+/* ROLE */
 #role-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:40px 24px;background:linear-gradient(160deg,var(--cream) 0%,var(--gold-pale) 100%)}
 .role-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep);margin-bottom:6px;text-align:center}
 .role-sub{font-size:13px;color:var(--text-soft);margin-bottom:32px;text-align:center}
@@ -50,9 +52,8 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .role-info p{font-size:12px;color:var(--text-soft);line-height:1.4}
 .role-confirm-btn{margin-top:24px;width:100%;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s;opacity:.4;pointer-events:none}
 .role-confirm-btn.ready{opacity:1;pointer-events:all}
-.role-confirm-btn:active{transform:scale(0.97)}
 
-/* ── MAIN APP ── */
+/* MAIN */
 #main-app{display:none;flex-direction:column;height:100%;position:relative}
 .screen{flex:1;overflow-y:auto;padding-bottom:80px;display:none}
 .screen.active{display:block}
@@ -95,13 +96,12 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .streak-label{font-size:11px;color:var(--text-soft);margin-top:2px;font-weight:400}
 .feedback-pill{display:inline-block;background:var(--success-bg);color:var(--success);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;margin-bottom:10px}
 .feedback-text{font-size:16px;color:var(--text-mid);line-height:1.6;font-style:italic;font-family:'Cormorant Garamond',serif}
-.feedback-meta{font-size:12px;color:var(--text-soft);margin-top:8px}
 .practice-btn{display:block;width:calc(100% - 32px);margin:18px 16px;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s;letter-spacing:.2px}
-.practice-btn:active{transform:scale(0.97);background:var(--maroon-deep)}
+.practice-btn:active{transform:scale(0.97)}
 .practice-btn.done{background:var(--success)}
 
 /* Log */
-.log-filter{padding:16px 16px 8px;display:flex;gap:10px;align-items:center}
+.log-filter{padding:16px 16px 8px;display:flex;gap:10px}
 .log-filter select{flex:1;appearance:none;background:var(--card-bg);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-dark);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .log-stats{display:flex;gap:6px;padding:0 16px 12px}
 .log-stat{flex:1;background:var(--surface);border-radius:10px;padding:10px;text-align:center}
@@ -114,50 +114,55 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .entry-month{font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px}
 .entry-body{flex:1}
 .entry-title{font-size:14px;font-weight:500;color:var(--text-dark);line-height:1.4}
-.entry-sub{font-size:12px;color:var(--text-soft);margin-top:4px;line-height:1.5}
 .entry-badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:6px}
 .badge-done{background:var(--success-bg);color:var(--success)}
-.badge-miss{background:#FFF0F0;color:#C0392B}
+.badge-miss{background:var(--danger-bg);color:var(--danger)}
 
-/* Teacher - Classes */
+/* Classes */
 .class-list{padding:0 16px}
 .class-card{background:var(--card-bg);border-radius:16px;padding:16px 18px;margin-bottom:12px;border:0.5px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:all .18s}
 .class-card:active{transform:scale(0.98)}
 .class-card-top{display:flex;align-items:center;justify-content:space-between}
 .class-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--maroon-deep)}
-.class-count{font-size:12px;color:var(--text-soft);margin-top:3px}
-.class-arrow{color:var(--text-soft);font-size:18px}
+.class-meta{font-size:12px;color:var(--text-soft);margin-top:3px}
+.class-code-badge{display:inline-block;background:var(--gold-pale);color:var(--gold);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;margin-top:6px;letter-spacing:1px;font-family:monospace}
 .add-class-btn{display:block;width:calc(100% - 32px);margin:14px 16px;padding:14px;background:transparent;color:var(--maroon);border:1px dashed var(--maroon);border-radius:14px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
-.add-class-btn:active{background:var(--gold-pale)}
+.join-class-btn{display:block;width:calc(100% - 32px);margin:0 16px 14px;padding:14px;background:transparent;color:var(--gold);border:1px dashed var(--gold);border-radius:14px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
 
 /* Class Detail */
 #class-detail-screen{display:none;position:absolute;inset:0;background:var(--warm-white);z-index:50;flex-direction:column}
 #class-detail-screen.open{display:flex}
-.detail-header{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:0.5px solid var(--border);background:var(--warm-white)}
+.detail-header{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:0.5px solid var(--border);background:var(--warm-white);flex-shrink:0}
 .back-btn{width:36px;height:36px;border-radius:10px;background:var(--surface);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .back-btn svg{width:18px;height:18px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .detail-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--maroon-deep);flex:1}
 .detail-body{flex:1;overflow-y:auto;padding-bottom:20px}
-.tab-bar{display:flex;border-bottom:0.5px solid var(--border);background:var(--warm-white)}
-.tab-btn{flex:1;padding:12px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;font-weight:400}
+.tab-bar{display:flex;border-bottom:0.5px solid var(--border);background:var(--warm-white);flex-shrink:0}
+.tab-btn{flex:1;padding:12px 8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;font-weight:400}
 .tab-btn.active{color:var(--maroon);border-bottom-color:var(--maroon);font-weight:500}
 .tab-content{display:none;padding:16px}
 .tab-content.active{display:block}
 
-/* Student list in class */
-.student-item{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:0.5px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .18s}
-.student-item:active{transform:scale(0.98)}
+/* Students */
+.student-item{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:0.5px solid var(--border);display:flex;align-items:center;gap:12px;transition:all .18s}
+.student-item.clickable{cursor:pointer}
+.student-item.clickable:active{transform:scale(0.98)}
 .student-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;flex-shrink:0}
 .student-info{flex:1}
 .student-name{font-size:14px;font-weight:500;color:var(--text-dark)}
 .student-email{font-size:12px;color:var(--text-soft);margin-top:2px}
-.student-status{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
-.status-present{background:var(--success-bg);color:var(--success)}
-.status-absent{background:#FFF0F0;color:#C0392B}
-.status-none{background:var(--surface);color:var(--text-soft)}
+.remove-btn{width:30px;height:30px;border-radius:8px;background:var(--danger-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.remove-btn svg{width:14px;height:14px;stroke:var(--danger);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .invite-input-row{display:flex;gap:8px;margin-bottom:16px}
 .invite-input-row input{flex:1;background:var(--card-bg);border:0.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none}
+.invite-input-row input:focus{border-color:var(--maroon)}
 .invite-input-row button{padding:11px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+
+/* Join code display */
+.join-code-box{background:var(--gold-pale);border:1px dashed var(--gold);border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:center}
+.join-code-box .label{font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.join-code-box .code{font-family:monospace;font-size:28px;font-weight:700;color:var(--maroon-deep);letter-spacing:4px}
+.join-code-box .hint{font-size:11px;color:var(--text-soft);margin-top:4px}
 
 /* Attendance */
 .attendance-date-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -166,10 +171,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .att-toggle{display:flex;gap:6px;margin-left:auto}
 .att-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text-soft);transition:all .15s}
 .att-btn.present{background:var(--success-bg);color:var(--success);border-color:transparent}
-.att-btn.absent{background:#FFF0F0;color:#C0392B;border-color:transparent}
+.att-btn.absent{background:var(--danger-bg);color:var(--danger);border-color:transparent}
 .save-att-btn{width:100%;padding:14px;background:var(--maroon);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px}
 
-/* Feedback/Assignment panel */
+/* Feedback/Assignment */
 .feedback-panel{background:var(--card-bg);border-radius:16px;padding:18px;margin-bottom:14px;border:0.5px solid var(--border)}
 .feedback-panel h4{font-size:13px;font-weight:500;color:var(--text-dark);margin-bottom:10px}
 .field-wrap{position:relative;margin-bottom:12px}
@@ -182,16 +187,24 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
 .save-btn{width:100%;padding:14px;background:var(--maroon);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
 .save-btn:active{transform:scale(0.97)}
+.danger-btn{width:100%;padding:14px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s;margin-top:10px}
 
-/* Student detail */
+/* Student Detail */
 #student-detail-screen{display:none;position:absolute;inset:0;background:var(--warm-white);z-index:60;flex-direction:column}
 #student-detail-screen.open{display:flex}
-.ornament-divider{text-align:center;padding:10px 0;font-size:12px;color:var(--gold);letter-spacing:6px;opacity:.6}
+
+/* Invite request notification */
+.invite-request{background:var(--gold-pale);border:1px solid rgba(201,146,42,0.3);border-radius:14px;padding:16px;margin-bottom:12px}
+.invite-request-title{font-size:14px;font-weight:500;color:var(--text-dark);margin-bottom:4px}
+.invite-request-sub{font-size:12px;color:var(--text-soft);margin-bottom:12px}
+.invite-request-btns{display:flex;gap:8px}
+.invite-accept{flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.invite-decline{flex:1;padding:10px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
 
 /* Modal */
 .modal-overlay{display:none;position:absolute;inset:0;background:rgba(26,10,10,.5);z-index:200;align-items:flex-end}
 .modal-overlay.open{display:flex}
-.modal-sheet{background:var(--warm-white);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto}
+.modal-sheet{background:var(--warm-white);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto}
 .modal-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 18px}
 .modal-sheet h3{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--maroon-deep);margin-bottom:16px}
 .modal-field{margin-bottom:14px}
@@ -214,50 +227,36 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .user-chip-name{font-size:13px;font-weight:500;color:var(--text-dark)}
 .user-chip-role{font-size:11px;color:var(--text-soft)}
 .signout-btn{font-size:12px;color:var(--maroon);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline}
+.ornament-divider{text-align:center;padding:10px 0;font-size:12px;color:var(--gold);letter-spacing:6px;opacity:.6}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- AUTH SCREEN -->
+  <!-- AUTH -->
   <div id="auth-screen">
     <div class="auth-ornament">✦ ✦ ✦</div>
     <h1 class="auth-title">Bharatanatyam<br>Tracker</h1>
     <p class="auth-subtitle">A practice companion for students<br>and teachers of classical dance</p>
     <button class="google-btn" onclick="signInWithGoogle()">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
       Continue with Google
     </button>
     <p class="auth-note">Sign in to sync your practice data<br>across all your devices</p>
   </div>
 
-  <!-- ROLE PICKER -->
+  <!-- ROLE -->
   <div id="role-screen">
     <h2 class="role-title">How do you use<br>this app?</h2>
     <p class="role-sub">Choose your role to get started</p>
     <div class="role-cards">
-      <div class="role-card" onclick="selectRole('teacher')">
-        <div class="role-icon teacher">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div class="role-info">
-          <h3>Teacher</h3>
-          <p>Manage classes, assign practice, give feedback & track attendance</p>
-        </div>
+      <div class="role-card" onclick="selectRole('teacher',this)">
+        <div class="role-icon teacher"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div class="role-info"><h3>Teacher</h3><p>Manage classes, assign practice, give feedback & track attendance</p></div>
       </div>
-      <div class="role-card" onclick="selectRole('student')">
-        <div class="role-icon student">
-          <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-        </div>
-        <div class="role-info">
-          <h3>Student</h3>
-          <p>View assignments, log practice sessions & see teacher feedback</p>
-        </div>
+      <div class="role-card" onclick="selectRole('student',this)">
+        <div class="role-icon student"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+        <div class="role-info"><h3>Student</h3><p>View assignments, log practice sessions & see teacher feedback</p></div>
       </div>
     </div>
     <button class="role-confirm-btn" id="role-confirm-btn" onclick="confirmRole()">Continue</button>
@@ -266,7 +265,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   <!-- MAIN APP -->
   <div id="main-app">
 
-    <!-- HOME SCREEN -->
+    <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div class="greeting-section">
         <div class="ornament-divider">✦ ✦ ✦</div>
@@ -278,12 +277,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="height:10px"></div>
     </div>
 
-    <!-- LOG SCREEN (student) -->
+    <!-- LOG (student) -->
     <div class="screen" id="screen-log">
-      <div class="page-header">
-        <h1>Practice Log</h1>
-        <p>Your journey, session by session</p>
-      </div>
+      <div class="page-header"><h1>Practice Log</h1><p>Your journey, session by session</p></div>
       <div class="log-filter">
         <select id="month-filter" onchange="renderLog()">
           <option value="2026-06">June 2026</option>
@@ -302,7 +298,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="height:10px"></div>
     </div>
 
-    <!-- CLASSES SCREEN (teacher) / CLASSES SCREEN (student) -->
+    <!-- CLASSES -->
     <div class="screen" id="screen-classes">
       <div class="page-header">
         <div class="header-ornament" id="classes-ornament">✦ Teacher Portal ✦</div>
@@ -310,29 +306,36 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <p id="classes-sub">Manage your students and sessions</p>
       </div>
       <div style="height:14px"></div>
+      <div id="pending-invites-section"></div>
       <div class="class-list" id="class-list"><div class="loading">Loading...</div></div>
       <button class="add-class-btn" id="add-class-btn" onclick="openAddClassModal()" style="display:none">+ Create New Class</button>
+      <button class="join-class-btn" id="join-class-btn" onclick="openJoinClassModal()" style="display:none">⌗ Join Class with Code</button>
       <div style="height:10px"></div>
     </div>
 
-    <!-- CLASS DETAIL (teacher) -->
+    <!-- CLASS DETAIL -->
     <div id="class-detail-screen">
       <div class="detail-header">
-        <button class="back-btn" onclick="closeClassDetail()">
-          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
+        <button class="back-btn" onclick="closeClassDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="detail-title" id="class-detail-title">Class</div>
       </div>
-      <div class="tab-bar">
+      <div class="tab-bar" id="class-tab-bar">
         <button class="tab-btn active" onclick="switchTab('students')">Students</button>
         <button class="tab-btn" onclick="switchTab('attendance')">Attendance</button>
         <button class="tab-btn" onclick="switchTab('assignments')">Assignments</button>
       </div>
       <div class="detail-body">
         <div class="tab-content active" id="tab-students">
-          <div class="invite-input-row">
-            <input type="email" id="invite-email" placeholder="Student email address">
-            <button onclick="inviteStudent()">Add</button>
+          <div id="teacher-invite-section">
+            <div class="join-code-box">
+              <div class="label">Class Join Code</div>
+              <div class="code" id="display-join-code">------</div>
+              <div class="hint">Share this code with students to join</div>
+            </div>
+            <div class="invite-input-row">
+              <input type="email" id="invite-email" placeholder="Or invite by email address">
+              <button onclick="inviteStudentByEmail()">Invite</button>
+            </div>
           </div>
           <div id="students-list"><div class="loading">Loading...</div></div>
         </div>
@@ -348,35 +351,29 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
             <h4>New Assignment / Practice</h4>
             <div class="field-wrap">
               <textarea id="assign-text" placeholder="e.g. Alarippu full sequence, focus on eye movements..." rows="3"></textarea>
-              <button class="mic-btn" id="mic-assign" onclick="toggleVoice('assign-text','mic-assign')">
-                <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-              </button>
+              <button class="mic-btn" id="mic-assign" onclick="toggleVoice('assign-text','mic-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
             </div>
-            <button class="save-btn" onclick="saveClassAssignment()">Post Assignment to All Students</button>
+            <button class="save-btn" onclick="saveClassAssignment()">Post to All Students</button>
           </div>
           <div id="assignments-list"></div>
         </div>
       </div>
     </div>
 
-    <!-- STUDENT DETAIL (teacher clicking a student) -->
+    <!-- STUDENT DETAIL (teacher view) -->
     <div id="student-detail-screen">
       <div class="detail-header">
-        <button class="back-btn" onclick="closeStudentDetail()">
-          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
+        <button class="back-btn" onclick="closeStudentDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="detail-title" id="student-detail-title">Student</div>
       </div>
       <div class="detail-body" style="padding:16px">
         <div class="feedback-panel">
-          <h4>Personal Feedback for this student</h4>
+          <h4>Personal Feedback</h4>
           <div class="field-wrap">
             <textarea id="student-feedback-text" placeholder="e.g. Work on aramandi posture..." rows="4"></textarea>
-            <button class="mic-btn" id="mic-student-feedback" onclick="toggleVoice('student-feedback-text','mic-student-feedback')">
-              <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-            </button>
+            <button class="mic-btn" id="mic-student-feedback" onclick="toggleVoice('student-feedback-text','mic-student-feedback')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
           </div>
-          <button class="save-btn" onclick="saveStudentFeedback()">Save Personal Feedback</button>
+          <button class="save-btn" onclick="saveStudentFeedback()">Save Feedback</button>
         </div>
         <div style="margin-top:16px">
           <div class="card-title" style="padding:0 0 8px">Practice History</div>
@@ -386,7 +383,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
 
     <!-- Bottom Nav -->
-    <nav class="bottom-nav" id="bottom-nav">
+    <nav class="bottom-nav">
       <button class="nav-tab active" id="tab-home" onclick="navigate('home')">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Home</span>
@@ -401,7 +398,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </button>
     </nav>
 
-    <!-- Add Log Entry Modal -->
+    <!-- Add Log Modal -->
     <div class="modal-overlay" id="add-modal">
       <div class="modal-sheet">
         <div class="modal-handle"></div>
@@ -422,7 +419,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <div class="modal-handle"></div>
         <h3>Create New Class</h3>
         <div class="modal-field"><label>Class Name</label><input type="text" id="new-class-name" placeholder="e.g. Intermediate Bharatanatyam"></div>
-        <div class="modal-field"><label>Description</label><textarea id="new-class-desc" placeholder="Brief description of this class..."></textarea></div>
+        <div class="modal-field"><label>Description</label><textarea id="new-class-desc" placeholder="Brief description..."></textarea></div>
         <div class="modal-btns">
           <button class="modal-btn-cancel" onclick="closeAddClassModal()">Cancel</button>
           <button class="modal-btn-save" onclick="createClass()">Create Class</button>
@@ -430,10 +427,25 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
 
+    <!-- Join Class Modal -->
+    <div class="modal-overlay" id="join-class-modal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <h3>Join a Class</h3>
+        <div class="modal-field">
+          <label>Enter Join Code</label>
+          <input type="text" id="join-code-input" placeholder="e.g. AB12CD" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:20px;text-align:center;font-family:monospace">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn-cancel" onclick="closeJoinClassModal()">Cancel</button>
+          <button class="modal-btn-save" onclick="joinByCode()">Join Class</button>
+        </div>
+      </div>
+    </div>
+
     <button class="fab" id="fab-add" style="display:none" onclick="openModal()">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
-
     <div class="saved-toast" id="toast"></div>
   </div>
 </div>
@@ -441,7 +453,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD8UJlf7N95PSfbWIFmKRkww-qduDcExp0",
@@ -453,28 +465,30 @@ const firebaseConfig = {
   measurementId: "G-D9XX5JL5GQ"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
 
 let currentUser = null;
 let userRole = null;
 let currentClassId = null;
+let currentClassData = null;
 let currentStudentId = null;
 let currentStudentName = null;
 let attendanceState = {};
 
+// ── HELPERS ──
+function generateJoinCode() {
+  return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
 // ── AUTH ──
 window.signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) { showToast('Sign in failed: ' + e.message); }
+  try { await signInWithPopup(auth, provider); }
+  catch(e) { showToast('Sign in failed: ' + e.message); }
 };
-
-window.signOut = async () => {
-  await signOut(auth);
-};
+window.doSignOut = async () => { await signOut(auth); };
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -483,21 +497,15 @@ onAuthStateChanged(auth, async (user) => {
     if (userDoc.exists() && userDoc.data().role) {
       userRole = userDoc.data().role;
       showMainApp();
-    } else {
-      showRoleScreen();
-    }
+    } else { showRoleScreen(); }
   } else {
-    currentUser = null;
-    userRole = null;
-    showAuthScreen();
+    currentUser = null; userRole = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('role-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'none';
   }
 });
 
-function showAuthScreen() {
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('role-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'none';
-}
 function showRoleScreen() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('role-screen').style.display = 'flex';
@@ -513,20 +521,17 @@ function showMainApp() {
 
 // ── ROLE ──
 let selectedRole = null;
-window.selectRole = (role) => {
+window.selectRole = (role, el) => {
   selectedRole = role;
   document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  el.classList.add('selected');
   document.getElementById('role-confirm-btn').classList.add('ready');
 };
 window.confirmRole = async () => {
   if (!selectedRole) return;
   await setDoc(doc(db, 'users', currentUser.uid), {
-    role: selectedRole,
-    name: currentUser.displayName,
-    email: currentUser.email,
-    photo: currentUser.photoURL,
-    createdAt: serverTimestamp()
+    role: selectedRole, name: currentUser.displayName,
+    email: currentUser.email, photo: currentUser.photoURL, createdAt: serverTimestamp()
   }, { merge: true });
   userRole = selectedRole;
   showMainApp();
@@ -539,6 +544,9 @@ function setupForRole() {
   document.getElementById('classes-title').textContent = isTeacher ? 'My Classes' : 'Enrolled Classes';
   document.getElementById('classes-sub').textContent = isTeacher ? 'Manage your students and sessions' : 'View assignments and feedback';
   if (isTeacher) document.getElementById('add-class-btn').style.display = 'block';
+  else document.getElementById('join-class-btn').style.display = 'block';
+  // Hide teacher-only sections for students
+  document.getElementById('teacher-invite-section').style.display = isTeacher ? 'block' : 'none';
 }
 
 // ── NAVIGATION ──
@@ -557,8 +565,6 @@ window.navigate = (screen) => {
 async function renderHome() {
   const name = currentUser.displayName.split(' ')[0];
   document.getElementById('greeting-name').innerHTML = `<em>${name}</em>`;
-
-  // User chip
   document.getElementById('user-chip-container').innerHTML = `
     <div class="user-chip">
       ${currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="">` : ''}
@@ -566,95 +572,63 @@ async function renderHome() {
         <div class="user-chip-name">${currentUser.displayName}</div>
         <div class="user-chip-role">${userRole === 'teacher' ? 'Teacher' : 'Student'}</div>
       </div>
-      <button class="signout-btn" onclick="window.signOut()">Sign out</button>
+      <button class="signout-btn" onclick="window.doSignOut()">Sign out</button>
     </div>`;
-
   if (userRole === 'teacher') renderTeacherHome();
   else renderStudentHome();
 }
 
 async function renderTeacherHome() {
-  const classesSnap = await getDocs(query(collection(db, 'classes'), where('teacherId', '==', currentUser.uid)));
-  const totalClasses = classesSnap.size;
+  const snap = await getDocs(query(collection(db, 'classes'), where('teacherId', '==', currentUser.uid)));
   let totalStudents = 0;
-  classesSnap.forEach(d => { totalStudents += (d.data().studentIds || []).length; });
-
+  snap.forEach(d => { totalStudents += (d.data().studentIds || []).length; });
   document.getElementById('home-content').innerHTML = `
     <div class="streak-row">
-      <div class="streak-card"><div class="streak-num">${totalClasses}</div><div class="streak-label">Classes</div></div>
+      <div class="streak-card"><div class="streak-num">${snap.size}</div><div class="streak-label">Classes</div></div>
       <div class="streak-card"><div class="streak-num">${totalStudents}</div><div class="streak-label">Students</div></div>
     </div>
     <div class="card today-card" style="margin-top:14px">
       <div class="card-title">Quick Actions</div>
       <h2>Manage your classes</h2>
-      <p style="margin-top:10px"><span class="gold-dot"></span>Add students by email</p>
+      <p style="margin-top:10px"><span class="gold-dot"></span>Add students by email or share join code</p>
       <p><span class="gold-dot"></span>Post assignments to the whole class</p>
       <p><span class="gold-dot"></span>Give personal feedback to each student</p>
+      <p><span class="gold-dot"></span>Track attendance per session</p>
     </div>`;
 }
 
 async function renderStudentHome() {
-  // Get classes this student is in
-  const classesSnap = await getDocs(query(collection(db, 'classes'), where('studentIds', 'array-contains', currentUser.uid)));
-  let latestAssignment = null;
-  let latestFeedback = null;
-  let classCount = classesSnap.size;
-
-  for (const classDoc of classesSnap.docs) {
-    // Get latest assignment
+  const snap = await getDocs(query(collection(db, 'classes'), where('studentIds', 'array-contains', currentUser.uid)));
+  let latestAssignment = null, latestFeedback = null;
+  for (const classDoc of snap.docs) {
     const assignSnap = await getDocs(query(collection(db, 'classes', classDoc.id, 'assignments'), orderBy('createdAt', 'desc')));
     if (!latestAssignment && !assignSnap.empty) latestAssignment = assignSnap.docs[0].data();
-
-    // Get personal feedback
     const fbDoc = await getDoc(doc(db, 'classes', classDoc.id, 'feedback', currentUser.uid));
     if (fbDoc.exists() && fbDoc.data().text) latestFeedback = fbDoc.data();
   }
-
-  // Get practice stats
   const logsSnap = await getDocs(query(collection(db, 'practiceLogs'), where('studentId', '==', currentUser.uid)));
   const completed = logsSnap.docs.filter(d => d.data().completed).length;
   const now = new Date();
   const monthStr = now.getFullYear() + '-' + (now.getMonth()+1).toString().padStart(2,'0');
   const thisMonth = logsSnap.docs.filter(d => d.data().date && d.data().date.startsWith(monthStr) && d.data().completed).length;
-
   const today = new Date().toISOString().split('T')[0];
   const todayDone = logsSnap.docs.some(d => d.data().date === today && d.data().completed);
-
   document.getElementById('home-content').innerHTML = `
     <div class="streak-row">
       <div class="streak-card"><div class="streak-num">${completed}</div><div class="streak-label">Total Sessions</div></div>
       <div class="streak-card"><div class="streak-num">${thisMonth}</div><div class="streak-label">This Month</div></div>
-      <div class="streak-card"><div class="streak-num">${classCount}</div><div class="streak-label">Classes</div></div>
+      <div class="streak-card"><div class="streak-num">${snap.size}</div><div class="streak-label">Classes</div></div>
     </div>
-    ${latestAssignment ? `
-    <div class="card today-card">
-      <div class="card-title">Latest Assignment</div>
-      <h2>Practice</h2>
-      <p style="margin-top:8px">${latestAssignment.text.replace(/\n/g,'<br>')}</p>
-    </div>` : `<div class="card" style="margin-top:14px"><div class="card-title">Assignment</div><p style="color:var(--text-soft);font-size:14px">No assignments yet. Check back after your next class!</p></div>`}
-    ${latestFeedback ? `
-    <div class="card">
-      <div class="card-title">Latest Feedback</div>
-      <div class="feedback-pill">From your teacher</div>
-      <div class="feedback-text">${latestFeedback.text}</div>
-    </div>` : ''}
-    <button class="practice-btn ${todayDone ? 'done' : ''}" id="mark-practiced-btn" onclick="window.markPracticed()">
-      ${todayDone ? '✓  Practiced Today' : '✓ &nbsp; Mark Today as Practiced'}
-    </button>`;
+    ${latestAssignment ? `<div class="card today-card"><div class="card-title">Latest Assignment</div><h2>Practice</h2><p style="margin-top:8px">${latestAssignment.text.replace(/\n/g,'<br>')}</p></div>` : `<div class="card" style="margin-top:14px"><div class="card-title">Assignment</div><p style="color:var(--text-soft);font-size:14px">No assignments yet.</p></div>`}
+    ${latestFeedback ? `<div class="card"><div class="card-title">Latest Feedback</div><div class="feedback-pill">From your teacher</div><div class="feedback-text">${latestFeedback.text}</div></div>` : ''}
+    <button class="practice-btn ${todayDone?'done':''}" onclick="window.markPracticed()">${todayDone ? '✓  Practiced Today' : '✓ &nbsp; Mark Today as Practiced'}</button>`;
 }
 
 window.markPracticed = async () => {
   const today = new Date().toISOString().split('T')[0];
-  const logsSnap = await getDocs(query(collection(db, 'practiceLogs'), where('studentId', '==', currentUser.uid), where('date', '==', today)));
-  if (logsSnap.empty) {
-    await addDoc(collection(db, 'practiceLogs'), {
-      studentId: currentUser.uid,
-      studentName: currentUser.displayName,
-      date: today,
-      practiceText: 'Daily practice',
-      completed: true,
-      createdAt: serverTimestamp()
-    });
+  const snap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',currentUser.uid), where('date','==',today)));
+  if (snap.empty) {
+    await addDoc(collection(db,'practiceLogs'), { studentId:currentUser.uid, studentName:currentUser.displayName, date:today, practiceText:'Daily practice', completed:true, createdAt:serverTimestamp() });
     showToast('Practice marked for today! 🙏');
     renderHome();
   }
@@ -663,22 +637,19 @@ window.markPracticed = async () => {
 // ── LOG ──
 async function renderLog() {
   const month = document.getElementById('month-filter').value;
-  const logsSnap = await getDocs(query(collection(db, 'practiceLogs'), where('studentId', '==', currentUser.uid)));
-  const filtered = logsSnap.docs.map(d => d.data()).filter(e => e.date && e.date.startsWith(month)).sort((a,b) => b.date.localeCompare(a.date));
-  const completed = filtered.filter(e => e.completed).length;
-  const missed = filtered.filter(e => !e.completed).length;
+  const snap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',currentUser.uid)));
+  const filtered = snap.docs.map(d=>d.data()).filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+  const completed = filtered.filter(e=>e.completed).length;
+  const missed = filtered.filter(e=>!e.completed).length;
   const pct = filtered.length ? Math.round(completed/filtered.length*100) : 0;
   document.getElementById('stat-completed').textContent = completed;
   document.getElementById('stat-missed').textContent = missed;
-  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('stat-pct').textContent = pct+'%';
   const list = document.getElementById('entry-list');
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state">No entries this month.<br>Start logging your practice!</div>'; return; }
+  if (!filtered.length) { list.innerHTML='<div class="empty-state">No entries this month.</div>'; return; }
   list.innerHTML = filtered.map(e => {
-    const d = new Date(e.date + 'T00:00:00');
-    return `<div class="entry">
-      <div class="entry-date-col"><div class="entry-day">${d.getDate()}</div><div class="entry-month">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
-      <div class="entry-body"><div class="entry-title">${e.practiceText||'Practice session'}</div><span class="entry-badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>
-    </div>`;
+    const d = new Date(e.date+'T00:00:00');
+    return `<div class="entry"><div class="entry-date-col"><div class="entry-day">${d.getDate()}</div><div class="entry-month">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="entry-body"><div class="entry-title">${e.practiceText||'Practice session'}</div><span class="entry-badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div></div>`;
   }).join('');
 }
 
@@ -686,105 +657,199 @@ async function renderLog() {
 async function renderClasses() {
   const list = document.getElementById('class-list');
   list.innerHTML = '<div class="loading">Loading...</div>';
-  let snap;
-  if (userRole === 'teacher') {
-    snap = await getDocs(query(collection(db, 'classes'), where('teacherId', '==', currentUser.uid)));
-  } else {
-    snap = await getDocs(query(collection(db, 'classes'), where('studentIds', 'array-contains', currentUser.uid)));
+
+  // Show pending invites for students
+  if (userRole === 'student') {
+    const invitesSnap = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',currentUser.email), where('status','==','pending')));
+    const inviteSection = document.getElementById('pending-invites-section');
+    if (!invitesSnap.empty) {
+      inviteSection.innerHTML = `<div style="padding:0 16px"><div class="card-title" style="padding:8px 0 6px">📬 Class Invitations</div>` +
+        invitesSnap.docs.map(d => {
+          const inv = d.data();
+          return `<div class="invite-request">
+            <div class="invite-request-title">${inv.teacherName} invited you to join</div>
+            <div class="invite-request-sub">${inv.className}</div>
+            <div class="invite-request-btns">
+              <button class="invite-accept" onclick="window.respondInvite('${d.id}','${inv.classId}','accept')">Join Class</button>
+              <button class="invite-decline" onclick="window.respondInvite('${d.id}','${inv.classId}','decline')">Decline</button>
+            </div>
+          </div>`;
+        }).join('') + '</div>';
+    } else { inviteSection.innerHTML = ''; }
   }
+
+  let snap;
+  if (userRole === 'teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',currentUser.uid)));
+  else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',currentUser.uid)));
+
   if (snap.empty) {
-    list.innerHTML = `<div class="empty-state">${userRole === 'teacher' ? 'No classes yet.\nCreate your first class below!' : 'You are not enrolled in any classes yet.\nAsk your teacher to add you.'}</div>`;
+    list.innerHTML = `<div class="empty-state">${userRole==='teacher'?'No classes yet.\nCreate your first class below!':'You are not enrolled in any classes yet.\nUse a join code or wait for an invite.'}</div>`;
     return;
   }
   list.innerHTML = snap.docs.map(d => {
     const data = d.data();
-    return `<div class="class-card" onclick="openClassDetail('${d.id}','${data.name.replace(/'/g,"\\'")}')">
+    const isTeacher = userRole === 'teacher';
+    return `<div class="class-card" onclick="openClassDetail('${d.id}')">
       <div class="class-card-top">
         <div>
           <div class="class-name">${data.name}</div>
-          <div class="class-count">${(data.studentIds||[]).length} student${(data.studentIds||[]).length!==1?'s':''} · ${data.teacherName||'Teacher'}</div>
+          <div class="class-meta">${isTeacher ? (data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'') : 'Teacher: '+(data.teacherName||'')}</div>
         </div>
-        <div class="class-arrow">›</div>
+        <div style="font-size:18px;color:var(--text-soft)">›</div>
       </div>
-      ${data.description ? `<div style="font-size:13px;color:var(--text-soft);margin-top:8px">${data.description}</div>` : ''}
+      ${data.description?`<div style="font-size:13px;color:var(--text-soft);margin-top:8px">${data.description}</div>`:''}
+      ${isTeacher?`<div class="class-code-badge">⌗ ${data.joinCode||'------'}</div>`:''}
     </div>`;
   }).join('');
 }
 
+// ── RESPOND TO INVITE ──
+window.respondInvite = async (inviteId, classId, action) => {
+  if (action === 'accept') {
+    await updateDoc(doc(db,'classes',classId), { studentIds: arrayUnion(currentUser.uid) });
+    showToast('Joined class! 🎉');
+  } else {
+    showToast('Invite declined');
+  }
+  await updateDoc(doc(db,'classInvites',inviteId), { status: action==='accept'?'accepted':'declined' });
+  renderClasses();
+};
+
 // ── CLASS DETAIL ──
-window.openClassDetail = async (classId, className) => {
+window.openClassDetail = async (classId) => {
   currentClassId = classId;
-  document.getElementById('class-detail-title').textContent = className;
+  const classDoc = await getDoc(doc(db,'classes',classId));
+  currentClassData = classDoc.data();
+  document.getElementById('class-detail-title').textContent = currentClassData.name;
   document.getElementById('class-detail-screen').classList.add('open');
   document.getElementById('att-date').value = new Date().toISOString().split('T')[0];
+
+  // Show/hide teacher-only tabs for students
+  const isTeacher = userRole === 'teacher';
+  const tabs = document.getElementById('class-tab-bar').querySelectorAll('.tab-btn');
+  tabs[0].style.display = 'flex'; // Students tab - show for all but different content
+  tabs[1].style.display = isTeacher ? 'flex' : 'none'; // Attendance - teacher only
+  tabs[2].style.display = 'flex'; // Assignments - show for all
+
+  // Show join code only for teacher
+  document.getElementById('display-join-code').textContent = currentClassData.joinCode || '------';
+
+  // For students: show Leave Class button, hide invite section
+  if (!isTeacher) {
+    document.getElementById('teacher-invite-section').style.display = 'none';
+  }
+
   switchTab('students');
 };
+
 window.closeClassDetail = () => {
   document.getElementById('class-detail-screen').classList.remove('open');
-  currentClassId = null;
+  currentClassId = null; currentClassData = null;
 };
 
 window.switchTab = (tab) => {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    const tabs = ['students','attendance','assignments'];
-    b.classList.toggle('active', tabs[i] === tab);
-  });
+  const tabNames = ['students','attendance','assignments'];
+  const tabs = document.getElementById('class-tab-bar').querySelectorAll('.tab-btn');
+  tabs.forEach((b, i) => b.classList.toggle('active', tabNames[i] === tab));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'students') loadStudentsList();
-  if (tab === 'attendance') loadAttendance();
-  if (tab === 'assignments') loadAssignments();
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab==='students') loadStudentsList();
+  if (tab==='attendance') loadAttendance();
+  if (tab==='assignments') loadAssignments();
 };
 
+// ── STUDENTS LIST ──
 async function loadStudentsList() {
-  const classDoc = await getDoc(doc(db, 'classes', currentClassId));
+  const classDoc = await getDoc(doc(db,'classes',currentClassId));
   const studentIds = classDoc.data().studentIds || [];
   const list = document.getElementById('students-list');
-  if (!studentIds.length) { list.innerHTML = '<div class="empty-state">No students yet.\nAdd a student by email above.</div>'; return; }
+  if (!studentIds.length) { list.innerHTML = '<div class="empty-state">No students yet.</div>'; return; }
   list.innerHTML = '<div class="loading">Loading...</div>';
-  const studentDocs = await Promise.all(studentIds.map(id => getDoc(doc(db, 'users', id))));
-  list.innerHTML = studentDocs.filter(d => d.exists()).map(d => {
+  const studentDocs = await Promise.all(studentIds.map(id => getDoc(doc(db,'users',id))));
+  const isTeacher = userRole === 'teacher';
+  list.innerHTML = studentDocs.filter(d=>d.exists()).map(d => {
     const s = d.data();
-    return `<div class="student-item" onclick="openStudentDetail('${d.id}','${(s.name||s.email).replace(/'/g,"\\'")}')">
+    return `<div class="student-item ${isTeacher?'clickable':''}" ${isTeacher?`onclick="openStudentDetail('${d.id}','${(s.name||s.email).replace(/'/g,"\\'")}')"`:''}> 
       <div class="student-avatar">${(s.name||'?')[0]}</div>
-      <div class="student-info">
-        <div class="student-name">${s.name||'Unknown'}</div>
-        <div class="student-email">${s.email||''}</div>
-      </div>
-      <div style="font-size:18px;color:var(--text-soft)">›</div>
+      <div class="student-info"><div class="student-name">${s.name||'Unknown'}</div><div class="student-email">${s.email||''}</div></div>
+      ${isTeacher ? `<button class="remove-btn" onclick="event.stopPropagation();removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
     </div>`;
-  }).join('');
+  }).join('') + (!isTeacher ? `<button class="danger-btn" onclick="leaveClass()">Leave this Class</button>` : '');
 }
 
-window.inviteStudent = async () => {
+// ── REMOVE STUDENT (teacher) ──
+window.removeStudent = async (studentId, studentName) => {
+  if (!confirm(`Remove ${studentName} from this class?`)) return;
+  await updateDoc(doc(db,'classes',currentClassId), { studentIds: arrayRemove(studentId) });
+  showToast(studentName+' removed');
+  loadStudentsList();
+};
+
+// ── LEAVE CLASS (student) ──
+window.leaveClass = async () => {
+  if (!confirm('Are you sure you want to leave this class?')) return;
+  await updateDoc(doc(db,'classes',currentClassId), { studentIds: arrayRemove(currentUser.uid) });
+  showToast('You left the class');
+  closeClassDetail();
+  renderClasses();
+};
+
+// ── INVITE BY EMAIL ──
+window.inviteStudentByEmail = async () => {
   const email = document.getElementById('invite-email').value.trim().toLowerCase();
   if (!email) return;
-  // Find user by email
-  const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
-  if (usersSnap.empty) { showToast('No user found with that email. They must sign in first.'); return; }
-  const studentId = usersSnap.docs[0].id;
-  const classRef = doc(db, 'classes', currentClassId);
-  const classDoc = await getDoc(classRef);
-  const studentIds = classDoc.data().studentIds || [];
-  if (studentIds.includes(studentId)) { showToast('Student already in this class'); return; }
-  await updateDoc(classRef, { studentIds: [...studentIds, studentId] });
+  // Check if already a user
+  const usersSnap = await getDocs(query(collection(db,'users'), where('email','==',email)));
+  const classDoc = await getDoc(doc(db,'classes',currentClassId));
+  const classData = classDoc.data();
+  if (!usersSnap.empty) {
+    const studentId = usersSnap.docs[0].id;
+    if ((classData.studentIds||[]).includes(studentId)) { showToast('Student already in this class'); return; }
+    // Create invite record
+    await addDoc(collection(db,'classInvites'), {
+      classId: currentClassId, className: classData.name,
+      teacherId: currentUser.uid, teacherName: currentUser.displayName,
+      studentEmail: email, studentId, status: 'pending', createdAt: serverTimestamp()
+    });
+    showToast('Invite sent to '+email+' ✓');
+  } else {
+    showToast('No account found for that email. Share the join code instead!');
+  }
   document.getElementById('invite-email').value = '';
-  showToast('Student added! ✓');
-  loadStudentsList();
+};
+
+// ── JOIN BY CODE ──
+window.openJoinClassModal = () => { document.getElementById('join-code-input').value=''; document.getElementById('join-class-modal').classList.add('open'); };
+window.closeJoinClassModal = () => document.getElementById('join-class-modal').classList.remove('open');
+window.joinByCode = async () => {
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  if (code.length < 4) { showToast('Please enter a valid code'); return; }
+  const snap = await getDocs(query(collection(db,'classes'), where('joinCode','==',code)));
+  if (snap.empty) { showToast('No class found with that code'); return; }
+  const classDoc = snap.docs[0];
+  const classData = classDoc.data();
+  if ((classData.studentIds||[]).includes(currentUser.uid)) { showToast('You are already in this class'); closeJoinClassModal(); return; }
+  // Show confirmation
+  closeJoinClassModal();
+  if (confirm(`Join "${classData.name}" by ${classData.teacherName}?`)) {
+    await updateDoc(doc(db,'classes',classDoc.id), { studentIds: arrayUnion(currentUser.uid) });
+    showToast('Joined '+classData.name+'! 🎉');
+    navigate('classes');
+  }
 };
 
 // ── ATTENDANCE ──
 async function loadAttendance() {
   const date = document.getElementById('att-date').value;
-  const classDoc = await getDoc(doc(db, 'classes', currentClassId));
+  const classDoc = await getDoc(doc(db,'classes',currentClassId));
   const studentIds = classDoc.data().studentIds || [];
-  if (!studentIds.length) { document.getElementById('attendance-list').innerHTML = '<div class="empty-state">No students in this class yet.</div>'; return; }
-  const attDoc = await getDoc(doc(db, 'classes', currentClassId, 'attendance', date));
+  if (!studentIds.length) { document.getElementById('attendance-list').innerHTML='<div class="empty-state">No students yet.</div>'; return; }
+  const attDoc = await getDoc(doc(db,'classes',currentClassId,'attendance',date));
   const existing = attDoc.exists() ? attDoc.data() : {};
-  attendanceState = { ...existing };
-  const studentDocs = await Promise.all(studentIds.map(id => getDoc(doc(db, 'users', id))));
-  document.getElementById('attendance-list').innerHTML = studentDocs.filter(d => d.exists()).map(d => {
-    const s = d.data(); const status = existing[d.id] || 'none';
+  attendanceState = {...existing};
+  const studentDocs = await Promise.all(studentIds.map(id => getDoc(doc(db,'users',id))));
+  document.getElementById('attendance-list').innerHTML = studentDocs.filter(d=>d.exists()).map(d => {
+    const s=d.data(); const status=existing[d.id]||'none';
     return `<div class="attendance-item">
       <div class="student-avatar" style="width:36px;height:36px;font-size:15px">${(s.name||'?')[0]}</div>
       <div style="flex:1;font-size:14px;font-weight:500">${s.name||s.email}</div>
@@ -798,132 +863,112 @@ async function loadAttendance() {
 
 window.setAtt = (studentId, status, btn) => {
   attendanceState[studentId] = status;
-  const row = btn.closest('.att-toggle');
-  row.querySelectorAll('.att-btn').forEach(b => { b.classList.remove('present','absent'); });
+  btn.closest('.att-toggle').querySelectorAll('.att-btn').forEach(b => b.classList.remove('present','absent'));
   btn.classList.add(status);
 };
-
 window.saveAttendance = async () => {
   const date = document.getElementById('att-date').value;
-  await setDoc(doc(db, 'classes', currentClassId, 'attendance', date), attendanceState);
+  await setDoc(doc(db,'classes',currentClassId,'attendance',date), attendanceState);
   showToast('Attendance saved ✓');
 };
 
 // ── ASSIGNMENTS ──
 async function loadAssignments() {
-  const snap = await getDocs(query(collection(db, 'classes', currentClassId, 'assignments'), orderBy('createdAt', 'desc')));
+  const snap = await getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')));
   const list = document.getElementById('assignments-list');
-  if (snap.empty) { list.innerHTML = '<div class="empty-state">No assignments posted yet.</div>'; return; }
+  if (snap.empty) { list.innerHTML='<div class="empty-state">No assignments posted yet.</div>'; return; }
   list.innerHTML = snap.docs.map(d => {
-    const a = d.data();
-    const date = a.createdAt ? new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+    const a=d.data();
+    const date=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
     return `<div class="card" style="margin:0 0 12px"><div class="card-title">${date}</div><div style="font-size:14px;line-height:1.6;color:var(--text-mid)">${a.text.replace(/\n/g,'<br>')}</div></div>`;
   }).join('');
 }
-
 window.saveClassAssignment = async () => {
   const text = document.getElementById('assign-text').value.trim();
   if (!text) return;
-  await addDoc(collection(db, 'classes', currentClassId, 'assignments'), {
-    text, teacherId: currentUser.uid, teacherName: currentUser.displayName, createdAt: serverTimestamp()
-  });
-  document.getElementById('assign-text').value = '';
-  showToast('Assignment posted to all students ✓');
+  await addDoc(collection(db,'classes',currentClassId,'assignments'), { text, teacherId:currentUser.uid, teacherName:currentUser.displayName, createdAt:serverTimestamp() });
+  document.getElementById('assign-text').value='';
+  showToast('Assignment posted ✓');
   loadAssignments();
 };
 
-// ── STUDENT DETAIL ──
+// ── STUDENT DETAIL (teacher) ──
 window.openStudentDetail = async (studentId, studentName) => {
-  currentStudentId = studentId;
-  currentStudentName = studentName;
-  document.getElementById('student-detail-title').textContent = studentName;
+  currentStudentId=studentId; currentStudentName=studentName;
+  document.getElementById('student-detail-title').textContent=studentName;
   document.getElementById('student-detail-screen').classList.add('open');
-  // Load existing feedback
-  const fbDoc = await getDoc(doc(db, 'classes', currentClassId, 'feedback', studentId));
-  document.getElementById('student-feedback-text').value = fbDoc.exists() ? fbDoc.data().text : '';
-  // Load practice log
-  const logsSnap = await getDocs(query(collection(db, 'practiceLogs'), where('studentId', '==', studentId)));
-  const logs = logsSnap.docs.map(d => d.data()).sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,10);
+  const fbDoc = await getDoc(doc(db,'classes',currentClassId,'feedback',studentId));
+  document.getElementById('student-feedback-text').value = fbDoc.exists()?fbDoc.data().text:'';
+  const snap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',studentId)));
+  const logs = snap.docs.map(d=>d.data()).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,10);
   const logList = document.getElementById('student-log-list');
-  if (!logs.length) { logList.innerHTML = '<div class="empty-state">No practice logs yet.</div>'; return; }
+  if (!logs.length) { logList.innerHTML='<div class="empty-state">No practice logs yet.</div>'; return; }
   logList.innerHTML = logs.map(e => {
-    const d = new Date((e.date||'2026-01-01') + 'T00:00:00');
-    return `<div class="entry" style="margin-bottom:10px">
-      <div class="entry-date-col"><div class="entry-day">${d.getDate()}</div><div class="entry-month">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
-      <div class="entry-body"><div class="entry-title">${e.practiceText||'Practice'}</div><span class="entry-badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>
-    </div>`;
+    const d=new Date((e.date||'2026-01-01')+'T00:00:00');
+    return `<div class="entry" style="margin-bottom:10px"><div class="entry-date-col"><div class="entry-day">${d.getDate()}</div><div class="entry-month">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="entry-body"><div class="entry-title">${e.practiceText||'Practice'}</div><span class="entry-badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div></div>`;
   }).join('');
 };
-
-window.closeStudentDetail = () => {
-  document.getElementById('student-detail-screen').classList.remove('open');
-  currentStudentId = null;
-};
-
+window.closeStudentDetail = () => { document.getElementById('student-detail-screen').classList.remove('open'); currentStudentId=null; };
 window.saveStudentFeedback = async () => {
-  const text = document.getElementById('student-feedback-text').value.trim();
-  if (!text) return;
-  await setDoc(doc(db, 'classes', currentClassId, 'feedback', currentStudentId), {
-    text, teacherId: currentUser.uid, teacherName: currentUser.displayName, studentId: currentStudentId, updatedAt: serverTimestamp()
-  });
-  showToast('Feedback saved for ' + currentStudentName + ' ✓');
+  const text=document.getElementById('student-feedback-text').value.trim();
+  if(!text) return;
+  await setDoc(doc(db,'classes',currentClassId,'feedback',currentStudentId), { text, teacherId:currentUser.uid, teacherName:currentUser.displayName, studentId:currentStudentId, updatedAt:serverTimestamp() });
+  showToast('Feedback saved for '+currentStudentName+' ✓');
 };
 
 // ── CREATE CLASS ──
 window.openAddClassModal = () => document.getElementById('add-class-modal').classList.add('open');
 window.closeAddClassModal = () => document.getElementById('add-class-modal').classList.remove('open');
 window.createClass = async () => {
-  const name = document.getElementById('new-class-name').value.trim();
-  const desc = document.getElementById('new-class-desc').value.trim();
-  if (!name) return;
-  await addDoc(collection(db, 'classes'), {
-    name, description: desc, teacherId: currentUser.uid, teacherName: currentUser.displayName, studentIds: [], createdAt: serverTimestamp()
-  });
-  document.getElementById('new-class-name').value = '';
-  document.getElementById('new-class-desc').value = '';
+  const name=document.getElementById('new-class-name').value.trim();
+  const desc=document.getElementById('new-class-desc').value.trim();
+  if(!name) return;
+  const joinCode = generateJoinCode();
+  await addDoc(collection(db,'classes'), { name, description:desc, teacherId:currentUser.uid, teacherName:currentUser.displayName, studentIds:[], joinCode, createdAt:serverTimestamp() });
+  document.getElementById('new-class-name').value='';
+  document.getElementById('new-class-desc').value='';
   closeAddClassModal();
-  showToast('Class created ✓');
+  showToast('Class created! Join code: '+joinCode);
   renderClasses();
 };
 
 // ── LOG ENTRY ──
-window.openModal = () => { document.getElementById('new-entry-date').value = new Date().toISOString().split('T')[0]; document.getElementById('add-modal').classList.add('open'); };
+window.openModal = () => { document.getElementById('new-entry-date').value=new Date().toISOString().split('T')[0]; document.getElementById('add-modal').classList.add('open'); };
 window.closeModal = () => document.getElementById('add-modal').classList.remove('open');
 window.saveEntry = async () => {
-  const date = document.getElementById('new-entry-date').value;
-  const text = document.getElementById('new-entry-practice').value.trim();
-  const status = document.getElementById('new-entry-status').value;
-  if (!date || !text) { showToast('Please fill in all fields'); return; }
-  await addDoc(collection(db, 'practiceLogs'), {
-    studentId: currentUser.uid, studentName: currentUser.displayName, date, practiceText: text,
-    completed: status === 'completed', createdAt: serverTimestamp()
-  });
+  const date=document.getElementById('new-entry-date').value;
+  const text=document.getElementById('new-entry-practice').value.trim();
+  const status=document.getElementById('new-entry-status').value;
+  if(!date||!text){showToast('Please fill in all fields');return;}
+  await addDoc(collection(db,'practiceLogs'), { studentId:currentUser.uid, studentName:currentUser.displayName, date, practiceText:text, completed:status==='completed', createdAt:serverTimestamp() });
   closeModal();
   renderLog();
   showToast('Session logged ✓');
 };
 
-// ── VOICE INPUT ──
-let activeRecognition = null, activeMicId = null;
-window.toggleVoice = (fieldId, micId) => {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { showToast('Voice not supported in this browser'); return; }
-  if (activeRecognition && activeMicId === micId) { activeRecognition.stop(); return; }
-  if (activeRecognition) { activeRecognition.stop(); document.getElementById(activeMicId).classList.remove('recording'); }
-  const rec = new SR(); rec.lang = 'en-IN'; rec.continuous = true; rec.interimResults = true;
-  const field = document.getElementById(fieldId); const base = field.value;
-  rec.onresult = evt => { let f='',i=''; for(let x=evt.resultIndex;x<evt.results.length;x++){if(evt.results[x].isFinal)f+=evt.results[x][0].transcript;else i+=evt.results[x][0].transcript;} field.value=(base+(base?'\n':'')+f+i).trim(); };
-  rec.onerror = rec.onend = () => { document.getElementById(micId).classList.remove('recording'); activeRecognition=null; activeMicId=null; };
-  rec.start(); activeRecognition=rec; activeMicId=micId; document.getElementById(micId).classList.add('recording');
+// ── VOICE ──
+let activeRecognition=null, activeMicId=null;
+window.toggleVoice=(fieldId,micId)=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Voice not supported');return;}
+  if(activeRecognition&&activeMicId===micId){activeRecognition.stop();return;}
+  if(activeRecognition){activeRecognition.stop();document.getElementById(activeMicId).classList.remove('recording');}
+  const rec=new SR();rec.lang='en-IN';rec.continuous=true;rec.interimResults=true;
+  const field=document.getElementById(fieldId);const base=field.value;
+  rec.onresult=evt=>{let f='',i='';for(let x=evt.resultIndex;x<evt.results.length;x++){if(evt.results[x].isFinal)f+=evt.results[x][0].transcript;else i+=evt.results[x][0].transcript;}field.value=(base+(base?'\n':'')+f+i).trim();};
+  rec.onerror=rec.onend=()=>{document.getElementById(micId).classList.remove('recording');activeRecognition=null;activeMicId=null;};
+  rec.start();activeRecognition=rec;activeMicId=micId;document.getElementById(micId).classList.add('recording');
 };
 
 // ── TOAST ──
-window.showToast = (msg) => { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); };
+window.showToast=(msg)=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);};
 
-// Date change for attendance
-document.getElementById('att-date').addEventListener('change', loadAttendance);
-document.getElementById('add-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
-document.getElementById('add-class-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeAddClassModal(); });
+// ── EVENT LISTENERS ──
+document.getElementById('att-date').addEventListener('change',loadAttendance);
+document.getElementById('add-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById('add-class-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddClassModal();});
+document.getElementById('join-class-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeJoinClassModal();});
+document.getElementById('join-code-input').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase();});
 </script>
 </body>
 </html>
