@@ -113,8 +113,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
 .class-card-meta{font-size:12px;color:var(--text-soft)}
-.class-code-chip{display:inline-flex;align-items:center;gap:6px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--maroon-deep);font-family:monospace;font-weight:600;letter-spacing:2px;margin-top:8px;cursor:pointer;user-select:all}
-.class-code-chip span{font-size:10px;color:var(--text-soft);font-family:'DM Sans',sans-serif;letter-spacing:0;font-weight:400}
+ 
  
 /* ── STREAM POST ── */
 .stream-post{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border)}
@@ -238,10 +237,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .home-hero h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px}
 .home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
-.join-code-display{background:var(--gold-pale);border:1.5px dashed rgba(201,146,42,.5);border-radius:12px;padding:14px;text-align:center}
-.join-code-display .label{font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.join-code-display .code{font-family:monospace;font-size:30px;font-weight:700;color:var(--maroon-deep);letter-spacing:5px}
-.join-code-display .hint{font-size:11px;color:var(--text-soft);margin-top:4px}
+ 
 </style>
 </head>
 <body>
@@ -309,7 +305,6 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
       <button class="btn btn-dashed" id="create-class-btn" style="display:none" onclick="openModal('create-class-modal')">+ Create New Class</button>
-      <button class="btn btn-dashed-gold" id="join-class-btn" style="display:none" onclick="openModal('join-class-modal')">⌗ Join Class with Code</button>
     </div>
   </div>
  
@@ -394,22 +389,6 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
  
-  <!-- Join Class -->
-  <div class="modal" id="join-class-modal">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Join a Class</div>
-      <div class="field">
-        <label>Enter Join Code</label>
-        <input id="join-code-input" placeholder="e.g. AB12CD" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:22px;text-align:center;font-family:monospace">
-      </div>
-      <div class="modal-btns" style="margin-top:16px">
-        <button class="btn btn-secondary" onclick="closeModal('join-class-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="joinByCode()">Join Class</button>
-      </div>
-    </div>
-  </div>
- 
   <!-- Add Log -->
   <div class="modal" id="add-log-modal">
     <div class="modal-sheet">
@@ -486,14 +465,27 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-handle"></div>
       <div class="modal-title">Class Settings</div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="join-code-display">
-          <div class="label">Join Code</div>
-          <div class="code" id="settings-join-code">------</div>
-          <div class="hint">Share with students to join</div>
+        <button class="btn btn-danger" onclick="deleteClass()">🗑 Delete this Class</button>
+        <button class="btn btn-secondary" onclick="closeModal('class-settings-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Edit Assignment -->
+  <div class="modal" id="edit-assign-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Assignment</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label>Title</label><input id="edit-assign-title" placeholder="e.g. Alarippu Practice"></div>
+        <div class="field"><label>Instructions</label>
+          <div class="field-voice"><textarea id="edit-assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-edit-assign" onclick="toggleVoice('edit-assign-body','mic-edit-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
-        <button class="btn btn-gold" onclick="copyJoinCode()">Copy Join Code</button>
-        <div class="divider"></div>
-        <button class="btn btn-secondary" onclick="closeModal('class-settings-modal')">Close</button>
+        <div class="field"><label>Due Date (optional)</label><input type="date" id="edit-assign-due"></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-assign-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditAssignment()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -532,7 +524,6 @@ let attState = {};
  
 // ── UTILS ──
 const $ = id => document.getElementById(id);
-const genCode = () => Math.random().toString(36).substring(2,8).toUpperCase();
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
 window.openModal = id => $(id).classList.add('open');
 window.closeModal = id => $(id).classList.remove('open');
@@ -582,7 +573,6 @@ function setupMain() {
   $('cls-ornament').textContent = isT ? '✦ Teacher Portal ✦' : '✦ My Classes ✦';
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
-  $('join-class-btn').style.display = isT ? 'none' : 'block';
   $('btab-log').style.display = isT ? 'none' : 'flex';
   goScreen('home');
 }
@@ -628,9 +618,12 @@ async function loadTeacherHome(c) {
   const sr = document.createElement('div'); sr.className='stat-row';
   sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
   c.appendChild(sr);
-  const hero = document.createElement('div'); hero.className='home-hero';
-  hero.innerHTML=`<div class="label">Teacher Quick Start</div><h2>Manage your classes</h2><p class="gold-bullet">Create classes & share join codes</p><p class="gold-bullet">Post assignments with due dates</p><p class="gold-bullet">Give personal feedback to students</p><p class="gold-bullet">Track attendance per session</p>`;
-  c.appendChild(hero);
+  const dismissed = localStorage.getItem('hideTeacherQuickStart');
+  if (!dismissed) {
+    const hero = document.createElement('div'); hero.className='home-hero'; hero.style.position='relative';
+    hero.innerHTML=`<button onclick="dismissQuickStart('teacher',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Teacher Quick Start</div><h2>Manage your classes</h2><p class="gold-bullet">Invite students by email</p><p class="gold-bullet">Post assignments with due dates</p><p class="gold-bullet">Give personal feedback to students</p><p class="gold-bullet">Track attendance per session</p>`;
+    c.appendChild(hero);
+  }
 }
  
 async function loadStudentHome(c) {
@@ -661,9 +654,19 @@ async function loadStudentHome(c) {
   }
  
   if (latestAssign) {
-    const a = document.createElement('div'); a.className='home-hero';
-    a.innerHTML=`<div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Practice'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:12px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
-    c.appendChild(a);
+    const dismissed2 = localStorage.getItem('hideStudentQuickStart');
+    if (!dismissed2) {
+      const a = document.createElement('div'); a.className='home-hero'; a.style.position='relative';
+      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Practice'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:12px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
+      c.appendChild(a);
+    }
+  } else {
+    const dismissed2 = localStorage.getItem('hideStudentQuickStart');
+    if (!dismissed2) {
+      const a = document.createElement('div'); a.className='home-hero'; a.style.position='relative';
+      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Quick Start</div><h2>Welcome!</h2><p class="gold-bullet">View assignments from your teacher</p><p class="gold-bullet">Log your daily practice sessions</p><p class="gold-bullet">Check personal feedback from your teacher</p>`;
+      c.appendChild(a);
+    }
   }
  
   if (latestFeedback) {
@@ -713,12 +716,12 @@ async function loadClasses() {
   let snap;
   if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
   else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-  if (snap.empty) { list.innerHTML=`<div class="empty">${ROLE==='teacher'?'No classes yet.\nTap "Create New Class" below!':'Not enrolled in any classes.\nUse a join code or wait for an invite.'}</div>`; return; }
+  if (snap.empty) { list.innerHTML=`<div class="empty">${ROLE==='teacher'?'No classes yet.\nTap "Create New Class" below!':'Not enrolled in any classes yet.\nAsk your teacher to invite you by email.'}</div>`; return; }
   list.innerHTML='';
-  snap.docs.forEach(d => {
+  snap.docs.filter(d=>!d.data().deleted).forEach(d => {
     const data=d.data();
     const el=document.createElement('div'); el.className='class-card';
-    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div><div class="class-card-body">${data.description?`<div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">${data.description}</div>`:''}<div class="class-code-chip">⌗ ${data.joinCode||'------'} <span>join code</span></div></div>`;
+    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
     el.onclick = () => openClassDetail(d.id, data);
     list.appendChild(el);
   });
@@ -738,7 +741,6 @@ async function openClassDetail(classId, classData) {
   currentClassId = classId;
   currentClassData = classData;
   $('pd-title').textContent = classData.name;
-  $('settings-join-code').textContent = classData.joinCode||'------';
   $('pd-settings-btn').style.display = ROLE==='teacher' ? 'flex' : 'none';
  
   // Build tabs based on role
@@ -812,6 +814,7 @@ async function renderStream(body) {
 }
  
 // ── ASSIGNMENTS ──
+let editingAssignId = null;
 async function renderAssignments(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
@@ -827,7 +830,7 @@ async function renderAssignments(body) {
       const a=d.data();
       const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
       const el=document.createElement('div'); el.className='assign-card';
-      el.innerHTML=`<div class="assign-card-top"><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>`;
+      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>`;
       wrap.appendChild(el);
     });
   }
@@ -972,15 +975,56 @@ window.inviteByEmail = async () => {
 window.removeStudent = async (sid, sname) => {
   if(!confirm(`Remove ${sname} from this class?`)) return;
   await updateDoc(doc(db,'classes',currentClassId), {studentIds:arrayRemove(sid)});
+  // Post to stream so teacher sees it
+  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body:`${sname} was removed from the class.`, teacherId:CU.uid, teacherName:'System', _system:true, createdAt:serverTimestamp() });
   showToast(sname+' removed');
   switchClassTab('people');
 };
+ 
 window.leaveClass = async () => {
   if(!confirm('Leave this class?')) return;
   await updateDoc(doc(db,'classes',currentClassId), {studentIds:arrayRemove(CU.uid)});
+  // Notify teacher via stream
+  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body:`${CU.displayName} left the class.`, teacherId:'system', teacherName:'System', _system:true, createdAt:serverTimestamp() });
   showToast('You left the class');
   closePanel('panel-class');
   loadClasses();
+};
+ 
+// ── DELETE CLASS ──
+window.deleteClass = async () => {
+  if(!confirm('Are you sure you want to permanently delete this class? This cannot be undone.')) return;
+  if(!confirm('This will delete all assignments, announcements and attendance records. Really delete?')) return;
+  await updateDoc(doc(db,'classes',currentClassId), {deleted:true, studentIds:[]});
+  closeModal('class-settings-modal');
+  closePanel('panel-class');
+  showToast('Class deleted');
+  loadClasses();
+};
+ 
+// ── DISMISS QUICK START ──
+window.dismissQuickStart = (role, el) => {
+  localStorage.setItem(role==='teacher'?'hideTeacherQuickStart':'hideStudentQuickStart','1');
+  el.style.transition='opacity .3s';
+  el.style.opacity='0';
+  setTimeout(()=>el.remove(), 300);
+};
+ 
+// ── EDIT ASSIGNMENT ──
+window.openEditAssignment = (id, title, body, due) => {
+  editingAssignId = id;
+  $('edit-assign-title').value = title;
+  $('edit-assign-body').value = body.replace(/\\n/g,'\n');
+  $('edit-assign-due').value = due;
+  openModal('edit-assign-modal');
+};
+window.saveEditAssignment = async () => {
+  const title=$('edit-assign-title').value.trim(), body=$('edit-assign-body').value.trim(), due=$('edit-assign-due').value;
+  if(!title||!body){showToast('Please fill in title and instructions');return;}
+  await updateDoc(doc(db,'classes',currentClassId,'assignments',editingAssignId), { title, body, due, editedAt:serverTimestamp() });
+  closeModal('edit-assign-modal');
+  showToast('Assignment updated ✓');
+  switchClassTab('assignments');
 };
  
 // ── STUDENT DETAIL ──
@@ -1029,35 +1073,11 @@ window.saveFeedback = async () => {
 window.createClass = async () => {
   const name=$('cc-name').value.trim(), desc=$('cc-desc').value.trim();
   if(!name) return;
-  const joinCode=genCode();
-  await addDoc(collection(db,'classes'), { name, description:desc, teacherId:CU.uid, teacherName:CU.displayName, studentIds:[], joinCode, createdAt:serverTimestamp() });
+  await addDoc(collection(db,'classes'), { name, description:desc, teacherId:CU.uid, teacherName:CU.displayName, studentIds:[], createdAt:serverTimestamp() });
   $('cc-name').value=''; $('cc-desc').value='';
   closeModal('create-class-modal');
-  showToast('Class created! Code: '+joinCode);
+  showToast('Class created! ✓');
   loadClasses();
-};
- 
-// ── JOIN BY CODE ──
-window.joinByCode = async () => {
-  const code=$('join-code-input').value.trim().toUpperCase();
-  if(code.length<4){showToast('Enter a valid code');return;}
-  const snap=await getDocs(query(collection(db,'classes'), where('joinCode','==',code)));
-  if(snap.empty){showToast('No class found with that code');return;}
-  const cd=snap.docs[0]; const cdata=cd.data();
-  if((cdata.studentIds||[]).includes(CU.uid)){showToast('Already in this class');closeModal('join-class-modal');return;}
-  if(confirm(`Join "${cdata.name}" by ${cdata.teacherName}?`)){
-    await updateDoc(doc(db,'classes',cd.id), {studentIds:arrayUnion(CU.uid)});
-    $('join-code-input').value='';
-    closeModal('join-class-modal');
-    showToast('Joined '+cdata.name+'! 🎉');
-    loadClasses();
-  }
-};
- 
-window.copyJoinCode = () => {
-  const code=$('settings-join-code').textContent;
-  navigator.clipboard.writeText(code).then(()=>showToast('Code copied: '+code));
-  closeModal('class-settings-modal');
 };
  
 // ── LOG ──
