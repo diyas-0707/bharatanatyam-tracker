@@ -25,7 +25,7 @@
 }
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
- 
+
 /* DESKTOP */
 @media(min-width:768px){
   html,body{overflow:hidden}
@@ -79,13 +79,13 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   .modal-handle{display:none}
   #auth-screen,#role-screen{max-width:460px;margin:auto;border-radius:20px;height:auto;min-height:480px;padding:48px 40px}
 }
- 
+
 /* ── LOADING ── */
 #loading-screen{position:absolute;inset:0;background:var(--warm-white);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
 .loading-logo{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--maroon-deep);font-weight:600}
 .loading-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;animation:ldot 1s infinite}
 @keyframes ldot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
- 
+
 /* ── AUTH ── */
 #auth-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;background:linear-gradient(160deg,var(--cream) 0%,var(--gold-pale) 100%)}
 .auth-ornament{font-size:12px;color:var(--gold);letter-spacing:6px;margin-bottom:24px;opacity:.8}
@@ -94,7 +94,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .google-btn{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 24px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text-dark);cursor:pointer;box-shadow:var(--shadow);transition:all .2s;width:100%;justify-content:center;font-weight:500}
 .google-btn:active{transform:scale(.97)}
 .google-btn svg{width:20px;height:20px;flex-shrink:0}
- 
+
 /* ── ROLE ── */
 #role-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;background:linear-gradient(160deg,var(--cream),var(--gold-pale))}
 .role-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep);margin-bottom:6px;text-align:center}
@@ -110,16 +110,16 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .role-info p{font-size:12px;color:var(--text-soft);line-height:1.4}
 .role-btn{margin-top:24px;width:100%;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;opacity:.4;pointer-events:none;transition:opacity .2s}
 .role-btn.ready{opacity:1;pointer-events:all}
- 
+
 /* ── MAIN APP ── */
 #main-app{display:none;flex-direction:column;height:100%;position:relative;overflow:hidden}
- 
+
 /* ── SCREENS ── */
 .screen{position:absolute;top:0;left:0;right:0;bottom:64px;overflow-y:auto;display:none;flex-direction:column;background:var(--warm-white);-webkit-overflow-scrolling:touch}
 .screen.active{display:flex}
 .screen::-webkit-scrollbar{width:3px}
 .screen::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
- 
+
 /* ── BOTTOM NAV ── */
 .bnav{position:absolute;bottom:0;left:0;right:0;height:64px;background:var(--card-bg);border-top:.5px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
 .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:none;background:none;transition:all .2s;padding:8px 0}
@@ -127,7 +127,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .bnav-tab span{font-size:10px;color:var(--text-soft);font-weight:400;letter-spacing:.3px;transition:color .2s}
 .bnav-tab.active svg{stroke:var(--maroon)}
 .bnav-tab.active span{color:var(--maroon);font-weight:500}
- 
+
 /* ── SLIDE-OVER PANEL ── */
 .panel{position:absolute;inset:0;background:var(--warm-white);z-index:100;display:none;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .panel.open{display:flex;transform:translateX(0)}
@@ -138,7 +138,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .panel-body{flex:1;overflow-y:auto;padding-bottom:20px}
 .panel-body::-webkit-scrollbar{width:3px}
 .panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
- 
+
 /* ── TAB BAR (inside panel) ── */
 .tab-bar{display:flex;border-bottom:.5px solid var(--border);flex-shrink:0;background:var(--warm-white);overflow-x:auto}
 .tab-bar::-webkit-scrollbar{display:none}
@@ -146,18 +146,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .tbtn.active{color:var(--maroon);border-bottom-color:var(--maroon);font-weight:500}
 .tpane{display:none;padding:16px;flex-direction:column;gap:12px}
 .tpane.active{display:flex}
- 
+
 /* ── PAGE HEADER ── */
 .pg-header{padding:20px 16px 0;flex-shrink:0}
 .pg-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
 .pg-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
 .pg-sub{font-size:13px;color:var(--text-soft);margin-top:3px;font-weight:300}
- 
+
 /* ── CARDS ── */
 .card{background:var(--card-bg);border-radius:16px;padding:16px 18px;border:.5px solid var(--border);box-shadow:var(--shadow)}
 .card-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-soft);font-weight:500;margin-bottom:8px}
 .card-title2{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text-dark);margin-bottom:4px}
- 
+
 /* ── CLASS CARD ── */
 .class-card{background:var(--card-bg);border-radius:16px;overflow:hidden;border:.5px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:transform .18s}
 .class-card:active{transform:scale(.98)}
@@ -167,8 +167,8 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
 .class-card-meta{font-size:12px;color:var(--text-soft)}
- 
- 
+
+
 /* ── STREAM POST ── */
 .stream-post{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border)}
 .stream-post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -182,7 +182,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .tag-announce{background:#EEF2FF;color:#4338CA}
 .tag-assign{background:var(--gold-pale);color:#92400E}
 .tag-feedback{background:var(--success-bg);color:var(--success)}
- 
+
 /* ── ASSIGNMENT CARD ── */
 .assign-card{background:var(--card-bg);border-radius:14px;border:.5px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .18s}
 .assign-card:active{transform:scale(.98)}
@@ -190,7 +190,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .assign-card-top-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--maroon-deep)}
 .assign-card-top-date{font-size:11px;color:var(--maroon-soft);margin-top:3px}
 .assign-card-body{padding:12px 16px;font-size:13px;color:var(--text-mid);line-height:1.6}
- 
+
 /* ── STUDENT ROW ── */
 .student-row{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:12px}
 .s-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0}
@@ -203,14 +203,14 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .icon-btn.danger svg{stroke:var(--danger)}
 .icon-btn.primary{background:var(--gold-pale)}
 .icon-btn.primary svg{stroke:var(--maroon)}
- 
+
 /* ── ATTENDANCE ── */
 .att-row{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:10px}
 .att-toggle{display:flex;gap:6px;margin-left:auto}
 .att-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:.5px solid var(--border);background:var(--surface);color:var(--text-soft);transition:all .15s}
 .att-btn.present{background:var(--success-bg);color:var(--success);border-color:transparent}
 .att-btn.absent{background:var(--danger-bg);color:var(--danger);border-color:transparent}
- 
+
 /* ── LOG ENTRY ── */
 .log-entry{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;gap:12px;align-items:flex-start}
 .log-date-col{text-align:center;min-width:36px}
@@ -221,13 +221,13 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:5px}
 .badge-done{background:var(--success-bg);color:var(--success)}
 .badge-miss{background:var(--danger-bg);color:var(--danger)}
- 
+
 /* ── STAT ROW ── */
 .stat-row{display:flex;gap:8px}
 .stat-box{flex:1;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.25);border-radius:12px;padding:12px;text-align:center}
 .stat-num{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep)}
 .stat-label{font-size:10px;color:var(--text-soft);margin-top:2px}
- 
+
 /* ── FORMS ── */
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
@@ -241,7 +241,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .mic-btn svg{width:14px;height:14px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mic-btn.rec svg{stroke:#fff}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
- 
+
 /* ── BUTTONS ── */
 .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
 .btn:active{transform:scale(.97)}
@@ -251,7 +251,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .btn-gold{background:var(--gold-pale);color:var(--maroon-deep);border:.5px solid rgba(201,146,42,.3)}
 .btn-dashed{background:transparent;border:1.5px dashed var(--maroon);color:var(--maroon)}
 .btn-dashed-gold{background:transparent;border:1.5px dashed var(--gold);color:var(--gold)}
- 
+
 /* ── MODAL ── */
 .modal{display:none;position:absolute;inset:0;background:rgba(26,10,10,.55);z-index:300;align-items:flex-end}
 .modal.open{display:flex}
@@ -260,7 +260,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--maroon-deep);margin-bottom:16px}
 .modal-btns{display:flex;gap:10px;margin-top:4px}
 .modal-btns .btn{flex:1}
- 
+
 /* ── INVITE CARD ── */
 .invite-card{background:var(--gold-pale);border:1px solid rgba(201,146,42,.35);border-radius:14px;padding:14px 16px}
 .invite-card h4{font-size:14px;font-weight:500;color:var(--text-dark);margin-bottom:3px}
@@ -268,7 +268,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .invite-btns{display:flex;gap:8px}
 .invite-accept{flex:1;padding:9px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
 .invite-decline{flex:1;padding:9px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
- 
+
 /* ── USER CHIP ── */
 .user-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gold-pale);border-radius:12px}
 .user-chip img{width:30px;height:30px;border-radius:50%;object-fit:cover}
@@ -276,11 +276,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .uc-name{font-size:13px;font-weight:500;color:var(--text-dark)}
 .uc-role{font-size:11px;color:var(--text-soft)}
 .uc-signout{font-size:12px;color:var(--maroon);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline}
- 
+
 /* ── TOAST ── */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A0A0A;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
 .toast.show{opacity:1}
- 
+
 /* ── MISC ── */
 .ornament{text-align:center;padding:8px 0;font-size:11px;color:var(--gold);letter-spacing:5px;opacity:.6}
 .empty{text-align:center;padding:36px 20px;color:var(--text-soft);font-size:13px;line-height:1.8}
@@ -291,18 +291,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .home-hero h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px}
 .home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
- 
+
 </style>
 </head>
 <body>
 <div id="app">
- 
+
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="loading-logo">✦ Bharatanatyam</div>
   <div class="loading-dot"></div>
 </div>
- 
+
 <!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-ornament">✦ ✦ ✦</div>
@@ -313,7 +313,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     Continue with Google
   </button>
 </div>
- 
+
 <!-- ROLE -->
 <div id="role-screen">
   <h2 class="role-title">I am a...</h2>
@@ -330,7 +330,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   </div>
   <button class="role-btn" id="role-btn" onclick="confirmRole()">Continue →</button>
 </div>
- 
+
 <!-- MAIN APP -->
 <div id="main-app">
   <!-- DESKTOP SIDEBAR (hidden on mobile via CSS) -->
@@ -364,7 +364,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   <div id="desktop-main" style="display:none;flex:1;flex-direction:column;overflow:hidden">
     <div id="desktop-topbar"><div id="desktop-topbar-title">Home</div></div>
     <div id="desktop-content" style="flex:1;overflow-y:auto;padding:24px;background:var(--cream)">
- 
+
   <!-- ══ SCREEN: HOME ══ -->
   <div class="screen active" id="scr-home">
     <div class="pg-header" style="padding-bottom:16px">
@@ -377,7 +377,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
     <div style="height:16px"></div>
   </div>
- 
+
   <!-- ══ SCREEN: CLASSES ══ -->
   <div class="screen" id="scr-classes">
     <div class="pg-header" style="padding-bottom:16px">
@@ -392,7 +392,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <button class="btn btn-dashed" id="create-class-btn" style="display:none" onclick="openModal('create-class-modal')">+ Create New Class</button>
     </div>
   </div>
- 
+
   <!-- ══ SCREEN: LOG (student only) ══ -->
   <div class="screen" id="scr-log">
     <div class="pg-header" style="padding-bottom:12px">
@@ -419,7 +419,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px" id="log-list"></div>
     <div style="height:16px"></div>
   </div>
- 
+
   <!-- ══ PANEL: CLASS DETAIL ══ -->
   <div class="panel" id="panel-class">
     <div class="panel-header">
@@ -430,7 +430,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div class="tab-bar" id="pd-tabs"></div>
     <div class="panel-body" id="pd-body"></div>
   </div>
- 
+
   <!-- ══ PANEL: STUDENT DETAIL (teacher) ══ -->
   <div class="panel" id="panel-student">
     <div class="panel-header">
@@ -439,10 +439,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
     <div class="panel-body" style="padding:16px;display:flex;flex-direction:column;gap:14px" id="sd-body"></div>
   </div>
- 
+
     </div><!-- /desktop-content -->
   </div><!-- /desktop-main -->
- 
+
   <!-- ══ BOTTOM NAV ══ -->
   <nav class="bnav">
     <button class="bnav-tab active" id="btab-home" onclick="goScreen('home')">
@@ -458,9 +458,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <span>Log</span>
     </button>
   </nav>
- 
+
   <!-- ══ MODALS ══ -->
- 
+
   <!-- Create Class -->
   <div class="modal" id="create-class-modal">
     <div class="modal-sheet">
@@ -476,7 +476,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Add Log -->
   <div class="modal" id="add-log-modal">
     <div class="modal-sheet">
@@ -495,7 +495,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Post Assignment (teacher) -->
   <div class="modal" id="post-assign-modal">
     <div class="modal-sheet">
@@ -514,7 +514,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Post Announcement (teacher) -->
   <div class="modal" id="post-announce-modal">
     <div class="modal-sheet">
@@ -530,7 +530,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Student Feedback (teacher) -->
   <div class="modal" id="feedback-modal">
     <div class="modal-sheet">
@@ -546,7 +546,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Class Settings -->
   <div class="modal" id="class-settings-modal">
     <div class="modal-sheet">
@@ -558,7 +558,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <!-- Edit Assignment -->
   <div class="modal" id="edit-assign-modal">
     <div class="modal-sheet">
@@ -577,16 +577,16 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </div>
     </div>
   </div>
- 
+
   <div class="toast" id="toast"></div>
 </div>
 </div>
- 
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
- 
+
 const cfg = {
   apiKey:"AIzaSyD8UJlf7N95PSfbWIFmKRkww-qduDcExp0",
   authDomain:"bharatanatyam-tracker.firebaseapp.com",
@@ -598,7 +598,7 @@ const cfg = {
 const fbApp = initializeApp(cfg);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
- 
+
 // ── STATE ──
 let CU = null; // current user
 let ROLE = null; // 'teacher' | 'student'
@@ -609,11 +609,11 @@ let currentStudentId = null;
 let currentStudentName = null;
 let currentTab = null;
 let attState = {};
- 
+
 // ── UTILS ──
 const $ = id => document.getElementById(id);
 const isDesktop = () => window.innerWidth >= 768;
- 
+
 function initDesktop() {
   if (!isDesktop()) return;
   $('sidebar').style.display = 'flex';
@@ -630,15 +630,17 @@ function initDesktop() {
   const toast = $('toast');
   if (toast && toast.parentNode !== mainApp) mainApp.appendChild(toast);
 }
- 
-function setSbActive(which) {
+
+window.setSbActive = function(which) {
   ['home','classes','log'].forEach(k => {
     const el = $('sb-'+k);
     if (el) el.classList.toggle('active', k===which);
   });
-  $('desktop-topbar-title').textContent = which==='home' ? 'Home' : which==='classes' ? 'Classes' : 'Practice Log';
-}
- 
+  const titles = {home:'Home',classes:'Classes',log:'Practice Log'};
+  const tb = $('desktop-topbar-title');
+  if (tb) tb.textContent = titles[which]||'';
+};
+
 function updateSbUserSection() {
   const sb = $('sb-user-section');
   if (!sb || !CU) return;
@@ -647,7 +649,7 @@ function updateSbUserSection() {
     : `<div class="sb-user-initials">${(CU.displayName||'U')[0]}</div>`;
   sb.innerHTML += `<div class="sb-user-info"><div class="sb-user-name">${CU.displayName||''}</div><div class="sb-user-role">${ROLE==='teacher'?'Teacher':'Student'}</div><button class="sb-signout" onclick="doSignOut()">Sign out</button></div>`;
 }
- 
+
 async function updateSbClassList() {
   const list = $('sb-class-list');
   if (!list) return;
@@ -669,14 +671,14 @@ async function updateSbClassList() {
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
 window.openModal = id => $(id).classList.add('open');
 window.closeModal = id => $(id).classList.remove('open');
- 
+
 // ── AUTH ──
 window.signInGoogle = async () => {
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
   catch(e) { showToast('Sign in failed'); }
 };
 window.doSignOut = async () => { await signOut(auth); };
- 
+
 onAuthStateChanged(auth, async user => {
   $('loading-screen').style.display = 'none';
   if (!user) { show('auth'); return; }
@@ -685,7 +687,7 @@ onAuthStateChanged(auth, async user => {
   if (ud.exists() && ud.data().role) { ROLE = ud.data().role; show('main'); }
   else show('role');
 });
- 
+
 function show(which) {
   $('auth-screen').style.display = 'none';
   $('role-screen').style.display = 'none';
@@ -694,7 +696,7 @@ function show(which) {
   else if (which==='role') $('role-screen').style.display = 'flex';
   else { $('main-app').style.display = 'flex'; setupMain(); }
 }
- 
+
 // ── ROLE ──
 window.pickRole = (role, el) => {
   selectedRole = role;
@@ -708,7 +710,7 @@ window.confirmRole = async () => {
   ROLE = selectedRole;
   show('main');
 };
- 
+
 // ── SETUP ──
 function setupMain() {
   const isT = ROLE==='teacher';
@@ -725,7 +727,7 @@ function setupMain() {
   }
   goScreen('home');
 }
- 
+
 // ── NAVIGATION ──
 window.goScreen = scr => {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -739,7 +741,7 @@ window.goScreen = scr => {
   if (scr==='classes') loadClasses();
   if (scr==='log') loadLog();
 };
- 
+
 window.openPanel = id => {
   $(id).classList.add('open');
   if (isDesktop()) {
@@ -755,7 +757,7 @@ window.closePanel = id => {
     updateSbClassList();
   }
 };
- 
+
 // ── HOME ──
 async function loadHome() {
   const name = CU.displayName.split(' ')[0];
@@ -763,7 +765,7 @@ async function loadHome() {
   $('home-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
   const c = $('home-content');
   c.innerHTML = '';
- 
+
   // User chip
   const chip = document.createElement('div');
   chip.className = 'user-chip';
@@ -771,11 +773,11 @@ async function loadHome() {
     <div class="uc-info"><div class="uc-name">${CU.displayName}</div><div class="uc-role">${ROLE==='teacher'?'Teacher':'Student'}</div></div>
     <button class="uc-signout" onclick="doSignOut()">Sign out</button>`;
   c.appendChild(chip);
- 
+
   if (ROLE==='teacher') await loadTeacherHome(c);
   else await loadStudentHome(c);
 }
- 
+
 async function loadTeacherHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
   let students = 0;
@@ -790,7 +792,7 @@ async function loadTeacherHome(c) {
     c.appendChild(hero);
   }
 }
- 
+
 async function loadStudentHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
   const logsSnap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
@@ -800,11 +802,11 @@ async function loadStudentHome(c) {
   const thisMonth = logsSnap.docs.filter(d=>d.data().date&&d.data().date.startsWith(ms)&&d.data().completed).length;
   const today = now.toISOString().split('T')[0];
   const todayDone = logsSnap.docs.some(d=>d.data().date===today&&d.data().completed);
- 
+
   const sr = document.createElement('div'); sr.className='stat-row';
   sr.innerHTML=`<div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Total Sessions</div></div><div class="stat-box"><div class="stat-num">${thisMonth}</div><div class="stat-label">This Month</div></div><div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div>`;
   c.appendChild(sr);
- 
+
   // Latest assignment
   let latestAssign = null, latestFeedback = null;
   for (const cd of snap.docs) {
@@ -817,7 +819,7 @@ async function loadStudentHome(c) {
       if (fb.exists()&&fb.data().text) latestFeedback = fb.data();
     }
   }
- 
+
   if (latestAssign) {
     const dismissed2 = localStorage.getItem('hideStudentQuickStart');
     if (!dismissed2) {
@@ -833,13 +835,13 @@ async function loadStudentHome(c) {
       c.appendChild(a);
     }
   }
- 
+
   if (latestFeedback) {
     const fb = document.createElement('div'); fb.className='card';
     fb.innerHTML=`<div class="card-label">Latest Teacher Feedback</div><div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-mid);line-height:1.65;font-style:italic">${latestFeedback.text}</div><div style="font-size:11px;color:var(--text-soft);margin-top:8px">From ${latestFeedback.teacherName||'your teacher'}</div>`;
     c.appendChild(fb);
   }
- 
+
   const pb = document.createElement('button');
   pb.className = 'btn '+(todayDone?'btn-secondary':'btn-primary');
   pb.style.marginTop = '4px';
@@ -847,7 +849,7 @@ async function loadStudentHome(c) {
   pb.onclick = () => markPracticed(pb);
   c.appendChild(pb);
 }
- 
+
 window.markPracticed = async btn => {
   const today = new Date().toISOString().split('T')[0];
   const s = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid), where('date','==',today)));
@@ -856,7 +858,7 @@ window.markPracticed = async btn => {
   showToast('Practice marked! 🙏');
   btn.textContent='✓ Practiced Today'; btn.className='btn btn-secondary';
 };
- 
+
 // ── CLASSES ──
 async function loadClasses() {
   if (isDesktop()) updateSbClassList();
@@ -876,7 +878,7 @@ async function loadClasses() {
       });
     }
   }
- 
+
   const list = $('classes-list');
   list.innerHTML = '<div class="empty">Loading...</div>';
   let snap;
@@ -892,7 +894,7 @@ async function loadClasses() {
     list.appendChild(el);
   });
 }
- 
+
 window.respondInvite = async (invId, classId, action) => {
   if (action==='accept') {
     await updateDoc(doc(db,'classes',classId), {studentIds:arrayUnion(CU.uid)});
@@ -901,29 +903,29 @@ window.respondInvite = async (invId, classId, action) => {
   await updateDoc(doc(db,'classInvites',invId), {status:action==='accept'?'accepted':'declined'});
   loadClasses();
 };
- 
+
 // ── CLASS DETAIL ──
 async function openClassDetail(classId, classData) {
   currentClassId = classId;
   currentClassData = classData;
   $('pd-title').textContent = classData.name;
   $('pd-settings-btn').style.display = ROLE==='teacher' ? 'flex' : 'none';
- 
+
   // Build tabs based on role
   const isT = ROLE==='teacher';
   const tabs = isT
     ? [['stream','Stream'],['assignments','Assignments'],['people','Students'],['attendance','Attendance']]
     : [['stream','Stream'],['assignments','Assignments'],['people','People']];
- 
+
   const tabBar = $('pd-tabs');
   tabBar.innerHTML = tabs.map(([id,label],i) =>
     `<button class="tbtn${i===0?' active':''}" onclick="switchClassTab('${id}')">${label}</button>`
   ).join('');
- 
+
   openPanel('panel-class');
   switchClassTab('stream');
 }
- 
+
 window.switchClassTab = async tab => {
   currentTab = tab;
   document.querySelectorAll('#pd-tabs .tbtn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase()===tab||(tab==='stream'&&b.textContent==='Stream')||(tab==='assignments'&&b.textContent==='Assignments')||(tab==='people'&&b.textContent==='Students')||(tab==='people'&&b.textContent==='People')||(tab==='attendance'&&b.textContent==='Attendance')));
@@ -939,32 +941,32 @@ window.switchClassTab = async tab => {
   if (tab==='people') await renderPeople(body);
   if (tab==='attendance') await renderAttendance(body);
 };
- 
+
 // ── STREAM ──
 async function renderStream(body) {
   body.innerHTML='';
   const isT = ROLE==='teacher';
   const wrap = document.createElement('div');
   wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
- 
+
   if (isT) {
     const actions = document.createElement('div');
     actions.style.cssText='display:flex;gap:8px';
     actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button>`;
     wrap.appendChild(actions);
   }
- 
+
   // Load stream (announcements + assignments)
   const [annSnap, assSnap] = await Promise.all([
     getDocs(query(collection(db,'classes',currentClassId,'announcements'), orderBy('createdAt','desc'))),
     getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')))
   ]);
- 
+
   const items = [
     ...annSnap.docs.map(d=>({...d.data(), _type:'announce', _id:d.id})),
     ...assSnap.docs.map(d=>({...d.data(), _type:'assign', _id:d.id}))
   ].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
- 
+
   if (!items.length) {
     wrap.innerHTML += '<div class="empty">No posts yet.</div>';
   } else {
@@ -978,7 +980,7 @@ async function renderStream(body) {
   }
   body.appendChild(wrap);
 }
- 
+
 // ── ASSIGNMENTS ──
 let editingAssignId = null;
 async function renderAssignments(body) {
@@ -1002,14 +1004,14 @@ async function renderAssignments(body) {
   }
   body.appendChild(wrap);
 }
- 
+
 // ── PEOPLE ──
 async function renderPeople(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
   wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
   const isT = ROLE==='teacher';
- 
+
   if (isT) {
     // Invite section
     const inv = document.createElement('div');
@@ -1017,10 +1019,10 @@ async function renderPeople(body) {
     inv.innerHTML=`<input id="invite-email-input" placeholder="Student email address" style="flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><button class="btn btn-primary" style="width:auto;padding:10px 16px;font-size:13px" onclick="inviteByEmail()">Invite</button>`;
     wrap.appendChild(inv);
   }
- 
+
   const classDoc = await getDoc(doc(db,'classes',currentClassId));
   const studentIds = classDoc.data().studentIds||[];
- 
+
   // Teacher row
   const teacherDoc = await getDoc(doc(db,'users',classDoc.data().teacherId));
   if (teacherDoc.exists()) {
@@ -1031,11 +1033,11 @@ async function renderPeople(body) {
     row.innerHTML=`<div class="s-avatar">${(td.name||'T')[0]}</div><div class="s-info"><div class="s-name">${td.name||'Teacher'}</div><div class="s-email">${td.email||''}</div></div>`;
     wrap.appendChild(row);
   }
- 
+
   // Students
   const lbl2=document.createElement('div'); lbl2.className='section-label'; lbl2.style.marginTop='4px'; lbl2.textContent=`Students (${studentIds.length})`;
   wrap.appendChild(lbl2);
- 
+
   if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.style.padding='20px 0'; e.textContent='No students yet.'; wrap.appendChild(e); }
   else {
     const sdocs = await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
@@ -1050,14 +1052,14 @@ async function renderPeople(body) {
       wrap.appendChild(row);
     });
   }
- 
+
   if (!isT) {
     const lb=document.createElement('button'); lb.className='btn btn-danger'; lb.textContent='Leave this Class'; lb.onclick=leaveClass; lb.style.marginTop='8px';
     wrap.appendChild(lb);
   }
   body.appendChild(wrap);
 }
- 
+
 // ── ATTENDANCE (teacher only) ──
 async function renderAttendance(body) {
   body.innerHTML='';
@@ -1074,7 +1076,7 @@ async function renderAttendance(body) {
   await loadAttendanceRows(wrap, dateInput.value);
   body.appendChild(wrap);
 }
- 
+
 async function loadAttendanceRows(wrap, date) {
   wrap.querySelectorAll('.att-row').forEach(r=>r.remove());
   wrap.querySelectorAll('.save-att-wrapper').forEach(r=>r.remove());
@@ -1093,7 +1095,7 @@ async function loadAttendanceRows(wrap, date) {
     wrap.appendChild(row);
   });
 }
- 
+
 window.setAtt = (sid, status, btn) => {
   attState[sid]=status;
   btn.closest('.att-toggle').querySelectorAll('.att-btn').forEach(b=>b.classList.remove('present','absent'));
@@ -1104,7 +1106,7 @@ window.saveAttendance = async () => {
   await setDoc(doc(db,'classes',currentClassId,'attendance',date), attState);
   showToast('Attendance saved ✓');
 };
- 
+
 // ── POST ACTIONS ──
 window.postAnnouncement = async () => {
   const body=$('announce-body').value.trim();
@@ -1124,7 +1126,7 @@ window.postAssignment = async () => {
   showToast('Assignment posted ✓');
   switchClassTab('assignments');
 };
- 
+
 // ── INVITE / REMOVE / LEAVE ──
 window.inviteByEmail = async () => {
   const email=$('invite-email-input').value.trim().toLowerCase();
@@ -1146,7 +1148,7 @@ window.removeStudent = async (sid, sname) => {
   showToast(sname+' removed');
   switchClassTab('people');
 };
- 
+
 window.leaveClass = async () => {
   if(!confirm('Leave this class?')) return;
   await updateDoc(doc(db,'classes',currentClassId), {studentIds:arrayRemove(CU.uid)});
@@ -1156,7 +1158,7 @@ window.leaveClass = async () => {
   closePanel('panel-class');
   loadClasses();
 };
- 
+
 // ── DELETE CLASS ──
 window.deleteClass = async () => {
   if(!confirm('Are you sure you want to permanently delete this class? This cannot be undone.')) return;
@@ -1167,7 +1169,7 @@ window.deleteClass = async () => {
   showToast('Class deleted');
   loadClasses();
 };
- 
+
 // ── DISMISS QUICK START ──
 window.dismissQuickStart = (role, el) => {
   localStorage.setItem(role==='teacher'?'hideTeacherQuickStart':'hideStudentQuickStart','1');
@@ -1175,7 +1177,7 @@ window.dismissQuickStart = (role, el) => {
   el.style.opacity='0';
   setTimeout(()=>el.remove(), 300);
 };
- 
+
 // ── EDIT ASSIGNMENT ──
 window.openEditAssignment = (id, title, body, due) => {
   editingAssignId = id;
@@ -1192,7 +1194,7 @@ window.saveEditAssignment = async () => {
   showToast('Assignment updated ✓');
   switchClassTab('assignments');
 };
- 
+
 // ── STUDENT DETAIL ──
 window.openStudentDetail = async (sid, sname, semail) => {
   currentStudentId=sid; currentStudentName=sname;
@@ -1201,18 +1203,18 @@ window.openStudentDetail = async (sid, sname, semail) => {
   const body=$('sd-body');
   body.innerHTML='<div class="empty">Loading...</div>';
   openPanel('panel-student');
- 
+
   const fbDoc=await getDoc(doc(db,'classes',currentClassId,'feedback',sid));
   $('feedback-body').value=fbDoc.exists()?fbDoc.data().text:'';
- 
+
   const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
   const logs=logsSnap.docs.map(d=>d.data()).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,15);
- 
+
   body.innerHTML='';
   const fbCard=document.createElement('div'); fbCard.className='card'; fbCard.style.margin='0';
   fbCard.innerHTML=`<div class="card-label">Personal Feedback</div>${fbDoc.exists()&&fbDoc.data().text?`<div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text-mid);line-height:1.65;font-style:italic;margin-bottom:10px">${fbDoc.data().text}</div>`:`<div style="font-size:13px;color:var(--text-soft);margin-bottom:10px">No feedback given yet.</div>`}<button class="btn btn-primary" style="font-size:13px;padding:10px" onclick="openModal('feedback-modal')">Edit Feedback</button>`;
   body.appendChild(fbCard);
- 
+
   const lbl=document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='16px'; lbl.textContent='Practice Log ('+logs.length+' entries)';
   body.appendChild(lbl);
   if(!logs.length){const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);}
@@ -1225,7 +1227,7 @@ window.openStudentDetail = async (sid, sname, semail) => {
     });
   }
 };
- 
+
 window.saveFeedback = async () => {
   const text=$('feedback-body').value.trim();
   if(!text) return;
@@ -1234,7 +1236,7 @@ window.saveFeedback = async () => {
   showToast('Feedback saved ✓');
   openStudentDetail(currentStudentId, currentStudentName, '');
 };
- 
+
 // ── CREATE CLASS ──
 window.createClass = async () => {
   const name=$('cc-name').value.trim(), desc=$('cc-desc').value.trim();
@@ -1245,7 +1247,7 @@ window.createClass = async () => {
   showToast('Class created! ✓');
   loadClasses();
 };
- 
+
 // ── LOG ──
 window.loadLog = async () => {
   const month=$('log-month-filter').value;
@@ -1263,7 +1265,7 @@ window.loadLog = async () => {
     list.appendChild(el);
   });
 };
- 
+
 window.saveLog = async () => {
   const date=$('log-date').value, text=$('log-practice').value.trim(), status=$('log-status').value;
   if(!date||!text){showToast('Please fill in all fields');return;}
@@ -1273,7 +1275,7 @@ window.saveLog = async () => {
   showToast('Session logged ✓');
   loadLog();
 };
- 
+
 // ── VOICE ──
 let activeRec=null, activeMicId=null;
 window.toggleVoice=(fieldId,micId)=>{
@@ -1287,12 +1289,12 @@ window.toggleVoice=(fieldId,micId)=>{
   rec.onerror=rec.onend=()=>{$(micId).classList.remove('rec');activeRec=null;activeMicId=null;};
   rec.start(); activeRec=rec; activeMicId=micId; $(micId).classList.add('rec');
 };
- 
+
 // ── MODAL CLOSE ON BACKDROP ──
 document.querySelectorAll('.modal').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
 });
- 
+
 // ── INIT LOG DATE ──
 $('log-date').value = new Date().toISOString().split('T')[0];
 </script>
