@@ -739,7 +739,11 @@ function show(which) {
   $('main-app').style.display = 'none';
   if (which==='auth') $('auth-screen').style.display = 'flex';
   else if (which==='role') $('role-screen').style.display = 'flex';
-  else { $('main-app').style.display = 'flex'; setupMain(); }
+  else {
+    $('main-app').style.display = isDesktop() ? 'flex' : 'flex';
+    $('main-app').style.flexDirection = isDesktop() ? 'row' : 'column';
+    setupMain();
+  }
 }
 
 // ── ROLE ──
@@ -763,7 +767,11 @@ function setupMain() {
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
   $('btab-log').style.display = isT ? 'none' : 'flex';
-  if (isDesktop()) setupDesktop();
+  if (isDesktop()) {
+    // Hide all mobile-only elements
+    document.querySelectorAll('.screen,.bnav').forEach(el => el.style.display='none');
+    setupDesktop();
+  }
   goScreen('home');
 }
 
