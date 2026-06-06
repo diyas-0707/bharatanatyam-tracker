@@ -686,13 +686,6 @@ function desktopShow(el) {
   el.style.minHeight = '100%';
 }
 
-    if (el) el.classList.toggle('active', k===which);
-  });
-  const titles = {home:'Home',classes:'Classes',log:'Practice Log'};
-  const tb = $('desktop-topbar-title');
-  if (tb) tb.textContent = titles[which]||'';
-};
-
 function updateSbUserSection() {
   const sb = $('sb-user-section');
   if (!sb || !CU) return;
