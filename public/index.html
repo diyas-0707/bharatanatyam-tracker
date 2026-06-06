@@ -304,6 +304,23 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
   .stat-box{flex:1}
   .log-entry{background:var(--card-bg);border-radius:12px;padding:14px 18px}
   
+  /* Force everything in app-page to stretch full width */
+  #app-page, #app-page > *, #app-page > * > *{
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  #app-page{display:flex;flex-direction:column}
+  #app-page .stat-row{display:flex;gap:12px}
+  #app-page .stat-box{flex:1}
+  #app-page .log-entry{width:100%!important}
+  #app-page .assign-card, #app-page .stream-post, #app-page .card, #app-page .invite-card{width:100%!important}
+  #app-page .pg-header{padding:28px 28px 0}
+  #app-page .ornament{padding:16px 0}
+  #app-page .entry-list, #app-page #log-list{padding:0}
+  #app-page #home-content{padding:0;gap:16px;display:flex;flex-direction:column}
+  #app-sidebar{flex-shrink:0}
+  
   /* Modal centered */
   .modal{align-items:center;justify-content:center;position:fixed}
   .modal-sheet{border-radius:16px;max-width:520px;width:90%;margin:0 auto}
@@ -831,7 +848,7 @@ async function loadHome() {
     const page = $('app-page');
     page.innerHTML = '';
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px;display:flex;flex-direction:column;gap:16px;width:100%';
+    wrap.style.cssText = 'padding:28px 32px;display:flex;flex-direction:column;gap:16px';
     page.appendChild(wrap);
     const name = CU.displayName.split(' ')[0];
     // User chip
@@ -952,7 +969,7 @@ async function loadClasses() {
     if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
     else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px;width:100%';
+    wrap.style.cssText = 'padding:28px 32px';
     // Pending invites for students
     if (ROLE==='student') {
       const is = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',CU.email), where('status','==','pending')));
@@ -1372,7 +1389,7 @@ window.loadLog = async () => {
   if (isDesktop()) {
     const page = $('app-page');
     page.innerHTML = '';
-    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px;width:100%;display:flex;flex-direction:column;gap:14px';
+    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:14px';
     // Filter row
     const filterRow = document.createElement('div'); filterRow.style.cssText='display:flex;gap:10px;align-items:center';
     filterRow.innerHTML=`<select id="log-month-filter-desk" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark)"><option value="2026-06">June 2026</option><option value="2026-05">May 2026</option><option value="2026-04">April 2026</option><option value="2026-03">March 2026</option></select><button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>`;
