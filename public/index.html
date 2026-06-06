@@ -243,6 +243,9 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 .home-hero h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px}
 .home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
+/* Hide desktop elements on mobile */
+#app-sidebar, #app-content { display: none; }
+
 /* ── DESKTOP LAYOUT ── */
 @media(min-width:768px){
   html,body{overflow:hidden}
@@ -290,12 +293,16 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
   #app-page{flex:1;overflow-y:auto;background:var(--cream);width:100%}
   #app-page::-webkit-scrollbar{width:4px}
   #app-page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  #app-page > *{width:100%!important;max-width:100%!important;box-sizing:border-box}
   
   /* Hide mobile nav */
   .bnav{display:none!important}
   
   /* Classes grid */
-  #classes-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  #classes-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .stat-row{display:flex;gap:12px;width:100%}
+  .stat-box{flex:1}
+  .log-entry{background:var(--card-bg);border-radius:12px;padding:14px 18px}
   
   /* Modal centered */
   .modal{align-items:center;justify-content:center;position:fixed}
@@ -353,7 +360,7 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 <div id="main-app">
   
   <!-- SIDEBAR (desktop only) -->
-  <div id="app-sidebar" style="display:none">
+  <div id="app-sidebar">
     <div class="sb-logo">
       <img src="/icon-192x192.png" alt="Lotus">
       <div class="sb-logo-text">Bharatanatyam<br>Tracker</div>
@@ -376,7 +383,7 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
     <button class="sb-addbtn" id="sb-addbtn" onclick="openModal('create-class-modal')">+ Create New Class</button>
   </div>
   <!-- CONTENT AREA (desktop only) -->
-  <div id="app-content" style="display:none">
+  <div id="app-content">
     <div id="app-topbar"><div id="app-topbar-title">Home</div></div>
     <div id="app-page"></div>
   </div>
@@ -634,8 +641,6 @@ const isDesktop = () => window.innerWidth >= 768;
 
 function setupDesktop() {
   if (!isDesktop()) return;
-  $('app-sidebar').style.display = 'flex';
-  $('app-content').style.display = 'flex';
   // Fill user block
   const ub = $('sb-user-block');
   if (ub && CU) {
@@ -1367,7 +1372,7 @@ window.loadLog = async () => {
   if (isDesktop()) {
     const page = $('app-page');
     page.innerHTML = '';
-    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px;max-width:700px;display:flex;flex-direction:column;gap:14px';
+    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px;width:100%;display:flex;flex-direction:column;gap:14px';
     // Filter row
     const filterRow = document.createElement('div'); filterRow.style.cssText='display:flex;gap:10px;align-items:center';
     filterRow.innerHTML=`<select id="log-month-filter-desk" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark)"><option value="2026-06">June 2026</option><option value="2026-05">May 2026</option><option value="2026-04">April 2026</option><option value="2026-03">March 2026</option></select><button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>`;
