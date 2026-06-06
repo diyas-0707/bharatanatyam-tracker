@@ -295,9 +295,29 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
   #app-page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
   #app-page > *{width:100%!important;max-width:100%!important;box-sizing:border-box}
   
+  /* Override all mobile screen constraints */
+  .screen, .screen.active{
+    position:static!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    padding-bottom:0!important;
+    display:none!important;
+  }
+  .screen.active{display:block!important}
+  
   /* Hide mobile nav */
   .bnav{display:none!important}
-  
+  /* Make all content divs stretch */
+  #home-content, #classes-list, #log-list, #entry-list, #class-list, #invites-section{
+    width:100%!important;
+    max-width:100%!important;
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+  #scr-home, #scr-classes, #scr-log{padding:0!important}
   /* Classes grid */
   #classes-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .stat-row{display:flex;gap:12px;width:100%}
@@ -400,9 +420,9 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
     <button class="sb-addbtn" id="sb-addbtn" onclick="openModal('create-class-modal')">+ Create New Class</button>
   </div>
   <!-- CONTENT AREA (desktop only) -->
-  <div id="app-content">
-    <div id="app-topbar"><div id="app-topbar-title">Home</div></div>
-    <div id="app-page"></div>
+  <div id="app-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);min-width:0;width:calc(100vw - 268px)">
+    <div id="app-topbar" style="height:56px;border-bottom:.5px solid rgba(107,30,30,0.12);display:flex;align-items:center;padding:0 28px;flex-shrink:0;background:#FFFCF5"><div id="app-topbar-title" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#4A1010">Home</div></div>
+    <div id="app-page" style="flex:1;overflow-y:auto;background:#FDF8F0;width:100%;display:block"></div>
   </div>
 
 
@@ -858,7 +878,7 @@ async function loadHome() {
     const page = $('app-page');
     page.innerHTML = '';
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px 32px;display:flex;flex-direction:column;gap:16px';
+    wrap.style.cssText = 'padding:28px 32px;display:flex;flex-direction:column;gap:16px;width:100%;box-sizing:border-box';
     page.appendChild(wrap);
     const name = CU.displayName.split(' ')[0];
     // User chip
