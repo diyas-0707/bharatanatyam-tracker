@@ -19,7 +19,7 @@
   --maroon:#6B1E1E;--maroon-deep:#4A1010;--maroon-soft:#8B3030;
   --gold:#C9922A;--gold-light:#E8B84B;--gold-pale:#FDF3DC;
   --cream:#FDF8F0;--warm-white:#FFFCF5;
-  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;
+  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;--body-font:'Cormorant Garamond',serif;
   --card-bg:#FFFFFF;--surface:#FDF8F2;
   --success:#2D6A4F;--success-bg:#D8F3DC;
   --danger:#C0392B;--danger-bg:#FFF0F0;
@@ -27,6 +27,7 @@
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden}
+p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.student-name,.class-card-name,.class-card-teacher,.class-meta,.sb-clsname,.entry-title,.entry-sub{font-family:'Cormorant Garamond',serif;font-size:15px}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
 
 
@@ -101,7 +102,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 /* ── PAGE HEADER ── */
 .pg-header{padding:20px 16px 0;flex-shrink:0}
 .pg-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
-.pg-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--maroon-deep);line-height:1.2}
 .pg-sub{font-size:13px;color:var(--text-soft);margin-top:3px;font-weight:300}
 
 /* ── CARDS ── */
@@ -114,7 +115,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .class-card:active{transform:scale(.98)}
 .class-card-banner{height:72px;display:flex;align-items:flex-end;padding:12px 16px;position:relative}
 .class-card-banner-bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft))}
-.class-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:#fff;position:relative;z-index:1;line-height:1.2}
+.class-card-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;position:relative;z-index:1;line-height:1.2}
 .class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
 .class-card-meta{font-size:12px;color:var(--text-soft)}
@@ -256,11 +257,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   }
   .sb-logo{padding:20px 18px 14px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid rgba(255,255,255,0.1)}
   .sb-logo img{width:38px;height:38px;border-radius:9px;object-fit:cover;flex-shrink:0}
-  .sb-logo-text{font-family:'Cormorant Garamond',serif;font-size:16px;color:#fff;font-weight:600;line-height:1.25}
+  .sb-logo-text{font-family:'Cormorant Garamond',serif;font-size:17px;color:#fff;font-weight:700;line-height:1.25}
   .sb-user-block{padding:14px 18px;border-bottom:.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px}
   .sb-user-block img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);flex-shrink:0}
   .sb-user-block .sb-initials{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--maroon-deep);flex-shrink:0}
-  .sb-user-block .sb-uname{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-user-block .sb-uname{font-size:16px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',serif}
   .sb-user-block .sb-urole{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px}
   .sb-user-block .sb-uout{font-size:11px;color:rgba(255,255,255,0.4);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;padding:0;display:block;margin-top:2px}
   .sb-nav{padding:8px 0;border-bottom:.5px solid rgba(255,255,255,0.08)}
@@ -283,10 +284,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   .sb-addbtn:hover{background:rgba(201,146,42,0.22)}
   
   /* Right content */
-  #app-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream)}
+  #app-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);width:0}
   #app-topbar{height:56px;border-bottom:.5px solid var(--border);display:flex;align-items:center;padding:0 28px;flex-shrink:0;background:var(--warm-white)}
-  #app-topbar-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--maroon-deep)}
-  #app-page{flex:1;overflow-y:auto;background:var(--cream)}
+  #app-topbar-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--maroon-deep)}
+  #app-page{flex:1;overflow-y:auto;background:var(--cream);width:100%}
   #app-page::-webkit-scrollbar{width:4px}
   #app-page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
   
@@ -372,8 +373,6 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <span>Practice Log</span>
       </button>
     </div>
-    <div class="sb-clslabel" id="sb-clslabel">My Classes</div>
-    <div id="sb-clslist" style="flex:1;overflow-y:auto"></div>
     <button class="sb-addbtn" id="sb-addbtn" onclick="openModal('create-class-modal')">+ Create New Class</button>
   </div>
   <!-- CONTENT AREA (desktop only) -->
@@ -645,7 +644,7 @@ function setupDesktop() {
   }
   if (ROLE==='student') { const el=$('sbnav-log'); if(el) el.style.display='flex'; }
   if (ROLE==='teacher') { const el=$('sb-addbtn'); if(el) el.style.display='block'; }
-  if (ROLE==='student') { const el=$('sb-clslabel'); if(el) el.textContent='My Classes'; }
+
   refreshSbClasses();
 }
 
@@ -827,7 +826,7 @@ async function loadHome() {
     const page = $('app-page');
     page.innerHTML = '';
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px;display:flex;flex-direction:column;gap:16px;max-width:900px';
+    wrap.style.cssText = 'padding:28px;display:flex;flex-direction:column;gap:16px;width:100%';
     page.appendChild(wrap);
     const name = CU.displayName.split(' ')[0];
     // User chip
@@ -948,7 +947,7 @@ async function loadClasses() {
     if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
     else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px;max-width:1100px';
+    wrap.style.cssText = 'padding:28px;width:100%';
     // Pending invites for students
     if (ROLE==='student') {
       const is = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',CU.email), where('status','==','pending')));
