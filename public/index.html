@@ -658,6 +658,15 @@ const isDesktop = () => window.innerWidth >= 768;
 
 function setupDesktop() {
   if (!isDesktop()) return;
+  // Force full width on app-page
+  const ap = $('app-page');
+  if (ap) {
+    ap.style.cssText = 'flex:1;overflow-y:auto;background:var(--cream);width:100%;display:block';
+  }
+  const ac = $('app-content');
+  if (ac) {
+    ac.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);width:100%;min-width:0';
+  }
   // Fill user block
   const ub = $('sb-user-block');
   if (ub && CU) {
@@ -789,7 +798,8 @@ function setupMain() {
   $('create-class-btn').style.display = isT ? 'block' : 'none';
   $('btab-log').style.display = isT ? 'none' : 'flex';
   if (isDesktop()) {
-    // Hide all mobile-only elements
+    const app = document.getElementById('app');
+    if (app) app.style.cssText = 'width:100%;max-width:100%;flex-direction:row;height:100vh;display:flex;overflow:hidden;margin:0';
     document.querySelectorAll('.screen,.bnav').forEach(el => el.style.display='none');
     setupDesktop();
   }
