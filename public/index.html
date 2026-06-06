@@ -719,10 +719,20 @@ function setupMain() {
 
 // ── NAVIGATION ──
 window.goScreen = scr => {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    if (isDesktop()) s.style.display = 'none';
+  });
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.remove('open');
+    if (isDesktop()) p.style.display = 'none';
+  });
   document.querySelectorAll('.bnav-tab').forEach(t=>t.classList.remove('active'));
   const scrEl = $('scr-'+scr);
-  if (scrEl) scrEl.classList.add('active');
+  if (scrEl) {
+    scrEl.classList.add('active');
+    if (isDesktop()) scrEl.style.display = 'block';
+  }
   const tabEl = $('btab-'+scr);
   if (tabEl) tabEl.classList.add('active');
   if (isDesktop()) setSbActive(scr);
@@ -732,19 +742,21 @@ window.goScreen = scr => {
 };
 
 window.openPanel = id => {
+  if (isDesktop()) {
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display='none'; });
+    document.querySelectorAll('.panel').forEach(p => { p.classList.remove('open'); p.style.display='none'; });
+  }
   $(id).classList.add('open');
   if (isDesktop()) {
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    $('desktop-topbar-title').textContent = $(id+' .panel-title') ? $('pd-title').textContent : '';
+    $(id).style.display = 'flex';
+    const titleEl = id==='panel-class' ? $('pd-title') : $('sd-title');
+    if (titleEl && $('desktop-topbar-title')) $('desktop-topbar-title').textContent = titleEl.textContent;
   }
 };
 window.closePanel = id => {
   $(id).classList.remove('open');
-  if (isDesktop()) {
-    setSbActive('classes');
-    goScreen('classes');
-    updateSbClassList();
-  }
+  if (isDesktop()) $(id).style.display = 'none';
+  if (isDesktop()) { setSbActive('classes'); goScreen('classes'); updateSbClassList(); }
 };
 
 // ── HOME ──
