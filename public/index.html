@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="apple-touch-icon" href="/icon-512x512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#6B1E1E">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/icon-512x512.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 <title>Bharatanatyam Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
   --maroon:#6B1E1E;--maroon-deep:#4A1010;--maroon-soft:#8B3030;
   --gold:#C9922A;--gold-light:#E8B84B;--gold-pale:#FDF3DC;
   --cream:#FDF8F0;--warm-white:#FFFCF5;
-  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;--body-font:'Cormorant Garamond',serif;
+  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;
   --card-bg:#FFFFFF;--surface:#FDF8F2;
   --success:#2D6A4F;--success-bg:#D8F3DC;
   --danger:#C0392B;--danger-bg:#FFF0F0;
@@ -27,10 +27,7 @@
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden}
-p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.student-name,.class-card-name,.class-card-teacher,.class-meta,.sb-clsname,.entry-title,.entry-sub{font-family:'Cormorant Garamond',serif;font-size:15px}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
-
-
 
 /* ── LOADING ── */
 #loading-screen{position:absolute;inset:0;background:var(--warm-white);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
@@ -102,7 +99,7 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 /* ── PAGE HEADER ── */
 .pg-header{padding:20px 16px 0;flex-shrink:0}
 .pg-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
-.pg-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--maroon-deep);line-height:1.2}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
 .pg-sub{font-size:13px;color:var(--text-soft);margin-top:3px;font-weight:300}
 
 /* ── CARDS ── */
@@ -115,7 +112,7 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 .class-card:active{transform:scale(.98)}
 .class-card-banner{height:72px;display:flex;align-items:flex-end;padding:12px 16px;position:relative}
 .class-card-banner-bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft))}
-.class-card-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;position:relative;z-index:1;line-height:1.2}
+.class-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:#fff;position:relative;z-index:1;line-height:1.2}
 .class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
 .class-card-meta{font-size:12px;color:var(--text-soft)}
@@ -243,120 +240,10 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 .home-hero h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px}
 .home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
-/* Hide desktop elements on mobile */
-#app-sidebar, #app-content { display: none; }
-
-/* ── DESKTOP LAYOUT ── */
-@media(min-width:768px){
-  html,body{overflow:hidden}
-  #app{max-width:100%!important;width:100%!important;flex-direction:row;height:100vh;overflow:visible;margin:0;background:transparent}
-  
-  /* Sidebar */
-  #app-sidebar{
-    width:268px;min-width:268px;height:100vh;
-    background:var(--maroon-deep);
-    display:flex;flex-direction:column;
-    overflow-y:auto;flex-shrink:0;
-  }
-  .sb-logo{padding:20px 18px 14px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid rgba(255,255,255,0.1)}
-  .sb-logo img{width:38px;height:38px;border-radius:9px;object-fit:cover;flex-shrink:0}
-  .sb-logo-text{font-family:'Cormorant Garamond',serif;font-size:17px;color:#fff;font-weight:700;line-height:1.25}
-  .sb-user-block{padding:14px 18px;border-bottom:.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px}
-  .sb-user-block img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);flex-shrink:0}
-  .sb-user-block .sb-initials{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--maroon-deep);flex-shrink:0}
-  .sb-user-block .sb-uname{font-size:16px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',serif}
-  .sb-user-block .sb-urole{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px}
-  .sb-user-block .sb-uout{font-size:11px;color:rgba(255,255,255,0.4);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;padding:0;display:block;margin-top:2px}
-  .sb-nav{padding:8px 0;border-bottom:.5px solid rgba(255,255,255,0.08)}
-  .sb-navbtn{display:flex;align-items:center;gap:13px;padding:13px 20px;cursor:pointer;transition:background .18s;border:none;background:none;width:100%;text-align:left}
-  .sb-navbtn:hover{background:rgba(255,255,255,0.07)}
-  .sb-navbtn.on{background:rgba(201,146,42,0.22)}
-  .sb-navbtn svg{width:19px;height:19px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:stroke .18s}
-  .sb-navbtn.on svg{stroke:var(--gold-light)}
-  .sb-navbtn span{font-size:14px;color:rgba(255,255,255,0.6);font-weight:400;transition:color .18s}
-  .sb-navbtn.on span{color:#fff;font-weight:500}
-  .sb-clslabel{padding:14px 20px 7px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.32);font-weight:500}
-  .sb-clsbtn{display:flex;align-items:center;gap:11px;padding:10px 20px;cursor:pointer;transition:background .18s;border:none;background:none;width:100%;text-align:left}
-  .sb-clsbtn:hover{background:rgba(255,255,255,0.07)}
-  .sb-clsbtn.on{background:rgba(201,146,42,0.18)}
-  .sb-clsdot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;opacity:0.55;transition:opacity .18s}
-  .sb-clsbtn.on .sb-clsdot{opacity:1}
-  .sb-clsname{font-size:13px;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .18s}
-  .sb-clsbtn.on .sb-clsname{color:#fff}
-  .sb-addbtn{margin:10px 16px 6px;padding:9px 14px;background:rgba(201,146,42,0.13);border:1px dashed rgba(201,146,42,0.38);border-radius:10px;color:var(--gold-light);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:background .18s;display:none;width:calc(100% - 32px)}
-  .sb-addbtn:hover{background:rgba(201,146,42,0.22)}
-  
-  /* Right content */
-  #app-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);min-width:0;width:100%}
-  #app-topbar{height:56px;border-bottom:.5px solid var(--border);display:flex;align-items:center;padding:0 28px;flex-shrink:0;background:var(--warm-white)}
-  #app-topbar-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--maroon-deep)}
-  #app-page{flex:1;overflow-y:auto;background:var(--cream);width:100%}
-  #app-page::-webkit-scrollbar{width:4px}
-  #app-page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-  #app-page > *{width:100%!important;max-width:100%!important;box-sizing:border-box}
-  
-  /* Override all mobile screen constraints */
-  .screen, .screen.active{
-    position:static!important;
-    width:100%!important;
-    max-width:100%!important;
-    height:auto!important;
-    min-height:0!important;
-    overflow:visible!important;
-    padding-bottom:0!important;
-    display:none!important;
-  }
-  .screen.active{display:block!important}
-  
-  /* Hide mobile nav */
-  .bnav{display:none!important}
-  /* Make all content divs stretch */
-  #home-content, #classes-list, #log-list, #entry-list, #class-list, #invites-section{
-    width:100%!important;
-    max-width:100%!important;
-    padding-left:0!important;
-    padding-right:0!important;
-  }
-  #scr-home, #scr-classes, #scr-log{padding:0!important}
-  /* Classes grid */
-  #classes-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-  .stat-row{display:flex;gap:12px;width:100%}
-  .stat-box{flex:1}
-  .log-entry{background:var(--card-bg);border-radius:12px;padding:14px 18px}
-  
-  /* Force everything in app-page to stretch full width */
-  #app-page, #app-page > *, #app-page > * > *{
-    width:100%!important;
-    max-width:100%!important;
-    box-sizing:border-box!important;
-  }
-  #app-page{display:flex;flex-direction:column}
-  #app-page .stat-row{display:flex;gap:12px}
-  #app-page .stat-box{flex:1}
-  #app-page .log-entry{width:100%!important}
-  #app-page .assign-card, #app-page .stream-post, #app-page .card, #app-page .invite-card{width:100%!important}
-  #app-page .pg-header{padding:28px 28px 0}
-  #app-page .ornament{padding:16px 0}
-  #app-page .entry-list, #app-page #log-list{padding:0}
-  #app-page #home-content{padding:0;gap:16px;display:flex;flex-direction:column}
-  #app-sidebar{flex-shrink:0}
-  
-  /* Modal centered */
-  .modal{align-items:center;justify-content:center;position:fixed}
-  .modal-sheet{border-radius:16px;max-width:520px;width:90%;margin:0 auto}
-  .modal-handle{display:none}
-  
-  /* Auth/role centered */
-  #auth-screen,#role-screen{max-width:460px;margin:auto;border-radius:20px;height:auto;min-height:480px;padding:48px 40px;align-self:center}
-  
-  /* Panel back button hidden on desktop */
-  .panel-back{display:none!important}
-}
 
 </style>
 </head>
 <body>
-
 <div id="app">
 
 <!-- LOADING -->
@@ -395,36 +282,6 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 
 <!-- MAIN APP -->
 <div id="main-app">
-  
-  <!-- SIDEBAR (desktop only) -->
-  <div id="app-sidebar">
-    <div class="sb-logo">
-      <img src="/icon-192x192.png" alt="Lotus">
-      <div class="sb-logo-text">Bharatanatyam<br>Tracker</div>
-    </div>
-    <div class="sb-user-block" id="sb-user-block"></div>
-    <div class="sb-nav">
-      <button class="sb-navbtn on" id="sbnav-home" onclick="sbNav('home')">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Home</span>
-      </button>
-      <button class="sb-navbtn" id="sbnav-classes" onclick="sbNav('classes')">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>All Classes</span>
-      </button>
-      <button class="sb-navbtn" id="sbnav-log" style="display:none" onclick="sbNav('log')">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>Practice Log</span>
-      </button>
-    </div>
-    <button class="sb-addbtn" id="sb-addbtn" onclick="openModal('create-class-modal')">+ Create New Class</button>
-  </div>
-  <!-- CONTENT AREA (desktop only) -->
-  <div id="app-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);min-width:0;width:calc(100vw - 268px)">
-    <div id="app-topbar" style="height:56px;border-bottom:.5px solid rgba(107,30,30,0.12);display:flex;align-items:center;padding:0 28px;flex-shrink:0;background:#FFFCF5"><div id="app-topbar-title" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#4A1010">Home</div></div>
-    <div id="app-page" style="flex:1;overflow-y:auto;background:#FDF8F0;width:100%;display:block"></div>
-  </div>
-
 
   <!-- ══ SCREEN: HOME ══ -->
   <div class="screen active" id="scr-home">
@@ -640,9 +497,7 @@ p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.st
 </div>
 </div>
 
-
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
@@ -672,104 +527,6 @@ let attState = {};
 
 // ── UTILS ──
 const $ = id => document.getElementById(id);
-
-// ── DESKTOP ──
-const isDesktop = () => window.innerWidth >= 768;
-
-function setupDesktop() {
-  if (!isDesktop()) return;
-  // Force full width on app-page
-  const ap = $('app-page');
-  if (ap) {
-    ap.style.cssText = 'flex:1;overflow-y:auto;background:var(--cream);width:100%;display:block';
-    // Observer to force all children to full width
-    const obs = new MutationObserver(() => {
-      ap.querySelectorAll('*').forEach(el => {
-        if (el.style) { el.style.maxWidth = '100%'; el.style.boxSizing = 'border-box'; }
-      });
-    });
-    obs.observe(ap, {childList:true, subtree:true});
-  }
-  const ac = $('app-content');
-  if (ac) {
-    ac.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);width:100%;min-width:0';
-  }
-  // Fill user block
-  const ub = $('sb-user-block');
-  if (ub && CU) {
-    ub.innerHTML = (CU.photoURL ? `<img src="${CU.photoURL}" alt="">` : `<div class="sb-initials">${(CU.displayName||'U')[0]}</div>`) +
-      `<div style="flex:1;min-width:0"><div class="sb-uname">${CU.displayName||''}</div><div class="sb-urole">${ROLE==='teacher'?'Teacher':'Student'}</div><button class="sb-uout" onclick="doSignOut()">Sign out</button></div>`;
-  }
-  if (ROLE==='student') { const el=$('sbnav-log'); if(el) el.style.display='flex'; }
-  if (ROLE==='teacher') { const el=$('sb-addbtn'); if(el) el.style.display='block'; }
-
-  refreshSbClasses();
-}
-
-async function refreshSbClasses() {
-  if (!isDesktop() || !CU) return;
-  const list = $('sb-clslist');
-  if (!list) return;
-  list.innerHTML = '';
-  let snap;
-  try {
-    if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
-    else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-    snap.docs.filter(d=>!d.data().deleted).forEach(d => {
-      const btn = document.createElement('button');
-      btn.className = 'sb-clsbtn';
-      btn.innerHTML = `<div class="sb-clsdot"></div><div class="sb-clsname">${d.data().name}</div>`;
-      btn.onclick = () => openClassDetail(d.id, d.data());
-      list.appendChild(btn);
-    });
-  } catch(e) { console.error(e); }
-}
-
-window.sbNav = scr => {
-  goScreen(scr);
-  ['home','classes','log'].forEach(k => {
-    const el = $('sbnav-'+k);
-    if (el) el.classList.toggle('on', k===scr);
-  });
-  $('app-topbar-title').textContent = scr==='home'?'Home':scr==='classes'?'Classes':'Practice Log';
-};
-
-function desktopShow(el) {
-  if (!isDesktop() || !el) return;
-  $('app-page').innerHTML = '';
-  $('app-page').appendChild(el);
-  el.style.display = 'block';
-  el.style.padding = '24px';
-  el.style.minHeight = '100%';
-}
-
-function updateSbUserSection() {
-  const sb = $('sb-user-section');
-  if (!sb || !CU) return;
-  sb.innerHTML = CU.photoURL
-    ? `<img src="${CU.photoURL}" alt="">`
-    : `<div class="sb-user-initials">${(CU.displayName||'U')[0]}</div>`;
-  sb.innerHTML += `<div class="sb-user-info"><div class="sb-user-name">${CU.displayName||''}</div><div class="sb-user-role">${ROLE==='teacher'?'Teacher':'Student'}</div><button class="sb-signout" onclick="doSignOut()">Sign out</button></div>`;
-}
-
-async function updateSbClassList() {
-  const list = $('sb-class-list');
-  if (!list) return;
-  list.innerHTML = '';
-  let snap;
-  if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
-  else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-  snap.docs.filter(d=>!d.data().deleted).forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'sb-class-item';
-    btn.innerHTML = `<div class="sb-class-dot"></div><div class="sb-class-name">${d.data().name}</div>`;
-    btn.onclick = () => { openClassDetail(d.id, d.data()); };
-    list.appendChild(btn);
-  });
-  if (ROLE==='teacher') $('sb-create-btn').style.display = 'block';
-  if (ROLE==='student') $('sb-log').style.display = 'flex';
-  if (ROLE==='student') $('sb-classes-label').textContent = 'My Classes';
-}
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
 window.openModal = id => $(id).classList.add('open');
 window.closeModal = id => $(id).classList.remove('open');
@@ -796,11 +553,7 @@ function show(which) {
   $('main-app').style.display = 'none';
   if (which==='auth') $('auth-screen').style.display = 'flex';
   else if (which==='role') $('role-screen').style.display = 'flex';
-  else {
-    $('main-app').style.display = isDesktop() ? 'flex' : 'flex';
-    $('main-app').style.flexDirection = isDesktop() ? 'row' : 'column';
-    setupMain();
-  }
+  else { $('main-app').style.display = 'flex'; setupMain(); }
 }
 
 // ── ROLE ──
@@ -824,78 +577,25 @@ function setupMain() {
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
   $('btab-log').style.display = isT ? 'none' : 'flex';
-  if (isDesktop()) {
-    const app = document.getElementById('app');
-    if (app) app.style.cssText = 'width:100%;max-width:100%;flex-direction:row;height:100vh;display:flex;overflow:hidden;margin:0';
-    document.querySelectorAll('.screen,.bnav').forEach(el => el.style.display='none');
-    setupDesktop();
-  }
   goScreen('home');
 }
 
 // ── NAVIGATION ──
 window.goScreen = scr => {
-  if (isDesktop()) {
-    // Desktop: render into app-page
-    const titles = {home:'Home',classes:'Classes',log:'Practice Log'};
-    if ($('app-topbar-title')) $('app-topbar-title').textContent = titles[scr]||'';
-    ['home','classes','log'].forEach(k => { const el=$('sbnav-'+k); if(el) el.classList.toggle('on',k===scr); });
-    if (scr==='home') { loadHome(); return; }
-    if (scr==='classes') { loadClasses(); return; }
-    if (scr==='log') { loadLog(); return; }
-    return;
-  }
-  // Mobile
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.bnav-tab').forEach(t=>t.classList.remove('active'));
-  const scrEl = $('scr-'+scr); if (scrEl) scrEl.classList.add('active');
-  const tabEl = $('btab-'+scr); if (tabEl) tabEl.classList.add('active');
+  $('scr-'+scr).classList.add('active');
+  $('btab-'+scr).classList.add('active');
   if (scr==='home') loadHome();
   if (scr==='classes') loadClasses();
   if (scr==='log') loadLog();
 };
 
-window.openPanel = id => {
-  if (isDesktop()) {
-    const panel = $(id);
-    if (!panel) return;
-    $('app-page').innerHTML = '';
-    panel.style.cssText = 'display:flex;flex-direction:column;padding:24px;min-height:100%';
-    $('app-page').appendChild(panel);
-    const titleEl = id==='panel-class' ? $('pd-title') : $('sd-title');
-    if (titleEl && $('app-topbar-title')) $('app-topbar-title').textContent = titleEl.textContent;
-    return;
-  }
-  $(id).classList.add('open');
-};
-window.closePanel = id => {
-  if (isDesktop()) {
-    const panel = $(id);
-    if (panel) { panel.style.cssText=''; document.getElementById('main-app').appendChild(panel); }
-    goScreen('classes');
-    refreshSbClasses();
-    return;
-  }
-  $(id).classList.remove('open');
-};
+window.openPanel = id => { $(id).classList.add('open'); };
+window.closePanel = id => { $(id).classList.remove('open'); };
 
 // ── HOME ──
 async function loadHome() {
-  if (isDesktop()) {
-    const page = $('app-page');
-    page.innerHTML = '';
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px 32px;display:flex;flex-direction:column;gap:16px;width:100%;box-sizing:border-box';
-    page.appendChild(wrap);
-    const name = CU.displayName.split(' ')[0];
-    // User chip
-    const chip = document.createElement('div'); chip.className='user-chip';
-    chip.innerHTML = (CU.photoURL?`<img src="${CU.photoURL}" alt="">`:'')+`<div class="uc-info"><div class="uc-name">${CU.displayName}</div><div class="uc-role">${ROLE==='teacher'?'Teacher':'Student'}</div></div>`;
-    wrap.appendChild(chip);
-    if (ROLE==='teacher') await loadTeacherHome(wrap);
-    else await loadStudentHome(wrap);
-    return;
-  }
   const name = CU.displayName.split(' ')[0];
   $('home-greeting').innerHTML = `Welcome, <em style="font-style:italic;color:var(--gold)">${name}</em>`;
   $('home-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
@@ -997,44 +697,6 @@ window.markPracticed = async btn => {
 
 // ── CLASSES ──
 async function loadClasses() {
-  if (isDesktop()) {
-    refreshSbClasses();
-    const page = $('app-page');
-    page.innerHTML = '<div style="padding:28px"><div class="loading">Loading...</div></div>';
-    // Build classes UI
-    let snap;
-    if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
-    else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px 32px;width:100%;box-sizing:border-box';
-    // Pending invites for students
-    if (ROLE==='student') {
-      const is = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',CU.email), where('status','==','pending')));
-      if (!is.empty) {
-        const lbl=document.createElement('div');lbl.className='section-label';lbl.style.marginBottom='12px';lbl.textContent='📬 Pending Invitations';wrap.appendChild(lbl);
-        is.docs.forEach(d=>{const inv=d.data();const el=document.createElement('div');el.className='invite-card';el.style.marginBottom='12px';el.innerHTML=`<h4>${inv.teacherName} invited you to join</h4><p>${inv.className}</p><div class="invite-btns"><button class="invite-accept" onclick="respondInvite('${d.id}','${inv.classId}','accept')">Join Class</button><button class="invite-decline" onclick="respondInvite('${d.id}','${inv.classId}','decline')">Decline</button></div>`;wrap.appendChild(el);});
-      }
-    }
-    if (ROLE==='teacher') {
-      const cb=document.createElement('button');cb.className='btn btn-dashed';cb.style.cssText='margin-bottom:20px;max-width:260px';cb.textContent='+ Create New Class';cb.onclick=()=>openModal('create-class-modal');wrap.appendChild(cb);
-    }
-    if (snap.empty) {
-      const e=document.createElement('div');e.className='empty';e.textContent=ROLE==='teacher'?'No classes yet. Create one!':'Not enrolled in any classes.';wrap.appendChild(e);
-    } else {
-      const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px';
-      snap.docs.filter(d=>!d.data().deleted).forEach(d=>{
-        const data=d.data();
-        const el=document.createElement('div');el.className='class-card';
-        el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
-        el.onclick=()=>openClassDetail(d.id,data);
-        grid.appendChild(el);
-      });
-      wrap.appendChild(grid);
-    }
-    page.innerHTML='';page.appendChild(wrap);
-    return;
-  }
-  refreshSbClasses();
   // Pending invites for students
   const invSec = $('invites-section');
   invSec.innerHTML = '';
@@ -1120,7 +782,7 @@ async function renderStream(body) {
   body.innerHTML='';
   const isT = ROLE==='teacher';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
 
   if (isT) {
     const actions = document.createElement('div');
@@ -1159,7 +821,7 @@ let editingAssignId = null;
 async function renderAssignments(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
   if (ROLE==='teacher') {
     const btn = document.createElement('button'); btn.className='btn btn-primary'; btn.textContent='+ Post Assignment'; btn.onclick=()=>openModal('post-assign-modal');
     wrap.appendChild(btn);
@@ -1182,7 +844,7 @@ async function renderAssignments(body) {
 async function renderPeople(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
   const isT = ROLE==='teacher';
 
   if (isT) {
@@ -1237,7 +899,7 @@ async function renderPeople(body) {
 async function renderAttendance(body) {
   body.innerHTML='';
   const wrap=document.createElement('div');
-  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
   const dateRow=document.createElement('div'); dateRow.style.cssText='display:flex;gap:8px;align-items:center';
   const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=new Date().toISOString().split('T')[0];
   dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:"DM Sans",sans-serif;outline:none';
@@ -1423,27 +1085,6 @@ window.createClass = async () => {
 
 // ── LOG ──
 window.loadLog = async () => {
-  if (isDesktop()) {
-    const page = $('app-page');
-    page.innerHTML = '';
-    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box';
-    // Filter row
-    const filterRow = document.createElement('div'); filterRow.style.cssText='display:flex;gap:10px;align-items:center';
-    filterRow.innerHTML=`<select id="log-month-filter-desk" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark)"><option value="2026-06">June 2026</option><option value="2026-05">May 2026</option><option value="2026-04">April 2026</option><option value="2026-03">March 2026</option></select><button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>`;
-    wrap.appendChild(filterRow);
-    page.appendChild(wrap);
-    const month = '2026-06';
-    const snap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
-    const filtered = snap.docs.map(d=>d.data()).filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
-    const done=filtered.filter(e=>e.completed).length, miss=filtered.filter(e=>!e.completed).length;
-    const pct=filtered.length?Math.round(done/filtered.length*100):0;
-    const statRow=document.createElement('div');statRow.className='stat-row';
-    statRow.innerHTML=`<div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Completed</div></div><div class="stat-box"><div class="stat-num">${miss}</div><div class="stat-label">Missed</div></div><div class="stat-box"><div class="stat-num">${pct}%</div><div class="stat-label">Rate</div></div>`;
-    wrap.appendChild(statRow);
-    if(!filtered.length){const e=document.createElement('div');e.className='empty';e.textContent='No entries this month.';wrap.appendChild(e);}
-    else{filtered.forEach(e=>{const d=new Date(e.date+'T00:00:00');const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div><span class="badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>`;wrap.appendChild(el);});}
-    return;
-  }
   const month=$('log-month-filter').value;
   const snap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
   const filtered=snap.docs.map(d=>d.data()).filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
@@ -1491,7 +1132,6 @@ document.querySelectorAll('.modal').forEach(m=>{
 
 // ── INIT LOG DATE ──
 $('log-date').value = new Date().toISOString().split('T')[0];
-
 </script>
 </body>
 </html>
