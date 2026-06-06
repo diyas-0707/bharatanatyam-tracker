@@ -682,6 +682,13 @@ function setupDesktop() {
   const ap = $('app-page');
   if (ap) {
     ap.style.cssText = 'flex:1;overflow-y:auto;background:var(--cream);width:100%;display:block';
+    // Observer to force all children to full width
+    const obs = new MutationObserver(() => {
+      ap.querySelectorAll('*').forEach(el => {
+        if (el.style) { el.style.maxWidth = '100%'; el.style.boxSizing = 'border-box'; }
+      });
+    });
+    obs.observe(ap, {childList:true, subtree:true});
   }
   const ac = $('app-content');
   if (ac) {
@@ -999,7 +1006,7 @@ async function loadClasses() {
     if (ROLE==='teacher') snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
     else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:28px 32px';
+    wrap.style.cssText = 'padding:28px 32px;width:100%;box-sizing:border-box';
     // Pending invites for students
     if (ROLE==='student') {
       const is = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',CU.email), where('status','==','pending')));
@@ -1113,7 +1120,7 @@ async function renderStream(body) {
   body.innerHTML='';
   const isT = ROLE==='teacher';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
 
   if (isT) {
     const actions = document.createElement('div');
@@ -1152,7 +1159,7 @@ let editingAssignId = null;
 async function renderAssignments(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   if (ROLE==='teacher') {
     const btn = document.createElement('button'); btn.className='btn btn-primary'; btn.textContent='+ Post Assignment'; btn.onclick=()=>openModal('post-assign-modal');
     wrap.appendChild(btn);
@@ -1175,7 +1182,7 @@ async function renderAssignments(body) {
 async function renderPeople(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   const isT = ROLE==='teacher';
 
   if (isT) {
@@ -1230,7 +1237,7 @@ async function renderPeople(body) {
 async function renderAttendance(body) {
   body.innerHTML='';
   const wrap=document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   const dateRow=document.createElement('div'); dateRow.style.cssText='display:flex;gap:8px;align-items:center';
   const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=new Date().toISOString().split('T')[0];
   dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:"DM Sans",sans-serif;outline:none';
@@ -1419,7 +1426,7 @@ window.loadLog = async () => {
   if (isDesktop()) {
     const page = $('app-page');
     page.innerHTML = '';
-    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:14px';
+    const wrap = document.createElement('div'); wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box';
     // Filter row
     const filterRow = document.createElement('div'); filterRow.style.cssText='display:flex;gap:10px;align-items:center';
     filterRow.innerHTML=`<select id="log-month-filter-desk" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark)"><option value="2026-06">June 2026</option><option value="2026-05">May 2026</option><option value="2026-04">April 2026</option><option value="2026-03">March 2026</option></select><button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>`;
