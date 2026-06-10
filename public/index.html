@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="/icon-512x512.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#6B1E1E">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/icon-512x512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 <title>Bharatanatyam Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -19,15 +19,123 @@
   --maroon:#6B1E1E;--maroon-deep:#4A1010;--maroon-soft:#8B3030;
   --gold:#C9922A;--gold-light:#E8B84B;--gold-pale:#FDF3DC;
   --cream:#FDF8F0;--warm-white:#FFFCF5;
-  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;
+  --text-dark:#1A0A0A;--text-mid:#4A3030;--text-soft:#8B7070;--body-font:'Cormorant Garamond',serif;
   --card-bg:#FFFFFF;--surface:#FDF8F2;
   --success:#2D6A4F;--success-bg:#D8F3DC;
   --danger:#C0392B;--danger-bg:#FFF0F0;
   --border:rgba(107,30,30,0.12);
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
+/* ── PINNED ANNOUNCEMENT ── */
+.pinned-badge{display:inline-flex;align-items:center;gap:4px;background:var(--gold-pale);color:var(--gold);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:8px}
+.stream-post.pinned{border-color:rgba(201,146,42,0.4);background:linear-gradient(135deg,#fff 0%,#fdf8ec 100%)}
+
+/* ── POLL ── */
+.poll-card{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border);box-shadow:var(--shadow)}
+.poll-question{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text-dark);margin-bottom:12px}
+.poll-option{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:.5px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all .2s;background:var(--surface);position:relative;overflow:hidden}
+.poll-option:hover{border-color:var(--maroon)}
+.poll-option.voted{border-color:var(--maroon);background:var(--gold-pale)}
+.poll-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(201,146,42,0.15);transition:width .4s;z-index:0}
+.poll-option-text{font-size:14px;color:var(--text-dark);position:relative;z-index:1;flex:1}
+.poll-pct{font-size:12px;color:var(--text-soft);position:relative;z-index:1;font-weight:500}
+.poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
+.poll-closed{opacity:.6;pointer-events:none}
+
+/* ── COMMENTS ── */
+.comments-section{margin-top:12px;border-top:.5px solid var(--border);padding-top:12px}
+.comment{display:flex;gap:10px;margin-bottom:12px}
+.comment-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.comment-body{flex:1}
+.comment-author{font-size:12px;font-weight:500;color:var(--text-dark)}
+.comment-text{font-size:13px;color:var(--text-mid);margin-top:2px;line-height:1.5}
+.comment-actions{display:flex;gap:12px;margin-top:4px}
+.comment-action{font-size:11px;color:var(--text-soft);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+.comment-action:hover{color:var(--maroon)}
+.reply{margin-left:38px}
+.comment-input-row{display:flex;gap:8px;margin-top:8px}
+.comment-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none}
+.comment-input:focus{border-color:var(--maroon)}
+.comment-submit{padding:8px 14px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+
+/* ── SUBMISSIONS ── */
+.submission-card{background:var(--surface);border-radius:12px;padding:14px;border:.5px solid var(--border);margin-top:12px}
+.submission-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card-bg);border-radius:8px;border:.5px solid var(--border);margin-bottom:8px}
+.submission-file-name{font-size:13px;color:var(--text-dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.submission-file-link{font-size:12px;color:var(--maroon);text-decoration:none}
+.upload-area{border:1.5px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-area:hover{border-color:var(--maroon);background:var(--gold-pale)}
+.upload-area p{font-size:13px;color:var(--text-soft)}
+.upload-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.upload-progress-bar{height:100%;background:var(--maroon);border-radius:2px;transition:width .3s}
+.private-feedback-box{background:var(--gold-pale);border-radius:10px;padding:12px;margin-top:10px;border:.5px solid rgba(201,146,42,.3)}
+.private-feedback-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:4px;font-weight:500}
+
+
+/* ── PINNED ── */
+.pinned-badge{display:inline-flex;align-items:center;gap:4px;background:var(--gold-pale);color:var(--gold);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:8px}
+.stream-post.pinned{border-color:rgba(201,146,42,0.4);background:linear-gradient(135deg,#fff 0%,#fdf8ec 100%)}
+
+/* ── POLL ── */
+.poll-wrap{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border);box-shadow:var(--shadow);margin-bottom:10px}
+.poll-q{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text-dark);margin-bottom:12px}
+.poll-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:.5px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all .2s;background:var(--surface);position:relative;overflow:hidden}
+.poll-opt.voted{border-color:var(--maroon)}
+.poll-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(201,146,42,0.18);transition:width .4s;z-index:0}
+.poll-opt-txt{font-size:14px;color:var(--text-dark);position:relative;z-index:1;flex:1}
+.poll-pct{font-size:12px;color:var(--text-soft);position:relative;z-index:1;font-weight:500}
+.poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
+
+/* ── COMMENTS ── */
+.comments-wrap{margin-top:10px;padding-top:10px;border-top:.5px solid var(--border)}
+.cmt{display:flex;gap:8px;margin-bottom:10px}
+.cmt-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0}
+.cmt-body{flex:1}
+.cmt-author{font-size:12px;font-weight:500;color:var(--text-dark)}
+.cmt-txt{font-size:13px;color:var(--text-mid);margin-top:2px;line-height:1.5}
+.cmt-acts{display:flex;gap:10px;margin-top:3px}
+.cmt-act{font-size:11px;color:var(--text-soft);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+.cmt-act:hover{color:var(--maroon)}
+.cmt-reply{margin-left:34px}
+.cmt-input-row{display:flex;gap:8px;margin-top:8px}
+.cmt-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none}
+.cmt-input:focus{border-color:var(--maroon)}
+.cmt-send{padding:8px 14px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer}
+
+/* ── SUBMISSIONS ── */
+.sub-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card-bg);border-radius:8px;border:.5px solid var(--border);margin-bottom:8px}
+.sub-file-name{font-size:13px;color:var(--text-dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-top:8px}
+.upload-zone:hover{border-color:var(--maroon);background:var(--gold-pale)}
+.upload-zone p{font-size:13px;color:var(--text-soft)}
+.priv-fb{background:var(--gold-pale);border-radius:10px;padding:12px;margin-top:10px;border:.5px solid rgba(201,146,42,.3)}
+.priv-fb-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:4px;font-weight:500}
+
+/* ── CHAT ── */
+.chat-list-item{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:.5px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .18s}
+.chat-list-item:active{transform:scale(0.98)}
+.chat-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;flex-shrink:0}
+.chat-info{flex:1}
+.chat-name{font-size:14px;font-weight:500;color:var(--text-dark)}
+.chat-preview{font-size:12px;color:var(--text-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-panel{position:absolute;inset:0;background:var(--warm-white);z-index:60;display:none;flex-direction:column}
+.chat-panel.open{display:flex}
+.chat-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5}
+.chat-bubble.mine{background:var(--maroon);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bubble.theirs{background:var(--surface);color:var(--text-dark);align-self:flex-start;border-bottom-left-radius:4px;border:.5px solid var(--border)}
+.chat-bubble-time{font-size:10px;opacity:.6;margin-top:3px}
+.chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:.5px solid var(--border);background:var(--warm-white);flex-shrink:0}
+.chat-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:20px;padding:10px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none}
+.chat-input:focus{border-color:var(--maroon)}
+.chat-send{width:40px;height:40px;background:var(--maroon);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-send svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden}
+p,li,.stream-body,.assign-card-body,.card p,.feedback-text,.log-text,.s-name,.student-name,.class-card-name,.class-card-teacher,.class-meta,.sb-clsname,.entry-title,.entry-sub{font-family:'Cormorant Garamond',serif;font-size:15px}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
+
+
 
 /* ── LOADING ── */
 #loading-screen{position:absolute;inset:0;background:var(--warm-white);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
@@ -99,7 +207,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 /* ── PAGE HEADER ── */
 .pg-header{padding:20px 16px 0;flex-shrink:0}
 .pg-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
-.pg-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--maroon-deep);line-height:1.2}
 .pg-sub{font-size:13px;color:var(--text-soft);margin-top:3px;font-weight:300}
 
 /* ── CARDS ── */
@@ -112,7 +220,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .class-card:active{transform:scale(.98)}
 .class-card-banner{height:72px;display:flex;align-items:flex-end;padding:12px 16px;position:relative}
 .class-card-banner-bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft))}
-.class-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:#fff;position:relative;z-index:1;line-height:1.2}
+.class-card-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;position:relative;z-index:1;line-height:1.2}
 .class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
 .class-card-meta{font-size:12px;color:var(--text-soft)}
@@ -241,9 +349,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
 
+
 </style>
 </head>
 <body>
+
 <div id="app">
 
 <!-- LOADING -->
@@ -276,12 +386,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="role-icon s"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
       <div class="role-info"><h3>Student</h3><p>Join classes, view assignments, log practice & see feedback</p></div>
     </div>
+    <div class="role-card" onclick="pickRole('parent',this)">
+      <div class="role-icon s" style="background:linear-gradient(135deg,#2D6A4F,#40916C)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div class="role-info"><h3>Parent</h3><p>View class activity, assignments & chat with teachers</p></div>
+    </div>
   </div>
   <button class="role-btn" id="role-btn" onclick="confirmRole()">Continue →</button>
 </div>
 
 <!-- MAIN APP -->
 <div id="main-app">
+</div>
+
 
   <!-- ══ SCREEN: HOME ══ -->
   <div class="screen active" id="scr-home">
@@ -308,6 +424,29 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
       <button class="btn btn-dashed" id="create-class-btn" style="display:none" onclick="openModal('create-class-modal')">+ Create New Class</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: CHAT (parent only) ══ -->
+  <div class="screen" id="scr-chat">
+    <div class="pg-header" style="padding-bottom:12px">
+      <div class="pg-title">Messages</div>
+      <div class="pg-sub">Chat with your child's teachers</div>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:10px" id="chat-list"></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- CHAT CONVERSATION PANEL -->
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+      <button class="panel-back" onclick="closeChatPanel()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="panel-title" id="chat-panel-title">Teacher</div>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Type a message..." rows="1"></textarea>
+      <button class="chat-send" onclick="sendChatMessage()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
     </div>
   </div>
 
@@ -372,6 +511,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       <span>Log</span>
     </button>
+    <button class="bnav-tab" id="btab-chat" onclick="goScreen('chat')" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Messages</span>
+    </button>
   </nav>
 
   <!-- ══ MODALS ══ -->
@@ -422,6 +565,14 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
           <div class="field-voice"><textarea id="assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-assign" onclick="toggleVoice('assign-body','mic-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Due Date (optional)</label><input type="date" id="assign-due"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <input type="checkbox" id="assign-submissions" style="width:16px;height:16px">
+          <label style="font-size:13px;color:var(--text-soft)">Allow students to submit files</label>
+        </div>
+        <div class="field" style="flex-direction:row;align-items:center;gap:10px">
+          <input type="checkbox" id="assign-grade" style="width:16px;height:16px">
+          <label style="font-size:13px;color:var(--text-soft);text-transform:none;letter-spacing:0">Allow file submissions from students</label>
+        </div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('post-assign-modal')">Cancel</button>
@@ -438,6 +589,14 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="field">
         <label>Message</label>
         <div class="field-voice"><textarea id="announce-body" placeholder="Share something with your class..." rows="4"></textarea><button class="mic-btn" id="mic-announce" onclick="toggleVoice('announce-body','mic-announce')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <input type="checkbox" id="announce-pin" style="width:16px;height:16px">
+        <label style="font-size:13px;color:var(--text-soft)">📌 Pin this announcement</label>
+      </div>
+      <div class="field" style="flex-direction:row;align-items:center;gap:10px;margin-top:4px">
+        <input type="checkbox" id="announce-pin" style="width:16px;height:16px">
+        <label style="font-size:13px;color:var(--text-soft);text-transform:none;letter-spacing:0">📌 Pin this announcement</label>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('post-announce-modal')">Cancel</button>
@@ -493,11 +652,101 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
 
+  <!-- Create Poll -->
+  <div class="modal" id="create-poll-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="poll-modal-title">Create Poll</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label>Question</label>
+          <div class="field-voice"><textarea id="poll-question" placeholder="Ask your class something..." rows="2"></textarea><button class="mic-btn" id="mic-poll" onclick="toggleVoice('poll-question','mic-poll')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+        </div>
+        <div class="field"><label>Options (one per line)</label><textarea id="poll-options" placeholder="Option 1&#10;Option 2&#10;Option 3" rows="4"></textarea></div>
+        <div class="field"><label>Poll closes on</label><input type="date" id="poll-closes"></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('create-poll-modal')">Cancel</button>
+        <button class="btn btn-primary" id="poll-submit-btn" onclick="savePoll()">Post Poll</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Assignment + Submit (student) -->
+  <div class="modal" id="view-assign-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="va-title">Assignment</div>
+      <div id="va-body" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('view-assign-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment / Reply modal -->
+  <div class="modal" id="comment-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="comment-modal-title">Add Comment</div>
+      <div class="field">
+        <div class="field-voice"><textarea id="comment-text" placeholder="Write a comment..." rows="3"></textarea><button class="mic-btn" id="mic-comment" onclick="toggleVoice('comment-text','mic-comment')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('comment-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitComment()">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Poll -->
+  <div class="modal" id="poll-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="poll-modal-title">Create Poll</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label>Question</label><div class="field-voice"><textarea id="poll-q-input" placeholder="Ask your class something..." rows="2"></textarea><button class="mic-btn" id="mic-poll" onclick="toggleVoice('poll-q-input','mic-poll')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div></div>
+        <div class="field"><label>Options (one per line, min 2)</label><textarea id="poll-opts-input" placeholder="Option 1&#10;Option 2&#10;Option 3" rows="4"></textarea></div>
+        <div class="field"><label>Poll closes on (optional)</label><input type="date" id="poll-closes-input"></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('poll-modal')">Cancel</button>
+        <button class="btn btn-primary" id="poll-save-btn" onclick="savePoll()">Post Poll</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View/Submit Assignment -->
+  <div class="modal" id="submit-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="submit-modal-title">Submit Work</div>
+      <div id="submit-modal-body" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('submit-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment/Reply -->
+  <div class="modal" id="reply-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="reply-modal-title">Reply</div>
+      <div class="field"><div class="field-voice"><textarea id="reply-input" placeholder="Write a reply..." rows="3"></textarea><button class="mic-btn" id="mic-reply" onclick="toggleVoice('reply-input','mic-reply')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('reply-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitReply()">Post Reply</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 </div>
 
+
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
@@ -510,6 +759,34 @@ const cfg = {
   messagingSenderId:"596130424146",
   appId:"1:596130424146:web:548447703d6efc920a868b"
 };
+
+// Cloudinary config
+const CLOUDINARY_CLOUD = 'do0xkyypc';
+const CLOUDINARY_PRESET = 's7xoqxzt';
+
+async function uploadToCloudinary(file, onProgress) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => {
+      const res = JSON.parse(xhr.responseText);
+      if (res.secure_url) resolve(res);
+      else reject(res);
+    };
+    xhr.onerror = reject;
+    xhr.send(formData);
+  });
+}
+
+// State for comments/polls
+let commentTargetId = null;
+let commentTargetType = null; // 'announcement' | 'reply'
+let commentParentId = null;
+let editingPollId = null;
 const fbApp = initializeApp(cfg);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
@@ -527,9 +804,6 @@ let attState = {};
 
 // ── UTILS ──
 const $ = id => document.getElementById(id);
-window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
-window.openModal = id => $(id).classList.add('open');
-window.closeModal = id => $(id).classList.remove('open');
 
 // ── AUTH ──
 window.signInGoogle = async () => {
@@ -553,7 +827,11 @@ function show(which) {
   $('main-app').style.display = 'none';
   if (which==='auth') $('auth-screen').style.display = 'flex';
   else if (which==='role') $('role-screen').style.display = 'flex';
-  else { $('main-app').style.display = 'flex'; setupMain(); }
+  else {
+    $('main-app').style.display = isDesktop() ? 'flex' : 'flex';
+    $('main-app').style.flexDirection = isDesktop() ? 'row' : 'column';
+    setupMain();
+  }
 }
 
 // ── ROLE ──
@@ -573,10 +851,12 @@ window.confirmRole = async () => {
 // ── SETUP ──
 function setupMain() {
   const isT = ROLE==='teacher';
+  const isParent = ROLE==='parent';
   $('cls-ornament').textContent = isT ? '✦ Teacher Portal ✦' : '✦ My Classes ✦';
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
-  $('btab-log').style.display = isT ? 'none' : 'flex';
+  $('btab-log').style.display = (ROLE==='student') ? 'flex' : 'none';
+  $('btab-chat').style.display = (isParent || isT) ? 'flex' : 'none';
   goScreen('home');
 }
 
@@ -584,11 +864,12 @@ function setupMain() {
 window.goScreen = scr => {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.bnav-tab').forEach(t=>t.classList.remove('active'));
-  $('scr-'+scr).classList.add('active');
-  $('btab-'+scr).classList.add('active');
+  const scrEl = $('scr-'+scr); if (scrEl) scrEl.classList.add('active');
+  const tabEl = $('btab-'+scr); if (tabEl) tabEl.classList.add('active');
   if (scr==='home') loadHome();
   if (scr==='classes') loadClasses();
   if (scr==='log') loadLog();
+  if (scr==='chat') { if (ROLE==='teacher') loadTeacherChats(); else loadChatList(); }
 };
 
 window.openPanel = id => { $(id).classList.add('open'); };
@@ -778,40 +1059,99 @@ window.switchClassTab = async tab => {
 };
 
 // ── STREAM ──
+function fmtDate(ts) {
+  if (!ts) return '';
+  return new Date(ts.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+async function buildCommentsSection(postId, postType) {
+  const sec = document.createElement('div'); sec.className='comments-section';
+  const commSnap = await getDocs(query(collection(db,'classes',currentClassId,postType+'Comments'), where('postId','==',postId), orderBy('createdAt','asc')));
+  commSnap.docs.forEach(d => {
+    const c=d.data();
+    const isOwn = c.authorId===CU.uid;
+    const commEl=document.createElement('div'); commEl.className='comment';
+    commEl.innerHTML=`<div class="comment-avatar">${(c.authorName||'?')[0]}</div><div class="comment-body"><div class="comment-author">${c.authorName||'User'} <span style="font-size:10px;color:var(--text-soft);font-weight:400">${fmtDate(c.createdAt)}</span></div><div class="comment-text">${c.text}</div><div class="comment-actions"><button class="comment-action" onclick="openReply('${postId}','${postType}','${d.id}','${(c.authorName||'').replace(/'/g,"\\'")}')">Reply</button>${isOwn?`<button class="comment-action" onclick="deleteComment('${postId}','${postType}','${d.id}')">Delete</button>`:''}</div></div>`;
+    sec.appendChild(commEl);
+    // replies
+    if (c.replies) {
+      c.replies.forEach(r => {
+        const rEl=document.createElement('div'); rEl.className='comment reply';
+        rEl.innerHTML=`<div class="comment-avatar" style="width:22px;height:22px;font-size:10px">${(r.authorName||'?')[0]}</div><div class="comment-body"><div class="comment-author">${r.authorName} <span style="font-size:10px;color:var(--text-soft)">${fmtDate(r.createdAt)}</span></div><div class="comment-text">${r.text}</div></div>`;
+        sec.appendChild(rEl);
+      });
+    }
+  });
+  const inputRow=document.createElement('div'); inputRow.className='comment-input-row';
+  inputRow.innerHTML=`<textarea class="comment-input" placeholder="Add a comment..." rows="1" id="ci-${postId}"></textarea><button class="comment-submit" onclick="postComment('${postId}','${postType}')">Post</button>`;
+  sec.appendChild(inputRow);
+  return sec;
+}
+
+async function buildPollCard(poll) {
+  const wrap=document.createElement('div'); wrap.className='poll-card';
+  const closed=poll.closes&&new Date(poll.closes)<new Date();
+  const totalVotes=Object.values(poll.votes||{}).length;
+  const userVote=(poll.votes||{})[CU.uid];
+  const optCounts={};
+  Object.values(poll.votes||{}).forEach(v=>{optCounts[v]=(optCounts[v]||0)+1;});
+  const isT=ROLE==='teacher';
+  let html=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div class="poll-question">${poll.question}</div>${isT?`<div style="display:flex;gap:6px"><button onclick="openEditPoll('${poll._id}')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-soft)">✏</button><button onclick="deletePoll('${poll._id}')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--danger)">✕</button></div>`:''}</div>`;
+  (poll.options||[]).forEach((opt,i)=>{
+    const votes=optCounts[opt]||0;
+    const pct=totalVotes?Math.round(votes/totalVotes*100):0;
+    const isVoted=userVote===opt;
+    html+=`<div class="poll-option${isVoted?' voted':''}${closed?' poll-closed':''}" onclick="castVote('${poll._id}','${opt.replace(/'/g,"\\'")}')"><div class="poll-bar" style="width:${pct}%"></div><div class="poll-option-text">${opt}</div><div class="poll-pct">${pct}% (${votes})</div></div>`;
+  });
+  html+=`<div class="poll-meta">📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed?'Poll closed':`Closes ${poll.closes||'anytime'}`}${fmtDate(poll.createdAt)?` · Posted ${fmtDate(poll.createdAt)}`:''}</div>`;
+  wrap.innerHTML=html;
+  return wrap;
+}
+
 async function renderStream(body) {
   body.innerHTML='';
   const isT = ROLE==='teacher';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
 
   if (isT) {
     const actions = document.createElement('div');
-    actions.style.cssText='display:flex;gap:8px';
-    actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button>`;
+    actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+    actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px;width:auto" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px;width:auto" onclick="openModal('post-assign-modal')">+ Assignment</button><button class="btn btn-secondary" style="font-size:13px;padding:11px;width:auto" onclick="openPollModal()">📊 Poll</button>`;
     wrap.appendChild(actions);
   }
 
-  // Load stream (announcements + assignments)
-  const [annSnap, assSnap] = await Promise.all([
+  const [annSnap, assSnap, pollSnap] = await Promise.all([
     getDocs(query(collection(db,'classes',currentClassId,'announcements'), orderBy('createdAt','desc'))),
-    getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')))
+    getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc'))),
+    getDocs(query(collection(db,'classes',currentClassId,'polls'), orderBy('createdAt','desc')))
   ]);
 
   const items = [
-    ...annSnap.docs.map(d=>({...d.data(), _type:'announce', _id:d.id})),
-    ...assSnap.docs.map(d=>({...d.data(), _type:'assign', _id:d.id}))
-  ].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    ...annSnap.docs.map(d=>({...d.data(),_type:'announce',_id:d.id})),
+    ...assSnap.docs.map(d=>({...d.data(),_type:'assign',_id:d.id})),
+    ...pollSnap.docs.map(d=>({...d.data(),_type:'poll',_id:d.id}))
+  ].sort((a,b)=>{
+    if(a.pinned&&!b.pinned)return -1;
+    if(!a.pinned&&b.pinned)return 1;
+    return (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0);
+  });
 
-  if (!items.length) {
-    wrap.innerHTML += '<div class="empty">No posts yet.</div>';
-  } else {
-    items.forEach(item => {
-      const post = document.createElement('div'); post.className='stream-post';
-      const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
-      const avatarHtml = CU.photoURL ? `<img src="${CU.photoURL}" alt="">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
-      post.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}</div><div class="stream-date">${dt}</div></div></div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
-      wrap.appendChild(post);
-    });
+  if(!items.length){wrap.innerHTML+='<div class="empty">No posts yet.</div>';}
+  else {
+    for(const item of items){
+      const el=document.createElement('div');
+      if(item._type==='poll'){
+        el.appendChild(await buildPollCard(item));
+      } else {
+        el.className=`stream-post${item.pinned?' pinned':''}`;
+        const dt=fmtDate(item.createdAt);
+        el.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${item.pinned?'<span class="pinned-badge">📌 Pinned</span>':''}</div><div class="stream-date">${dt}</div></div>${isT&&item._type==='announce'?`<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px">${item.pinned?'📌':'📍'}</button>`:''}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const commSec=await buildCommentsSection(item._id, item._type==='assign'?'assignment':'announcement');
+        el.appendChild(commSec);
+      }
+      wrap.appendChild(el);
+    }
   }
   body.appendChild(wrap);
 }
@@ -821,21 +1161,33 @@ let editingAssignId = null;
 async function renderAssignments(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   if (ROLE==='teacher') {
-    const btn = document.createElement('button'); btn.className='btn btn-primary'; btn.textContent='+ Post Assignment'; btn.onclick=()=>openModal('post-assign-modal');
+    const btn = document.createElement('button'); btn.className='btn btn-primary'; btn.style.cssText='width:auto;align-self:flex-start;padding:10px 18px;font-size:13px'; btn.textContent='+ Post Assignment'; btn.onclick=()=>openModal('post-assign-modal');
     wrap.appendChild(btn);
   }
   const snap = await getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')));
   if (snap.empty) { wrap.innerHTML += '<div class="empty">No assignments yet.</div>'; }
   else {
-    snap.docs.forEach(d => {
+    for (const d of snap.docs) {
       const a=d.data();
-      const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+      const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
       const el=document.createElement('div'); el.className='assign-card';
-      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>`;
+      let submitHtml='';
+      if (ROLE==='student' && a.allowSubmissions) {
+        const subDoc=await getDoc(doc(db,'classes',currentClassId,'submissions',d.id+'_'+CU.uid));
+        const hasSub=subDoc.exists();
+        submitHtml=`<div style="padding:12px 16px;border-top:.5px solid var(--border)"><button class="btn ${hasSub?'btn-secondary':'btn-primary'}" style="font-size:13px;padding:10px" onclick="openSubmission('${d.id}','${(a.title||'').replace(/'/g,"\\'")}',${a.allowSubmissions})">${hasSub?'✓ View/Edit Submission':'Submit Work'}</button>${hasSub?`<div style="font-size:11px;color:var(--success);margin-top:6px">Submitted</div>`:''}</div>`;
+      }
+      if (ROLE==='teacher') {
+        // Show all student submissions count
+        const subsSnap=await getDocs(collection(db,'classes',currentClassId,'submissions'));
+        const count=subsSnap.docs.filter(s=>s.id.startsWith(d.id+'_')).length;
+        submitHtml=`<div style="padding:8px 16px;border-top:.5px solid var(--border);font-size:12px;color:var(--text-soft)">📎 ${count} submission${count!==1?'s':''} · <button onclick="viewSubmissions('${d.id}','${(a.title||'').replace(/'/g,"\\'")}');" style="background:none;border:none;color:var(--maroon);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">View all</button></div>`;
+      }
+      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}',${!!a.allowSubmissions})" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>${submitHtml}`;
       wrap.appendChild(el);
-    });
+    }
   }
   body.appendChild(wrap);
 }
@@ -844,7 +1196,7 @@ async function renderAssignments(body) {
 async function renderPeople(body) {
   body.innerHTML='';
   const wrap = document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   const isT = ROLE==='teacher';
 
   if (isT) {
@@ -899,7 +1251,7 @@ async function renderPeople(body) {
 async function renderAttendance(body) {
   body.innerHTML='';
   const wrap=document.createElement('div');
-  wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  wrap.style.cssText='padding:28px 32px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box';
   const dateRow=document.createElement('div'); dateRow.style.cssText='display:flex;gap:8px;align-items:center';
   const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=new Date().toISOString().split('T')[0];
   dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:"DM Sans",sans-serif;outline:none';
@@ -945,18 +1297,20 @@ window.saveAttendance = async () => {
 // ── POST ACTIONS ──
 window.postAnnouncement = async () => {
   const body=$('announce-body').value.trim();
+  const pinned=$('announce-pin').checked;
   if(!body) return;
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
-  $('announce-body').value='';
+  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  $('announce-body').value=''; $('announce-pin').checked=false;
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
   switchClassTab('stream');
 };
 window.postAssignment = async () => {
   const title=$('assign-title').value.trim(), body=$('assign-body').value.trim(), due=$('assign-due').value;
+  const allowSubmissions=$('assign-submissions').checked;
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
-  await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
-  $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value='';
+  await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, allowSubmissions, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value=''; $('assign-submissions').checked=false;
   closeModal('post-assign-modal');
   showToast('Assignment posted ✓');
   switchClassTab('assignments');
@@ -1014,7 +1368,7 @@ window.dismissQuickStart = (role, el) => {
 };
 
 // ── EDIT ASSIGNMENT ──
-window.openEditAssignment = (id, title, body, due) => {
+window.openEditAssignment = (id, title, body, due, allowSubmissions) => {
   editingAssignId = id;
   $('edit-assign-title').value = title;
   $('edit-assign-body').value = body.replace(/\\n/g,'\n');
@@ -1111,6 +1465,316 @@ window.saveLog = async () => {
   loadLog();
 };
 
+// ── CHAT (parent only) ──
+let chatUnsubscribe = null;
+let currentChatId = null;
+
+async function loadChatList() {
+  const list = document.getElementById('chat-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  // Get all classes this parent's child is in
+  const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  if (snap.empty) { list.innerHTML = '<div class="empty-state">Not enrolled in any classes yet.</div>'; return; }
+  list.innerHTML = '';
+  for (const cd of snap.docs) {
+    const data = cd.data();
+    // Get last message
+    const msgSnap = await getDocs(query(collection(db,'chats',getChatId(CU.uid,data.teacherId),'messages'), orderBy('createdAt','desc')));
+    const lastMsg = msgSnap.empty ? null : msgSnap.docs[0].data();
+    const el = document.createElement('div'); el.className = 'chat-list-item';
+    el.innerHTML = `<div class="chat-av">${(data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'}</div><div class="chat-preview">${lastMsg?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.onclick = () => openChat(data.teacherId, data.teacherName||'Teacher');
+    list.appendChild(el);
+  }
+}
+
+function getChatId(uid1, uid2) {
+  return [uid1,uid2].sort().join('_');
+}
+
+window.openChat = async (teacherId, teacherName) => {
+  currentChatId = getChatId(CU.uid, teacherId);
+  const panel = document.getElementById('chat-panel');
+  const header = document.getElementById('chat-panel-name');
+  const messages = document.getElementById('chat-messages');
+  if (!panel) return;
+  header.textContent = teacherName;
+  panel.classList.add('open');
+  messages.innerHTML = '<div class="loading">Loading...</div>';
+
+  // Unsubscribe previous listener
+  if (chatUnsubscribe) chatUnsubscribe();
+
+  // Real-time listener
+  const { onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+  chatUnsubscribe = onSnapshot(
+    query(collection(db,'chats',currentChatId,'messages'), orderBy('createdAt','asc')),
+    snap => {
+      messages.innerHTML = '';
+      snap.docs.forEach(d => {
+        const m = d.data();
+        const isMine = m.senderId === CU.uid;
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'}`;
+        const time = m.createdAt ? new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
+        bubble.innerHTML = `<div class="chat-bubble ${isMine?'mine':'theirs'}">${m.text}<div class="chat-bubble-time">${time}</div></div>`;
+        messages.appendChild(bubble);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    }
+  );
+};
+
+window.closeChat = () => {
+  if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+  const panel = document.getElementById('chat-panel');
+  if (panel) panel.classList.remove('open');
+  currentChatId = null;
+};
+
+window.sendMessage = async () => {
+  const input = document.getElementById('chat-input');
+  if (!input || !currentChatId) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  await addDoc(collection(db,'chats',currentChatId,'messages'), {
+    text, senderId: CU.uid, senderName: CU.displayName, createdAt: serverTimestamp()
+  });
+};
+window.sendChatMessage = window.sendMessage;
+
+window.closeChatPanel = window.closeChat;
+window.sendChatMessage = window.sendMessage;
+
+// Fix chat panel title id mismatch
+window.openChat = async (teacherId, teacherName) => {
+  currentChatId = getChatId(CU.uid, teacherId);
+  const panel = document.getElementById('chat-panel');
+  const header = document.getElementById('chat-panel-title') || document.getElementById('chat-panel-name');
+  const messages = document.getElementById('chat-messages');
+  if (!panel) return;
+  if (header) header.textContent = teacherName;
+  panel.classList.add('open');
+  messages.innerHTML = '<div class="loading">Loading...</div>';
+  if (chatUnsubscribe) chatUnsubscribe();
+  const { onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+  chatUnsubscribe = onSnapshot(
+    query(collection(db,'chats',currentChatId,'messages'), orderBy('createdAt','asc')),
+    snap => {
+      messages.innerHTML = '';
+      if (snap.empty) { messages.innerHTML = '<div class="empty-state" style="padding:20px;text-align:center;color:var(--text-soft);font-size:13px">No messages yet. Say hello!</div>'; return; }
+      snap.docs.forEach(d => {
+        const m = d.data();
+        const isMine = m.senderId === CU.uid;
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'}`;
+        const time = m.createdAt ? new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
+        bubble.innerHTML = `<div class="chat-bubble ${isMine?'mine':'theirs'}">${m.text}<div class="chat-bubble-time">${time}</div></div>`;
+        messages.appendChild(bubble);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    }
+  );
+};
+async function loadTeacherChats() {
+  const list = document.getElementById('chat-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
+  const parentIds = new Set();
+  snap.docs.forEach(d => (d.data().studentIds||[]).forEach(id => parentIds.add(id)));
+  if (!parentIds.size) { list.innerHTML = '<div class="empty-state">No parents to chat with yet.</div>'; return; }
+  list.innerHTML = '';
+  for (const pid of parentIds) {
+    const userDoc = await getDoc(doc(db,'users',pid));
+    if (!userDoc.exists() || userDoc.data().role !== 'parent') continue;
+    const u = userDoc.data();
+    const el = document.createElement('div'); el.className = 'chat-list-item';
+    el.innerHTML = `<div class="chat-av">${(u.name||'P')[0]}</div><div class="chat-info"><div class="chat-name">${u.name||'Parent'}</div><div class="chat-preview">Tap to open chat</div></div>`;
+    el.onclick = () => openChat(pid, u.name||'Parent');
+    list.appendChild(el);
+  }
+}
+
+// ── PIN TOGGLE ──
+window.togglePin = async (annId, pin) => {
+  await updateDoc(doc(db,'classes',currentClassId,'announcements',annId), {pinned:pin});
+  showToast(pin?'Announcement pinned 📌':'Unpinned');
+  switchClassTab('stream');
+};
+
+// ── POLLS ──
+window.openCreatePoll = () => {
+  editingPollId=null;
+  $('poll-modal-title').textContent='Create Poll';
+  $('poll-question').value=''; $('poll-options').value=''; $('poll-closes').value='';
+  $('poll-submit-btn').textContent='Post Poll';
+  openModal('create-poll-modal');
+};
+window.openEditPoll = async (pollId) => {
+  editingPollId=pollId;
+  const pd=await getDoc(doc(db,'classes',currentClassId,'polls',pollId));
+  const p=pd.data();
+  $('poll-modal-title').textContent='Edit Poll';
+  $('poll-question').value=p.question||'';
+  $('poll-options').value=(p.options||[]).join('\n');
+  $('poll-closes').value=p.closes||'';
+  $('poll-submit-btn').textContent='Save Changes';
+  openModal('create-poll-modal');
+};
+window.savePoll = async () => {
+  const question=$('poll-question').value.trim();
+  const options=$('poll-options').value.split('\n').map(o=>o.trim()).filter(Boolean);
+  const closes=$('poll-closes').value;
+  if(!question||options.length<2){showToast('Need a question and at least 2 options');return;}
+  if(editingPollId){
+    await updateDoc(doc(db,'classes',currentClassId,'polls',editingPollId),{question,options,closes,updatedAt:serverTimestamp()});
+    showToast('Poll updated ✓');
+  } else {
+    await addDoc(collection(db,'classes',currentClassId,'polls'),{question,options,closes,votes:{},teacherId:CU.uid,teacherName:CU.displayName,createdAt:serverTimestamp()});
+    showToast('Poll posted ✓');
+  }
+  closeModal('create-poll-modal');
+  switchClassTab('stream');
+};
+window.deletePoll = async (pollId) => {
+  if(!confirm('Delete this poll?'))return;
+  await updateDoc(doc(db,'classes',currentClassId,'polls',pollId),{deleted:true});
+  showToast('Poll deleted');
+  switchClassTab('stream');
+};
+window.castVote = async (pollId, option) => {
+  const pollRef=doc(db,'classes',currentClassId,'polls',pollId);
+  const pd=await getDoc(pollRef);
+  if(!pd.exists())return;
+  const p=pd.data();
+  if(p.closes&&new Date(p.closes)<new Date()){showToast('This poll is closed');return;}
+  const votes={...p.votes||{}};
+  votes[CU.uid]=option;
+  await updateDoc(pollRef,{votes});
+  switchClassTab('stream');
+};
+
+// ── COMMENTS ──
+window.postComment = async (postId, postType) => {
+  const input=$(`ci-${postId}`);
+  if(!input)return;
+  const text=input.value.trim();
+  if(!text)return;
+  await addDoc(collection(db,'classes',currentClassId,postType+'Comments'),{
+    postId,text,authorId:CU.uid,authorName:CU.displayName,replies:[],createdAt:serverTimestamp()
+  });
+  input.value='';
+  showToast('Comment posted ✓');
+  switchClassTab('stream');
+};
+window.openReply = (postId, postType, commentId, authorName) => {
+  commentTargetId=postId; commentTargetType=postType; commentParentId=commentId;
+  $('comment-modal-title').textContent=`Reply to ${authorName}`;
+  $('comment-text').value='';
+  openModal('comment-modal');
+};
+window.submitComment = async () => {
+  const text=$('comment-text').value.trim();
+  if(!text)return;
+  if(commentParentId){
+    const ref=doc(db,'classes',currentClassId,commentTargetType+'Comments',commentParentId);
+    const cd=await getDoc(ref);
+    const replies=[...(cd.data().replies||[]),{text,authorId:CU.uid,authorName:CU.displayName,createdAt:{seconds:Math.floor(Date.now()/1000)}}];
+    await updateDoc(ref,{replies});
+  }
+  $('comment-text').value='';
+  closeModal('comment-modal');
+  showToast('Reply posted ✓');
+  switchClassTab('stream');
+};
+window.deleteComment = async (postId, postType, commentId) => {
+  if(!confirm('Delete this comment?'))return;
+  await updateDoc(doc(db,'classes',currentClassId,postType+'Comments',commentId),{text:'[deleted]',deleted:true});
+  showToast('Comment deleted');
+  switchClassTab('stream');
+};
+
+// ── SUBMISSIONS ──
+window.openSubmission = async (assignId, assignTitle, allowSubmissions) => {
+  const vaTitle=$('va-title'); vaTitle.textContent=assignTitle;
+  const vaBody=$('va-body'); vaBody.innerHTML='<div class="empty">Loading...</div>';
+  openModal('view-assign-modal');
+  const subId=assignId+'_'+CU.uid;
+  const subDoc=await getDoc(doc(db,'classes',currentClassId,'submissions',subId));
+  const sub=subDoc.exists()?subDoc.data():{files:[]};
+  vaBody.innerHTML='';
+  if(sub.files&&sub.files.length){
+    const lbl=document.createElement('div');lbl.className='section-label';lbl.textContent='Your Submitted Files';vaBody.appendChild(lbl);
+    sub.files.forEach(f=>{
+      const el=document.createElement('div');el.className='submission-file';
+      el.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a>`;
+      vaBody.appendChild(el);
+    });
+  }
+  if(sub.privateFeedback){
+    const fb=document.createElement('div');fb.className='private-feedback-box';
+    fb.innerHTML=`<div class="private-feedback-label">Teacher Feedback</div><div style="font-size:14px;color:var(--text-mid)">${sub.privateFeedback}</div>`;
+    vaBody.appendChild(fb);
+  }
+  const uploadArea=document.createElement('div');uploadArea.className='upload-area';
+  uploadArea.innerHTML=`<p>📎 Click to upload files (or drag & drop)</p><p style="font-size:11px;margin-top:4px">Any file type accepted</p>`;
+  const fileInput=document.createElement('input');fileInput.type='file';fileInput.multiple=true;fileInput.style.display='none';
+  fileInput.onchange=async()=>{
+    const files=Array.from(fileInput.files);
+    if(!files.length)return;
+    const prog=document.createElement('div');prog.className='upload-progress';
+    const bar=document.createElement('div');bar.className='upload-progress-bar';bar.style.width='0%';
+    prog.appendChild(bar);uploadArea.appendChild(prog);
+    uploadArea.querySelector('p').textContent='Uploading...';
+    const uploaded=[];
+    for(let i=0;i<files.length;i++){
+      try {
+        const res=await uploadToCloudinary(files[i],pct=>{bar.style.width=((i/files.length+pct/100/files.length)*100)+'%';});
+        uploaded.push({name:files[i].name,url:res.secure_url,publicId:res.public_id});
+      } catch(e){showToast('Upload failed: '+e.message);return;}
+    }
+    const existing=sub.files||[];
+    await setDoc(doc(db,'classes',currentClassId,'submissions',subId),{
+      assignId,studentId:CU.uid,studentName:CU.displayName,files:[...existing,...uploaded],submittedAt:serverTimestamp()
+    },{merge:true});
+    closeModal('view-assign-modal');
+    showToast('Files uploaded ✓');
+    switchClassTab('assignments');
+  };
+  uploadArea.onclick=()=>fileInput.click();
+  vaBody.appendChild(uploadArea);
+  vaBody.appendChild(fileInput);
+};
+
+window.viewSubmissions = async (assignId, assignTitle) => {
+  const vaTitle=$('va-title'); vaTitle.textContent=`Submissions: ${assignTitle}`;
+  const vaBody=$('va-body'); vaBody.innerHTML='<div class="empty">Loading...</div>';
+  openModal('view-assign-modal');
+  const subsSnap=await getDocs(collection(db,'classes',currentClassId,'submissions'));
+  const subs=subsSnap.docs.filter(d=>d.id.startsWith(assignId+'_'));
+  if(!subs.length){vaBody.innerHTML='<div class="empty">No submissions yet.</div>';return;}
+  vaBody.innerHTML='';
+  for(const s of subs){
+    const sub=s.data();
+    const studentDoc=await getDoc(doc(db,'users',sub.studentId));
+    const sname=studentDoc.exists()?studentDoc.data().name:sub.studentName;
+    const card=document.createElement('div');card.className='card';card.style.marginBottom='12px';
+    let filesHtml=(sub.files||[]).map(f=>`<div class="submission-file"><div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a></div>`).join('');
+    const fbVal=sub.privateFeedback||'';
+    card.innerHTML=`<div class="card-label">${sname}</div>${filesHtml}<div style="margin-top:10px"><div style="font-size:11px;color:var(--text-soft);margin-bottom:4px">PRIVATE FEEDBACK</div><textarea style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none" rows="2" id="pfb-${s.id}" placeholder="Add private feedback for this student...">${fbVal}</textarea><button class="btn btn-primary" style="font-size:12px;padding:8px;margin-top:6px" onclick="savePrivateFeedback('${s.id}','${assignId}','${sub.studentId}')">Save Feedback</button></div>`;
+    vaBody.appendChild(card);
+  }
+};
+
+window.savePrivateFeedback = async (subDocId, assignId, studentId) => {
+  const text=$(`pfb-${subDocId}`).value.trim();
+  await setDoc(doc(db,'classes',currentClassId,'submissions',subDocId),{privateFeedback:text,feedbackAt:serverTimestamp()},{merge:true});
+  showToast('Feedback saved ✓');
+};
+
 // ── VOICE ──
 let activeRec=null, activeMicId=null;
 window.toggleVoice=(fieldId,micId)=>{
@@ -1132,6 +1796,7 @@ document.querySelectorAll('.modal').forEach(m=>{
 
 // ── INIT LOG DATE ──
 $('log-date').value = new Date().toISOString().split('T')[0];
+
 </script>
 </body>
 </html>
