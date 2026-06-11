@@ -962,13 +962,22 @@ async function renderAssignments(body) {
   const snap = await getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')));
   if (snap.empty) { wrap.innerHTML += '<div class="empty">No assignments yet.</div>'; }
   else {
-    snap.docs.forEach(d => {
+    for (const d of snap.docs) {
       const a=d.data();
       const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
       const el=document.createElement('div'); el.className='assign-card';
-      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>`;
+      const subId = d.id+'_'+CU.uid;
+      let subBtn = '';
+      if (ROLE==='student') {
+        const subDoc = await getDoc(doc(db,'classes',currentClassId,'submissions',subId));
+        const hasSub = subDoc.exists() && (subDoc.data().files||[]).length > 0;
+        subBtn = `<div style="padding:0 16px 14px"><button class="submit-btn${hasSub?' done':''}" onclick="openSubmit('${d.id}','${(a.title||'').replace(/'/g,"\\'")}')"> ${hasSub?'✓ View/Edit Submission':'📎 Submit Work'}</button></div>`;
+      } else {
+        subBtn = `<div style="padding:0 16px 14px"><button onclick="viewSubmissions('${d.id}','${(a.title||'').replace(/'/g,"\\'")}');" style="background:none;border:none;color:var(--maroon);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">View submissions</button></div>`;
+      }
+      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>${subBtn}`;
       wrap.appendChild(el);
-    });
+    }
   }
   body.appendChild(wrap);
 }
