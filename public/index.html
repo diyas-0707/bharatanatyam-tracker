@@ -133,6 +133,20 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .poll-check{font-size:14px;position:relative;z-index:1}
 .poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
 .poll-closed .poll-option{pointer-events:none;opacity:.8}
+.comments-section{margin-top:12px;padding-top:12px;border-top:.5px solid var(--border)}
+.comment{display:flex;gap:8px;margin-bottom:10px}
+.comment-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0;font-family:'Cormorant Garamond',serif}
+.comment-body{flex:1;min-width:0}
+.comment-author{font-size:11px;font-weight:500;color:var(--text-dark)}
+.comment-text{font-size:13px;color:var(--text-mid);margin-top:2px;line-height:1.5;word-break:break-word}
+.comment-actions{display:flex;gap:10px;margin-top:4px}
+.comment-action{font-size:11px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+.comment-action:hover{color:var(--maroon)}
+.reply-indent{margin-left:34px}
+.comment-input-row{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.comment-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4;min-height:36px;max-height:100px}
+.comment-input:focus{border-color:var(--maroon)}
+.comment-post-btn{padding:8px 14px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .stream-post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .stream-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0}
 .stream-avatar img{width:36px;height:36px;border-radius:50%;object-fit:cover}
@@ -529,6 +543,21 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
 
+  <!-- Edit Comment -->
+  <div class="modal" id="edit-comment-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Comment</div>
+      <div class="field">
+        <textarea id="edit-comment-text" rows="3" placeholder="Edit your comment..."></textarea>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-comment-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditComment()">Save</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 </div>
@@ -859,6 +888,10 @@ async function renderStream(body) {
         const pinnedBadge = item.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
         const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
         post.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        if (item._type === 'announce') {
+          const commSec = await buildCommentsSection(item._id);
+          post.appendChild(commSec);
+        }
         wrap.appendChild(post);
       }
     }
@@ -1062,6 +1095,130 @@ window.dismissQuickStart = (role, el) => {
   el.style.transition='opacity .3s';
   el.style.opacity='0';
   setTimeout(()=>el.remove(), 300);
+};
+
+// ── COMMENTS ──
+let editingCommentId = null;
+let editingCommentPostId = null;
+let replyingToCommentId = null;
+let replyingToAuthor = null;
+
+async function buildCommentsSection(postId) {
+  const sec = document.createElement('div');
+  sec.className = 'comments-section';
+  sec.id = 'comments-' + postId;
+
+  const commSnap = await getDocs(query(
+    collection(db,'classes',currentClassId,'comments'),
+    where('postId','==',postId),
+    orderBy('createdAt','asc')
+  ));
+
+  const comments = commSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const topLevel = comments.filter(c=>!c.parentId);
+
+  topLevel.forEach(c => {
+    sec.appendChild(buildCommentEl(c, postId, false));
+    // replies
+    comments.filter(r=>r.parentId===c.id).forEach(r => {
+      sec.appendChild(buildCommentEl(r, postId, true));
+    });
+  });
+
+  // Input row
+  const inputRow = buildCommentInput(postId, null, null);
+  sec.appendChild(inputRow);
+  return sec;
+}
+
+function buildCommentEl(c, postId, isReply) {
+  const isOwn = c.authorId === CU.uid;
+  const wrap = document.createElement('div');
+  wrap.className = 'comment' + (isReply ? ' reply-indent' : '');
+  wrap.id = 'comment-el-' + c.id;
+  wrap.innerHTML = `<div class="comment-av">${(c.authorName||'?')[0]}</div>
+    <div class="comment-body">
+      <div class="comment-author">${c.authorName||'User'}</div>
+      <div class="comment-text" id="comment-text-${c.id}">${c.text}</div>
+      <div class="comment-actions">
+        ${!isReply ? `<button class="comment-action" onclick="showReplyInput('${postId}','${c.id}','${(c.authorName||'').replace(/'/g,"\'")}')">Reply</button>` : ''}
+        ${isOwn ? `<button class="comment-action" onclick="startEditComment('${c.id}','${postId}')">Edit</button>` : ''}
+        ${isOwn ? `<button class="comment-action" style="color:var(--danger)" onclick="deleteComment('${c.id}','${postId}')">Delete</button>` : ''}
+      </div>
+    </div>`;
+  return wrap;
+}
+
+function buildCommentInput(postId, parentId, replyToName) {
+  const row = document.createElement('div');
+  row.className = 'comment-input-row';
+  row.id = 'input-row-' + postId + (parentId ? '-' + parentId : '');
+  const placeholder = replyToName ? `Reply to ${replyToName}...` : 'Add a comment...';
+  row.innerHTML = `<textarea class="comment-input" id="cinput-${postId}${parentId?'-'+parentId:''}" placeholder="${placeholder}" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea>
+    <button class="comment-post-btn" onclick="postComment('${postId}','${parentId||''}')">Post</button>`;
+  return row;
+}
+
+window.showReplyInput = (postId, parentId, authorName) => {
+  // Remove any existing reply inputs
+  document.querySelectorAll('[id^="input-row-'+postId+'-"]').forEach(el=>el.remove());
+  const parentEl = document.getElementById('comment-el-'+parentId);
+  if (!parentEl) return;
+  const replyRow = buildCommentInput(postId, parentId, authorName);
+  parentEl.insertAdjacentElement('afterend', replyRow);
+  const input = document.getElementById(`cinput-${postId}-${parentId}`);
+  if (input) input.focus();
+};
+
+window.postComment = async (postId, parentId) => {
+  const inputId = `cinput-${postId}${parentId?'-'+parentId:''}`;
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  await addDoc(collection(db,'classes',currentClassId,'comments'), {
+    postId, parentId: parentId||null, text,
+    authorId: CU.uid, authorName: CU.displayName,
+    createdAt: serverTimestamp()
+  });
+  // Refresh just the comments section
+  const sec = document.getElementById('comments-'+postId);
+  if (sec) {
+    const newSec = await buildCommentsSection(postId);
+    sec.replaceWith(newSec);
+  }
+};
+
+window.startEditComment = (commentId, postId) => {
+  editingCommentId = commentId;
+  editingCommentPostId = postId;
+  const textEl = document.getElementById('comment-text-'+commentId);
+  $('edit-comment-text').value = textEl ? textEl.textContent : '';
+  openModal('edit-comment-modal');
+};
+
+window.saveEditComment = async () => {
+  const text = $('edit-comment-text').value.trim();
+  if (!text) return;
+  await updateDoc(doc(db,'classes',currentClassId,'comments',editingCommentId), {text, editedAt:serverTimestamp()});
+  closeModal('edit-comment-modal');
+  showToast('Comment updated ✓');
+  const sec = document.getElementById('comments-'+editingCommentPostId);
+  if (sec) {
+    const newSec = await buildCommentsSection(editingCommentPostId);
+    sec.replaceWith(newSec);
+  }
+};
+
+window.deleteComment = async (commentId, postId) => {
+  if (!confirm('Delete this comment?')) return;
+  await updateDoc(doc(db,'classes',currentClassId,'comments',commentId), {text:'[deleted]', deleted:true});
+  showToast('Comment deleted');
+  const sec = document.getElementById('comments-'+postId);
+  if (sec) {
+    const newSec = await buildCommentsSection(postId);
+    sec.replaceWith(newSec);
+  }
 };
 
 // ── TOGGLE PIN ──
