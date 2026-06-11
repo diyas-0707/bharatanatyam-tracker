@@ -133,6 +133,15 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .poll-check{font-size:14px;position:relative;z-index:1}
 .poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
 .poll-closed .poll-option{pointer-events:none;opacity:.8}
+.submit-btn{display:inline-block;margin-top:10px;padding:8px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
+.submit-btn.done{background:var(--success)}
+.submission-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border-radius:8px;border:.5px solid var(--border);margin-bottom:6px}
+.submission-file-name{font-size:12px;color:var(--text-dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.submission-file-link{font-size:11px;color:var(--maroon);text-decoration:none;flex-shrink:0}
+.upload-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.upload-bar{height:100%;background:var(--maroon);border-radius:2px;transition:width .3s}
+.private-fb-box{background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:10px;padding:10px 12px;margin-top:8px}
+.private-fb-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);font-weight:500;margin-bottom:4px}
 .comments-section{margin-top:12px;padding-top:12px;border-top:.5px solid var(--border)}
 .comment{display:flex;gap:8px;margin-bottom:10px}
 .comment-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0;font-family:'Cormorant Garamond',serif}
@@ -543,6 +552,30 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
 
+  <!-- Student Submit Work -->
+  <div class="modal" id="submit-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="submit-modal-title">Submit Work</div>
+      <div id="submit-modal-body" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('submit-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher View Submissions -->
+  <div class="modal" id="view-submissions-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="vsub-title">Submissions</div>
+      <div id="vsub-body" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('view-submissions-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Comment -->
   <div class="modal" id="edit-comment-modal">
     <div class="modal-sheet">
@@ -576,6 +609,23 @@ const cfg = {
   appId:"1:596130424146:web:548447703d6efc920a868b"
 };
 const fbApp = initializeApp(cfg);
+
+const CLOUD_NAME = 'do0xkyypc';
+const UPLOAD_PRESET = 's7xoqxzt';
+
+async function uploadToCloudinary(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => { const r=JSON.parse(xhr.responseText); r.secure_url ? resolve(r) : reject(r); };
+    xhr.onerror = reject;
+    xhr.send(fd);
+  });
+}
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
 
@@ -1219,6 +1269,110 @@ window.deleteComment = async (commentId, postId) => {
     const newSec = await buildCommentsSection(postId);
     sec.replaceWith(newSec);
   }
+};
+
+// ── SUBMISSIONS ──
+window.openSubmit = async (assignId, assignTitle) => {
+  $('submit-modal-title').textContent = assignTitle;
+  const body = $('submit-modal-body');
+  body.innerHTML = '<div class="empty">Loading...</div>';
+  openModal('submit-modal');
+
+  const subId = assignId + '_' + CU.uid;
+  const subDoc = await getDoc(doc(db,'classes',currentClassId,'submissions',subId));
+  const sub = subDoc.exists() ? subDoc.data() : {files:[]};
+  body.innerHTML = '';
+
+  // Show existing files
+  if ((sub.files||[]).length) {
+    const lbl = document.createElement('div'); lbl.className='card-label'; lbl.textContent='Your Submitted Files';
+    body.appendChild(lbl);
+    sub.files.forEach(f => {
+      const row = document.createElement('div'); row.className='submission-file';
+      row.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a>`;
+      body.appendChild(row);
+    });
+  }
+
+  // Show private feedback if any
+  if (sub.privateFeedback) {
+    const fb = document.createElement('div'); fb.className='private-fb-box';
+    fb.innerHTML=`<div class="private-fb-label">Teacher Feedback</div><div style="font-size:13px;color:var(--text-mid)">${sub.privateFeedback}</div>`;
+    body.appendChild(fb);
+  }
+
+  // Upload area
+  const uploadLbl = document.createElement('div'); uploadLbl.className='card-label'; uploadLbl.style.marginTop='8px';
+  uploadLbl.textContent = (sub.files||[]).length ? 'Add More Files' : 'Upload Files';
+  body.appendChild(uploadLbl);
+
+  const fileInput = document.createElement('input');
+  fileInput.type='file'; fileInput.multiple=true; fileInput.style.display='none';
+  fileInput.onchange = async () => {
+    const files = Array.from(fileInput.files);
+    if (!files.length) return;
+    const progWrap = document.createElement('div'); progWrap.className='upload-progress';
+    const bar = document.createElement('div'); bar.className='upload-bar'; bar.style.width='0%';
+    progWrap.appendChild(bar); body.appendChild(progWrap);
+    const statusLbl = document.createElement('div'); statusLbl.style.cssText='font-size:12px;color:var(--text-soft);margin-top:4px'; statusLbl.textContent='Uploading...';
+    body.appendChild(statusLbl);
+    const uploaded = [];
+    for (let i=0; i<files.length; i++) {
+      try {
+        const res = await uploadToCloudinary(files[i], pct => { bar.style.width = ((i/files.length + pct/100/files.length)*100)+'%'; });
+        uploaded.push({name:files[i].name, url:res.secure_url});
+      } catch(e) { showToast('Upload failed: '+e.message); return; }
+    }
+    const existing = sub.files||[];
+    await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
+      assignId, studentId:CU.uid, studentName:CU.displayName,
+      files:[...existing,...uploaded], submittedAt:serverTimestamp()
+    }, {merge:true});
+    closeModal('submit-modal');
+    showToast('Submitted! ✓');
+    switchClassTab('assignments');
+  };
+
+  const uploadBtn = document.createElement('button');
+  uploadBtn.className='btn btn-primary'; uploadBtn.style.marginTop='4px';
+  uploadBtn.textContent='📎 Choose Files to Upload';
+  uploadBtn.onclick = () => fileInput.click();
+  body.appendChild(uploadBtn);
+  body.appendChild(fileInput);
+};
+
+window.viewSubmissions = async (assignId, assignTitle) => {
+  $('vsub-title').textContent = 'Submissions: ' + assignTitle;
+  const body = $('vsub-body');
+  body.innerHTML = '<div class="empty">Loading...</div>';
+  openModal('view-submissions-modal');
+
+  const snap = await getDocs(collection(db,'classes',currentClassId,'submissions'));
+  const subs = snap.docs.filter(d=>d.id.startsWith(assignId+'_')).map(d=>({id:d.id,...d.data()}));
+
+  if (!subs.length) { body.innerHTML='<div class="empty">No submissions yet.</div>'; return; }
+  body.innerHTML='';
+
+  for (const sub of subs) {
+    const card = document.createElement('div'); card.className='card'; card.style.marginBottom='0';
+    const userDoc = await getDoc(doc(db,'users',sub.studentId));
+    const name = userDoc.exists() ? userDoc.data().name : sub.studentName||'Student';
+    let filesHtml = (sub.files||[]).map(f=>`<div class="submission-file"><div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a></div>`).join('');
+    const fbVal = sub.privateFeedback||'';
+    card.innerHTML=`<div class="card-label">${name}</div>${filesHtml}
+      <div style="margin-top:8px">
+        <div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Private Feedback</div>
+        <textarea id="pfb-${sub.id}" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5" rows="2" placeholder="Add private feedback...">${fbVal}</textarea>
+        <button class="btn btn-primary" style="font-size:12px;padding:8px;margin-top:6px" onclick="savePrivateFeedback('${sub.id}','${sub.studentId}')">Save Feedback</button>
+      </div>`;
+    body.appendChild(card);
+  }
+};
+
+window.savePrivateFeedback = async (subDocId, studentId) => {
+  const text = document.getElementById('pfb-'+subDocId).value.trim();
+  await setDoc(doc(db,'classes',currentClassId,'submissions',subDocId), {privateFeedback:text, feedbackAt:serverTimestamp()}, {merge:true});
+  showToast('Feedback saved ✓');
 };
 
 // ── TOGGLE PIN ──
