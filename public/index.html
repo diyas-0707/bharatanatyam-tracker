@@ -1296,9 +1296,9 @@ window.openSubmit = async (assignId, assignTitle) => {
   if ((sub.files||[]).length) {
     const lbl = document.createElement('div'); lbl.className='card-label'; lbl.textContent='Your Submitted Files';
     body.appendChild(lbl);
-    sub.files.forEach(f => {
+    sub.files.forEach((f, i) => {
       const row = document.createElement('div'); row.className='submission-file';
-      row.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a>`;
+      row.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a><button onclick="removeSubmissionFile('${assignId}','${subId}',${i})" style="background:var(--danger-bg);border:none;border-radius:6px;padding:4px 8px;font-size:11px;color:var(--danger);cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif">✕</button>`;
       body.appendChild(row);
     });
   }
@@ -1376,6 +1376,16 @@ window.viewSubmissions = async (assignId, assignTitle) => {
       </div>`;
     body.appendChild(card);
   }
+};
+
+window.removeSubmissionFile = async (assignId, subId, index) => {
+  if (!confirm('Remove this file?')) return;
+  const subDoc = await getDoc(doc(db,'classes',currentClassId,'submissions',subId));
+  const files = [...(subDoc.data().files||[])];
+  files.splice(index, 1);
+  await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {files}, {merge:true});
+  showToast('File removed');
+  openSubmit(assignId, $('submit-modal-title').textContent);
 };
 
 window.savePrivateFeedback = async (subDocId, studentId) => {
