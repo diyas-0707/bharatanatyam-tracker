@@ -1101,7 +1101,7 @@ function buildPollCard(poll, isT) {
     </div>`;
   });
 
-  html += `<div class="poll-meta">📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed ? 'Poll closed' : poll.closes ? `Closes ${poll.closes}` : 'No closing date'} · Posted ${dt}</div>`;
+  html += `<div class="poll-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed ? 'Poll closed' : poll.closes ? `Closes ${poll.closes}` : 'No closing date'} · Posted ${dt}</span>${userVote && !closed ? `<button onclick="removeVote('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif">Remove vote</button>` : ''}</div>`;
   wrap.innerHTML = html;
   return wrap;
 }
@@ -1150,6 +1150,15 @@ window.deletePoll = async (pollId) => {
   if (!confirm('Delete this poll?')) return;
   await updateDoc(doc(db,'classes',currentClassId,'polls',pollId), {deleted:true});
   showToast('Poll deleted');
+  switchClassTab('stream');
+};
+
+window.removeVote = async (pollId) => {
+  const pollRef = doc(db,'classes',currentClassId,'polls',pollId);
+  const pd = await getDoc(pollRef);
+  const votes = {...(pd.data().votes||{})};
+  delete votes[CU.uid];
+  await updateDoc(pollRef, {votes});
   switchClassTab('stream');
 };
 
