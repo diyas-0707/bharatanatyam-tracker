@@ -133,6 +133,19 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .poll-check{font-size:14px;position:relative;z-index:1}
 .poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
 .poll-closed .poll-option{pointer-events:none;opacity:.8}
+.settings-section{background:var(--card-bg);border-radius:16px;border:.5px solid var(--border);overflow:hidden}
+.settings-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .18s}
+.settings-row:last-child{border-bottom:none}
+.settings-row:active{background:var(--surface)}
+.settings-row-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.settings-row-icon svg{width:18px;height:18px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.settings-row-label{flex:1;font-size:14px;color:var(--text-dark);font-weight:400}
+.settings-row-value{font-size:13px;color:var(--text-soft)}
+.settings-row-arrow{font-size:16px;color:var(--text-soft)}
+.settings-profile-pic{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;margin:0 auto 8px;position:relative;cursor:pointer;overflow:hidden}
+.settings-profile-pic img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.settings-profile-pic-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%}
+.settings-profile-pic:hover .settings-profile-pic-overlay{opacity:1}
 .chat-list-item{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .18s}
 .chat-list-item:active{transform:scale(.98)}
 .chat-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;flex-shrink:0}
@@ -388,6 +401,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div style="height:16px"></div>
   </div>
 
+  <!-- ══ SCREEN: SETTINGS ══ -->
+  <div class="screen" id="scr-settings">
+    <div class="pg-header" style="padding-bottom:16px">
+      <div class="pg-ornament">✦ Account ✦</div>
+      <div class="pg-title">Settings</div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:14px" id="settings-content">
+      <div class="empty">Loading...</div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+
   <!-- ══ SCREEN: CHAT (parent) ══ -->
   <div class="screen" id="scr-chat">
     <div class="pg-header" style="padding-bottom:12px">
@@ -450,6 +475,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <button class="bnav-tab" id="btab-chat" onclick="goScreen('chat')" style="display:none">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <span>Chat</span>
+    </button>
+    <button class="bnav-tab" id="btab-settings" onclick="goScreen('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Settings</span>
     </button>
   </nav>
 
@@ -619,6 +648,47 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
 
+  <!-- Edit Display Name -->
+  <div class="modal" id="edit-name-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Change Display Name</div>
+      <div class="field"><label>New Name</label><input id="new-display-name" placeholder="Your name"></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-name-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDisplayName()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Role -->
+  <div class="modal" id="change-role-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Change Role</div>
+      <p style="font-size:13px;color:var(--text-soft);margin-bottom:16px">Changing your role will affect what features you can access.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-secondary" onclick="changeRoleTo('teacher')">👩‍🏫 Switch to Teacher</button>
+        <button class="btn btn-secondary" onclick="changeRoleTo('student')">🎓 Switch to Student</button>
+        <button class="btn btn-secondary" onclick="changeRoleTo('parent')">💚 Switch to Parent</button>
+        <button class="btn btn-secondary" onclick="closeModal('change-role-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account -->
+  <div class="modal" id="delete-account-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" style="color:var(--danger)">Delete Account</div>
+      <p style="font-size:13px;color:var(--text-soft);margin-bottom:16px">This will permanently delete your account data. This cannot be undone.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-danger" onclick="confirmDeleteAccount()">Yes, Delete My Account</button>
+        <button class="btn btn-secondary" onclick="closeModal('delete-account-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Comment -->
   <div class="modal" id="edit-comment-modal">
     <div class="modal-sheet">
@@ -750,6 +820,7 @@ window.goScreen = scr => {
   if (scr==='classes') loadClasses();
   if (scr==='log') loadLog();
   if (scr==='chat') { if (ROLE==='teacher') loadTeacherChatList(); else loadChatList(); }
+  if (scr==='settings') loadSettings();
 };
 
 window.openPanel = id => { $(id).classList.add('open'); };
@@ -1670,6 +1741,113 @@ window.saveLog = async () => {
   closeModal('add-log-modal');
   showToast('Session logged ✓');
   loadLog();
+};
+
+// ── SETTINGS ──
+async function loadSettings() {
+  const c = $('settings-content');
+  c.innerHTML = '';
+
+  // Profile section
+  const profileSec = document.createElement('div');
+  profileSec.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding:8px 0';
+  const picDiv = document.createElement('div'); picDiv.className = 'settings-profile-pic';
+  picDiv.title = 'Change profile picture';
+  if (CU.photoURL) {
+    picDiv.innerHTML = `<img src="${CU.photoURL}" alt=""><div class="settings-profile-pic-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+  } else {
+    picDiv.innerHTML = `<span>${(CU.displayName||'U')[0]}</span><div class="settings-profile-pic-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+  }
+
+  // Profile pic upload via Cloudinary
+  const picInput = document.createElement('input'); picInput.type='file'; picInput.accept='image/*'; picInput.style.display='none';
+  picInput.onchange = async () => {
+    const file = picInput.files[0]; if (!file) return;
+    showToast('Uploading...');
+    try {
+      const res = await uploadToCloudinary(file);
+      await updateDoc(doc(db,'users',CU.uid), {photo: res.secure_url});
+      // Update Firebase Auth profile
+      const { updateProfile } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js');
+      await updateProfile(CU, {photoURL: res.secure_url});
+      showToast('Profile picture updated ✓');
+      loadSettings();
+    } catch(e) { showToast('Upload failed'); }
+  };
+  picDiv.onclick = () => picInput.click();
+  profileSec.appendChild(picDiv);
+  profileSec.appendChild(picInput);
+
+  const nameEl = document.createElement('div');
+  nameEl.style.cssText='font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:600;color:var(--maroon-deep);text-align:center';
+  nameEl.textContent = CU.displayName||'';
+  profileSec.appendChild(nameEl);
+
+  const roleEl = document.createElement('div');
+  roleEl.style.cssText='font-size:12px;color:var(--text-soft);margin-top:3px;text-align:center';
+  roleEl.textContent = ROLE==='teacher'?'Teacher':ROLE==='parent'?'Parent':'Student';
+  profileSec.appendChild(roleEl);
+  c.appendChild(profileSec);
+
+  // Account settings section
+  const sec = document.createElement('div'); sec.className='settings-section';
+
+  // Change name
+  const nameRow = document.createElement('div'); nameRow.className='settings-row';
+  nameRow.innerHTML=`<div class="settings-row-icon" style="background:var(--gold-pale)"><svg viewBox="0 0 24 24" stroke="var(--gold)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="settings-row-label">Display Name</div><div class="settings-row-value">${CU.displayName||''}</div><div class="settings-row-arrow">›</div>`;
+  nameRow.onclick = () => { $('new-display-name').value = CU.displayName||''; openModal('edit-name-modal'); };
+  sec.appendChild(nameRow);
+
+  // Change role
+  const roleRow = document.createElement('div'); roleRow.className='settings-row';
+  roleRow.innerHTML=`<div class="settings-row-icon" style="background:#EEF2FF"><svg viewBox="0 0 24 24" stroke="#4338CA"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="settings-row-label">Role</div><div class="settings-row-value">${ROLE==='teacher'?'Teacher':ROLE==='parent'?'Parent':'Student'}</div><div class="settings-row-arrow">›</div>`;
+  roleRow.onclick = () => openModal('change-role-modal');
+  sec.appendChild(roleRow);
+
+  // Sign out
+  const signOutRow = document.createElement('div'); signOutRow.className='settings-row';
+  signOutRow.innerHTML=`<div class="settings-row-icon" style="background:var(--surface)"><svg viewBox="0 0 24 24" stroke="var(--text-soft)"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="settings-row-label">Sign Out</div><div class="settings-row-arrow">›</div>`;
+  signOutRow.onclick = () => doSignOut();
+  sec.appendChild(signOutRow);
+
+  c.appendChild(sec);
+
+  // Danger zone
+  const dangerSec = document.createElement('div'); dangerSec.className='settings-section';
+  const deleteRow = document.createElement('div'); deleteRow.className='settings-row';
+  deleteRow.innerHTML=`<div class="settings-row-icon" style="background:var(--danger-bg)"><svg viewBox="0 0 24 24" stroke="var(--danger)"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></div><div class="settings-row-label" style="color:var(--danger)">Delete Account</div><div class="settings-row-arrow" style="color:var(--danger)">›</div>`;
+  deleteRow.onclick = () => openModal('delete-account-modal');
+  dangerSec.appendChild(deleteRow);
+  c.appendChild(dangerSec);
+}
+
+window.saveDisplayName = async () => {
+  const name = $('new-display-name').value.trim();
+  if (!name) return;
+  const { updateProfile } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js');
+  await updateProfile(CU, {displayName: name});
+  await updateDoc(doc(db,'users',CU.uid), {name});
+  closeModal('edit-name-modal');
+  showToast('Name updated ✓');
+  loadSettings();
+};
+
+window.changeRoleTo = async (newRole) => {
+  if (newRole === ROLE) { showToast('Already a '+newRole); closeModal('change-role-modal'); return; }
+  await updateDoc(doc(db,'users',CU.uid), {role: newRole});
+  ROLE = newRole;
+  closeModal('change-role-modal');
+  showToast('Role changed to '+(newRole==='teacher'?'Teacher':newRole==='parent'?'Parent':'Student'));
+  setupMain();
+};
+
+window.confirmDeleteAccount = async () => {
+  closeModal('delete-account-modal');
+  try {
+    await updateDoc(doc(db,'users',CU.uid), {deleted:true, deletedAt:serverTimestamp()});
+    await doSignOut();
+    showToast('Account deleted');
+  } catch(e) { showToast('Error deleting account: '+e.message); }
 };
 
 // ── CHAT ──
