@@ -120,6 +120,8 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 
 /* ── STREAM POST ── */
 .stream-post{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border)}
+.stream-post.pinned{border-color:rgba(201,146,42,0.4);background:linear-gradient(135deg,#fff 0%,#fdf8ec 100%)}
+.pinned-badge{display:inline-flex;align-items:center;background:var(--gold-pale);color:var(--gold);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:6px}
 .stream-post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .stream-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0}
 .stream-avatar img{width:36px;height:36px;border-radius:50%;object-fit:cover}
@@ -439,7 +441,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <label>Message</label>
         <div class="field-voice"><textarea id="announce-body" placeholder="Share something with your class..." rows="4"></textarea><button class="mic-btn" id="mic-announce" onclick="toggleVoice('announce-body','mic-announce')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
-      <div class="modal-btns" style="margin-top:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+        <input type="checkbox" id="announce-pin" style="width:16px;height:16px;accent-color:var(--maroon)">
+        <label for="announce-pin" style="font-size:13px;color:var(--text-soft);cursor:pointer">📌 Pin this announcement</label>
+      </div>
+      <div class="modal-btns" style="margin-top:12px">
         <button class="btn btn-secondary" onclick="closeModal('post-announce-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="postAnnouncement()">Post</button>
       </div>
@@ -800,16 +806,22 @@ async function renderStream(body) {
   const items = [
     ...annSnap.docs.map(d=>({...d.data(), _type:'announce', _id:d.id})),
     ...assSnap.docs.map(d=>({...d.data(), _type:'assign', _id:d.id}))
-  ].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  ].sort((a,b)=>{
+    if(a.pinned&&!b.pinned) return -1;
+    if(!a.pinned&&b.pinned) return 1;
+    return (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0);
+  });
 
   if (!items.length) {
     wrap.innerHTML += '<div class="empty">No posts yet.</div>';
   } else {
     items.forEach(item => {
-      const post = document.createElement('div'); post.className='stream-post';
-      const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
-      const avatarHtml = CU.photoURL ? `<img src="${CU.photoURL}" alt="">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
-      post.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}</div><div class="stream-date">${dt}</div></div></div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+      const post = document.createElement('div');
+      post.className = 'stream-post' + (item.pinned ? ' pinned' : '');
+      const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+      const pinnedBadge = item.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
+      const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
+      post.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
       wrap.appendChild(post);
     });
   }
@@ -831,7 +843,7 @@ async function renderAssignments(body) {
   else {
     snap.docs.forEach(d => {
       const a=d.data();
-      const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+      const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
       const el=document.createElement('div'); el.className='assign-card';
       el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>`;
       wrap.appendChild(el);
@@ -945,9 +957,10 @@ window.saveAttendance = async () => {
 // ── POST ACTIONS ──
 window.postAnnouncement = async () => {
   const body=$('announce-body').value.trim();
+  const pinned=$('announce-pin').checked;
   if(!body) return;
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
-  $('announce-body').value='';
+  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  $('announce-body').value=''; $('announce-pin').checked=false;
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
   switchClassTab('stream');
@@ -1011,6 +1024,13 @@ window.dismissQuickStart = (role, el) => {
   el.style.transition='opacity .3s';
   el.style.opacity='0';
   setTimeout(()=>el.remove(), 300);
+};
+
+// ── TOGGLE PIN ──
+window.togglePin = async (annId, pin) => {
+  await updateDoc(doc(db,'classes',currentClassId,'announcements',annId), {pinned:pin});
+  showToast(pin ? 'Pinned 📌' : 'Unpinned');
+  switchClassTab('stream');
 };
 
 // ── EDIT ASSIGNMENT ──
