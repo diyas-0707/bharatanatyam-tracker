@@ -133,6 +133,20 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .poll-check{font-size:14px;position:relative;z-index:1}
 .poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
 .poll-closed .poll-option{pointer-events:none;opacity:.8}
+.bubble-wrap{display:flex;flex-direction:column}
+.bubble-wrap.mine{align-items:flex-end}
+.bubble-wrap.theirs{align-items:flex-start}
+.bubble-actions{display:flex;gap:8px;margin-top:3px;opacity:0;transition:opacity .2s}
+.bubble-wrap:hover .bubble-actions{opacity:1}
+.bubble-action-btn{font-size:10px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:2px 6px;border-radius:6px;background:var(--surface)}
+.bubble-action-btn:hover{color:var(--maroon)}
+.reply-preview{background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:4px 8px;margin-bottom:4px;font-size:11px;color:var(--text-soft)}
+.bubble.mine .reply-preview{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.5);color:rgba(255,255,255,0.8)}
+.edited-tag{font-size:10px;opacity:.5;margin-left:4px}
+.chat-reply-bar{background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:12px;color:var(--text-soft);display:none;align-items:center;gap:8px}
+.chat-reply-bar.show{display:flex}
+.chat-reply-bar span{flex:1}
+.chat-reply-cancel{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0}
 .settings-section{background:var(--card-bg);border-radius:16px;border:.5px solid var(--border);overflow:hidden}
 .settings-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .18s}
 .settings-row:last-child{border-bottom:none}
@@ -428,10 +442,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   <!-- ══ PANEL: CHAT CONVERSATION ══ -->
   <div class="panel" id="panel-chat">
     <div class="panel-header">
-      <button class="panel-back" onclick="if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}closePanel('panel-chat')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="panel-back" onclick="closeChatPanel()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="panel-title" id="chat-panel-name">Teacher</div>
     </div>
     <div class="panel-body" id="chat-messages" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;justify-content:flex-end"></div>
+    <div class="chat-reply-bar" id="chat-reply-bar">
+      <span id="chat-reply-preview">Replying to...</span>
+      <button class="chat-reply-cancel" onclick="cancelReply()">✕</button>
+    </div>
+    <div id="chat-reply-bar" style="display:none;background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:12px;color:var(--text-soft);align-items:center;gap:8px;flex-shrink:0">
+      <span style="flex:1">Replying...</span>
+      <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0">✕</button>
+    </div>
     <div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;background:var(--warm-white);flex-shrink:0">
       <textarea id="chat-input" placeholder="Type a message..." rows="1" style="flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
       <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
@@ -685,6 +707,32 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="display:flex;flex-direction:column;gap:10px">
         <button class="btn btn-danger" onclick="confirmDeleteAccount()">Yes, Delete My Account</button>
         <button class="btn btn-secondary" onclick="closeModal('delete-account-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Message -->
+  <div class="modal" id="edit-message-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Message</div>
+      <div class="field"><textarea id="edit-message-text" rows="3"></textarea></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-message-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditMessage()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Message -->
+  <div class="modal" id="edit-message-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Message</div>
+      <div class="field"><textarea id="edit-message-text" rows="3"></textarea></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-message-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditMessage()">Save</button>
       </div>
     </div>
   </div>
@@ -1852,92 +1900,141 @@ window.confirmDeleteAccount = async () => {
 
 // ── CHAT ──
 let chatUnsubscribe = null;
-let currentChatTeacherId = null;
+let currentChatOtherId = null;
+let replyingToMsg = null;
+let editingMsgId = null;
+let editingChatId = null;
 
-function getChatId(uid1, uid2) {
-  return [uid1, uid2].sort().join('_');
-}
+function getChatId(uid1, uid2) { return [uid1,uid2].sort().join('_'); }
+
+window.closeChatPanel = () => {
+  if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe=null; }
+  replyingToMsg=null;
+  closePanel('panel-chat');
+};
 
 async function loadChatList() {
-  const list = $('chat-list');
-  list.innerHTML = '<div class="empty">Loading...</div>';
-  const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-  if (snap.empty) { list.innerHTML='<div class="empty">Not enrolled in any classes yet.</div>'; return; }
-  list.innerHTML = '';
-  const seen = new Set();
-  for (const cd of snap.docs) {
-    const data = cd.data();
-    const tid = data.teacherId;
-    if (seen.has(tid)) continue;
-    seen.add(tid);
-    const chatId = getChatId(CU.uid, tid);
-    const msgSnap = await getDocs(query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','desc')));
-    const lastMsg = msgSnap.empty ? null : msgSnap.docs[0].data();
-    const el = document.createElement('div'); el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${(data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'}</div><div class="chat-preview">${lastMsg?lastMsg.text:'Start a conversation...'}</div></div>`;
-    el.onclick = () => openChatWith(tid, data.teacherName||'Teacher');
+  const list=$('chat-list'); list.innerHTML='<div class="empty">Loading...</div>';
+  const snap=await getDocs(query(collection(db,'classes'),where('studentIds','array-contains',CU.uid)));
+  if(snap.empty){list.innerHTML='<div class="empty">Not enrolled in any classes yet.</div>';return;}
+  list.innerHTML='';
+  const seen=new Set();
+  for(const cd of snap.docs){
+    const data=cd.data(); const tid=data.teacherId;
+    if(seen.has(tid))continue; seen.add(tid);
+    const chatId=getChatId(CU.uid,tid);
+    const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
+    const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
+    const el=document.createElement('div'); el.className='chat-list-item';
+    el.innerHTML=`<div class="chat-av">${(data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'}</div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.onclick=()=>openChatWith(tid,data.teacherName||'Teacher');
     list.appendChild(el);
   }
 }
 
-async function openChatWith(teacherId, teacherName) {
-  currentChatTeacherId = teacherId;
-  $('chat-panel-name').textContent = teacherName;
-  $('chat-messages').innerHTML = '<div class="empty" style="padding:20px">Loading...</div>';
+async function openChatWith(otherId,otherName){
+  currentChatOtherId=otherId;
+  $('chat-panel-name').textContent=otherName;
+  $('chat-messages').innerHTML='<div class="empty" style="padding:20px">Loading...</div>';
   openPanel('panel-chat');
-  const chatId = getChatId(CU.uid, teacherId);
-  if (chatUnsubscribe) chatUnsubscribe();
-  const { onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
-  chatUnsubscribe = onSnapshot(
-    query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc')),
-    snap => {
-      const msgs = $('chat-messages');
-      msgs.innerHTML = '';
-      if (snap.empty) { msgs.innerHTML='<div class="empty" style="padding:20px">No messages yet. Say hello!</div>'; return; }
-      snap.docs.forEach(d => {
-        const m = d.data();
-        const isMine = m.senderId === CU.uid;
-        const wrap = document.createElement('div'); wrap.style.cssText=`display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'}`;
-        const time = m.createdAt ? new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
-        wrap.innerHTML=`<div class="bubble ${isMine?'mine':'theirs'}">${m.text}<div class="bubble-time">${time}</div></div>`;
+  const chatId=getChatId(CU.uid,otherId);
+  if(chatUnsubscribe)chatUnsubscribe();
+  const {onSnapshot}=await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+  chatUnsubscribe=onSnapshot(
+    query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','asc')),
+    snap=>{
+      const msgs=$('chat-messages'); msgs.innerHTML='';
+      if(snap.empty){msgs.innerHTML='<div class="empty" style="padding:20px">No messages yet. Say hello!</div>';return;}
+      const allMsgs={};
+      snap.docs.forEach(d=>{allMsgs[d.id]={...d.data(),id:d.id};});
+      snap.docs.forEach(d=>{
+        const m={...d.data(),id:d.id};
+        if(m.deleted){
+          const del=document.createElement('div');
+          del.style.cssText='text-align:center;font-size:11px;color:var(--text-soft);padding:2px 0;font-style:italic';
+          del.textContent='Message deleted';
+          msgs.appendChild(del); return;
+        }
+        const isMine=m.senderId===CU.uid;
+        const wrap=document.createElement('div');
+        wrap.style.cssText=`display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'};margin-bottom:4px`;
+        const time=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'';
+        let replyHtml='';
+        if(m.replyTo&&allMsgs[m.replyTo]&&!allMsgs[m.replyTo].deleted){
+          const orig=allMsgs[m.replyTo];
+          replyHtml=`<div style="background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:3px 8px;margin-bottom:4px;font-size:11px;color:var(--text-soft)">↩ ${orig.senderName}: ${orig.text.substring(0,50)}${orig.text.length>50?'...':''}</div>`;
+        }
+        const editedTag=m.edited?'<span style="font-size:10px;opacity:.5;margin-left:4px">(edited)</span>':'';
+        const actionsHtml=`<div style="display:flex;gap:6px;margin-top:3px">
+          <button onclick="startReplyMsg('${d.id}','${(m.senderName||'').replace(/'/g,"\\'")}','${m.text.replace(/'/g,"\\'").replace(/\n/g,' ').substring(0,40)}')" style="font-size:10px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Reply</button>
+          ${isMine?`<button onclick="startEditMsg('${d.id}','${chatId}','${m.text.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:10px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button>`:''}
+          ${isMine?`<button onclick="deleteMsg('${d.id}','${chatId}')" style="font-size:10px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>`:''}
+        </div>`;
+        wrap.innerHTML=`<div class="bubble ${isMine?'mine':'theirs'}">${replyHtml}${m.text}${editedTag}<div class="bubble-time">${time}</div></div>${actionsHtml}`;
         msgs.appendChild(wrap);
       });
-      msgs.scrollTop = msgs.scrollHeight;
+      msgs.scrollTop=msgs.scrollHeight;
     }
   );
 }
 
-window.sendChatMessage = async () => {
-  const input = $('chat-input');
-  if (!input || !currentChatTeacherId) return;
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  const chatId = getChatId(CU.uid, currentChatTeacherId);
-  await addDoc(collection(db,'chats',chatId,'messages'), {
-    text, senderId:CU.uid, senderName:CU.displayName, createdAt:serverTimestamp()
-  });
+window.sendChatMessage=async()=>{
+  const input=$('chat-input');
+  if(!input||!currentChatOtherId)return;
+  const text=input.value.trim(); if(!text)return;
+  input.value='';
+  const chatId=getChatId(CU.uid,currentChatOtherId);
+  const msgData={text,senderId:CU.uid,senderName:CU.displayName,createdAt:serverTimestamp()};
+  if(replyingToMsg){msgData.replyTo=replyingToMsg;replyingToMsg=null;const rb=$('chat-reply-bar');if(rb)rb.style.display='none';}
+  await addDoc(collection(db,'chats',chatId,'messages'),msgData);
 };
 
-// Also allow teachers to see and reply to parent chats
-async function loadTeacherChatList() {
-  const list = $('chat-list');
-  list.innerHTML = '<div class="empty">Loading...</div>';
-  const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
-  const parentIds = new Set();
-  snap.docs.forEach(d => (d.data().studentIds||[]).forEach(id => parentIds.add(id)));
-  if (!parentIds.size) { list.innerHTML='<div class="empty">No parents to chat with yet.</div>'; return; }
+window.startReplyMsg=(msgId,senderName,preview)=>{
+  replyingToMsg=msgId;
+  const rb=$('chat-reply-bar');
+  if(rb){rb.style.display='flex';rb.querySelector('span').textContent=`↩ ${senderName}: ${preview}${preview.length>=40?'...':''}`;}
+  $('chat-input').focus();
+};
+
+window.cancelReply=()=>{
+  replyingToMsg=null;
+  const rb=$('chat-reply-bar');if(rb)rb.style.display='none';
+};
+
+window.startEditMsg=(msgId,chatId,currentText)=>{
+  editingMsgId=msgId;editingChatId=chatId;
+  $('edit-message-text').value=currentText.replace(/\\n/g,'\n');
+  openModal('edit-message-modal');
+};
+
+window.saveEditMessage=async()=>{
+  const text=$('edit-message-text').value.trim();if(!text)return;
+  await updateDoc(doc(db,'chats',editingChatId,'messages',editingMsgId),{text,edited:true,editedAt:serverTimestamp()});
+  closeModal('edit-message-modal');showToast('Message edited ✓');
+};
+
+window.deleteMsg=async(msgId,chatId)=>{
+  if(!confirm('Delete this message?'))return;
+  await updateDoc(doc(db,'chats',chatId,'messages',msgId),{deleted:true,text:'[deleted]'});
+};
+
+async function loadTeacherChatList(){
+  const list=$('chat-list');list.innerHTML='<div class="empty">Loading...</div>';
+  const snap=await getDocs(query(collection(db,'classes'),where('teacherId','==',CU.uid)));
+  const parentIds=new Set();
+  snap.docs.forEach(d=>(d.data().studentIds||[]).forEach(id=>parentIds.add(id)));
+  if(!parentIds.size){list.innerHTML='<div class="empty">No parents to chat with yet.</div>';return;}
   list.innerHTML='';
-  for (const pid of parentIds) {
-    const uDoc = await getDoc(doc(db,'users',pid));
-    if (!uDoc.exists() || uDoc.data().role !== 'parent') continue;
-    const u = uDoc.data();
-    const chatId = getChatId(CU.uid, pid);
-    const msgSnap = await getDocs(query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','desc')));
-    const lastMsg = msgSnap.empty ? null : msgSnap.docs[0].data();
-    const el = document.createElement('div'); el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${(u.name||'P')[0]}</div><div class="chat-info"><div class="chat-name">${u.name||'Parent'}</div><div class="chat-preview">${lastMsg?lastMsg.text:'No messages yet'}</div></div>`;
-    el.onclick = () => openChatWith(pid, u.name||'Parent');
+  for(const pid of parentIds){
+    const uDoc=await getDoc(doc(db,'users',pid));
+    if(!uDoc.exists()||uDoc.data().role!=='parent')continue;
+    const u=uDoc.data();
+    const chatId=getChatId(CU.uid,pid);
+    const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
+    const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
+    const el=document.createElement('div');el.className='chat-list-item';
+    el.innerHTML=`<div class="chat-av">${(u.name||'P')[0]}</div><div class="chat-info"><div class="chat-name">${u.name||'Parent'}</div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'No messages yet'}</div></div>`;
+    el.onclick=()=>openChatWith(pid,u.name||'Parent');
     list.appendChild(el);
   }
 }
