@@ -147,6 +147,14 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .chat-reply-bar.show{display:flex}
 .chat-reply-bar span{flex:1}
 .chat-reply-cancel{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0}
+.notif-item{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:background .18s}
+.notif-item.unread{border-color:var(--maroon);background:var(--gold-pale)}
+.notif-item:active{background:var(--surface)}
+.notif-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--surface)}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:13px;font-weight:500;color:var(--text-dark)}
+.notif-text{font-size:12px;color:var(--text-soft);margin-top:2px;line-height:1.4}
+.notif-time{font-size:10px;color:var(--text-soft);margin-top:4px}
 .settings-section{background:var(--card-bg);border-radius:16px;border:.5px solid var(--border);overflow:hidden}
 .settings-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .18s}
 .settings-row:last-child{border-bottom:none}
@@ -416,6 +424,18 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div style="height:16px"></div>
   </div>
 
+  <!-- ══ SCREEN: NOTIFICATIONS ══ -->
+  <div class="screen" id="scr-notifs">
+    <div class="pg-header" style="padding-bottom:16px">
+      <div class="pg-ornament">✦ Alerts ✦</div>
+      <div class="pg-title">Notifications</div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px" id="notifs-list">
+      <div class="empty">Loading...</div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+
   <!-- ══ SCREEN: SETTINGS ══ -->
   <div class="screen" id="scr-settings">
     <div class="pg-header" style="padding-bottom:16px">
@@ -498,6 +518,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <button class="bnav-tab" id="btab-chat" onclick="goScreen('chat')" style="display:none">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <span>Chat</span>
+    </button>
+    <button class="bnav-tab" id="btab-notifs" onclick="goScreen('notifs')" style="position:relative">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>Alerts</span>
+      <div id="notif-badge" style="display:none;position:absolute;top:6px;right:calc(50% - 16px);background:var(--danger);color:#fff;font-size:9px;font-weight:600;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center">0</div>
     </button>
     <button class="bnav-tab" id="btab-settings" onclick="goScreen('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -867,7 +892,7 @@ function show(which) {
   $('main-app').style.display = 'none';
   if (which==='auth') $('auth-screen').style.display = 'flex';
   else if (which==='role') $('role-screen').style.display = 'flex';
-  else { $('main-app').style.display = 'flex'; setupMain(); }
+  else { $('main-app').style.display = 'flex'; setupMain(); initFCM(); updateNotifBadge(); }
 }
 
 // ── ROLE ──
@@ -908,6 +933,7 @@ window.goScreen = scr => {
   if (scr==='log') loadLog();
   if (scr==='chat') { if (ROLE==='teacher') loadTeacherChatList(); else loadChatList(); }
   if (scr==='settings') loadSettings();
+  if (scr==='notifs') loadNotifications();
 };
 
 window.openPanel = id => { $(id).classList.add('open'); };
@@ -2209,6 +2235,82 @@ async function loadTeacherChatList(){
     el.onclick=()=>openChatWith(uid,u.name||'User');
     list.appendChild(el);
   }
+}
+
+// ── NOTIFICATIONS + FCM ──
+async function initFCM() {
+  try {
+    const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-messaging.js');
+    const messaging = getMessaging(fbApp);
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const token = await getToken(messaging, {
+      vapidKey: 'BJ322q3rrDbeXMMk5yK6AD9uDfAJY5k6ILMLGc5A4V3Uw2cMOaiR75Y6MeV4bwrE0Y0Q41Jqs8lOnHuaj6SMYc4'
+    });
+    if (token && CU) {
+      // Save token to user doc
+      const userRef = doc(db,'users',CU.uid);
+      const userDoc = await getDoc(userRef);
+      const existing = userDoc.data()?.fcmTokens || [];
+      if (!existing.includes(token)) {
+        await updateDoc(userRef, { fcmTokens: arrayUnion(token) });
+      }
+    }
+    // Handle foreground messages
+    onMessage(messaging, (payload) => {
+      showToast(payload.notification?.title + ': ' + payload.notification?.body);
+      updateNotifBadge();
+    });
+  } catch(e) {
+    console.log('FCM not available:', e.message);
+  }
+}
+
+async function updateNotifBadge() {
+  if (!CU) return;
+  const snap = await getDocs(query(
+    collection(db,'notifications'),
+    where('userId','==',CU.uid),
+    where('read','==',false)
+  ));
+  const count = snap.size;
+  const badge = $('notif-badge');
+  if (badge) {
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.style.display = count > 0 ? 'block' : 'none';
+  }
+}
+
+async function loadNotifications() {
+  const list = $('notifs-list');
+  list.innerHTML = '<div class="empty">Loading...</div>';
+  const snap = await getDocs(query(
+    collection(db,'notifications'),
+    where('userId','==',CU.uid),
+    orderBy('createdAt','desc')
+  ));
+  if (snap.empty) { list.innerHTML='<div class="empty">No notifications yet.</div>'; return; }
+  list.innerHTML = '';
+
+  // Mark all as read
+  snap.docs.filter(d=>!d.data().read).forEach(d => {
+    updateDoc(doc(db,'notifications',d.id), {read:true});
+  });
+  updateNotifBadge();
+
+  const icons = {
+    submission:'📎', log:'📝', feedback:'💬', logFeedback:'💬',
+    chat:'💬', announcement:'📢', assignment:'📚'
+  };
+
+  snap.docs.forEach(d => {
+    const n = d.data();
+    const el = document.createElement('div');
+    el.className = 'notif-item' + (!n.read ? ' unread' : '');
+    const time = n.createdAt ? new Date(n.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    el.innerHTML=`<div class="notif-icon">${icons[n.data?.type]||'🔔'}</div><div class="notif-body"><div class="notif-title">${n.title}</div><div class="notif-text">${n.body}</div><div class="notif-time">${time}</div></div>`;
+    list.appendChild(el);
+  });
 }
 
 // ── VOICE ──
