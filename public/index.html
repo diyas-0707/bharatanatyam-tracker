@@ -432,7 +432,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   <div class="screen" id="scr-chat">
     <div class="pg-header" style="padding-bottom:12px">
       <div class="pg-title">Messages</div>
-      <div class="pg-sub">Chat with your child's teachers</div>
+      <div class="pg-sub">Chat with students and their parents</div>
     </div>
     <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px" id="chat-list">
       <div class="empty">Loading...</div>
@@ -547,6 +547,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
           <div class="field-voice"><textarea id="log-practice" placeholder="Describe your practice..." rows="3"></textarea><button class="mic-btn" id="mic-log" onclick="toggleVoice('log-practice','mic-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Status</label><select id="log-status"><option value="completed">✓ Completed</option><option value="partial">◐ Partially Done</option><option value="missed">✕ Not Done</option></select></div>
+        <div class="field"><label>Attach Files (optional)</label>
+          <div id="log-files-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+          <button type="button" onclick="document.getElementById('log-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:13px">📎 Choose Files</button>
+          <input type="file" id="log-file-input" multiple style="display:none" onchange="previewLogFiles(this)">
+        </div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('add-log-modal')">Cancel</button>
@@ -1268,10 +1273,12 @@ async function renderPeople(body) {
     sdocs.filter(d=>d.exists()).forEach(d => {
       const s=d.data();
       const row=document.createElement('div'); row.className='student-row';
+      const sAvImg=s.photo?`<img src="${s.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(s.name||'?')[0]}</div>`;
+      const sRoleBadge=s.role==='parent'?'<span style="font-size:10px;background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:10px;margin-left:4px">Parent</span>':'<span style="font-size:10px;background:var(--gold-pale);color:var(--maroon-deep);padding:1px 7px;border-radius:10px;margin-left:4px">Student</span>';
       if (isT) {
-        row.innerHTML=`<div class="s-avatar">${(s.name||'?')[0]}</div><div class="s-info"><div class="s-name">${s.name||'Unknown'}</div><div class="s-email">${s.email||''}</div></div><button class="icon-btn primary" onclick="openStudentDetail('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}','${s.email||''}')" title="Give feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button><button class="icon-btn danger" onclick="removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+        row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div><button class="icon-btn primary" onclick="openStudentDetail('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}','${s.email||''}')" title="Give feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button><button class="icon-btn danger" onclick="removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
       } else {
-        row.innerHTML=`<div class="s-avatar">${(s.name||'?')[0]}</div><div class="s-info"><div class="s-name">${s.name||'Unknown'}</div><div class="s-email">${s.email||''}</div></div>`;
+        row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div>`;
       }
       wrap.appendChild(row);
     });
@@ -1865,6 +1872,15 @@ window.openStudentDetail = async (sid, sname, semail) => {
   }
 };
 
+window.saveLogFeedback = async (logId, studentId) => {
+  const text = document.getElementById('lfb-'+logId)?.value.trim();
+  if (text === undefined) return;
+  await setDoc(doc(db,'classes',currentClassId,'logFeedback',logId), {
+    text, teacherId:CU.uid, teacherName:CU.displayName, studentId, updatedAt:serverTimestamp()
+  });
+  showToast('Feedback saved ✓');
+};
+
 window.saveFeedback = async () => {
   const text=$('feedback-body').value.trim();
   if(!text) return;
@@ -1911,11 +1927,34 @@ window.loadLog = async () => {
   });
 };
 
+let logFilesToUpload = [];
+window.previewLogFiles = (input) => {
+  logFilesToUpload = Array.from(input.files);
+  const preview = $('log-files-preview');
+  preview.innerHTML = '';
+  logFilesToUpload.forEach(f => {
+    const tag = document.createElement('span');
+    tag.style.cssText='font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
+    tag.textContent='📎 '+f.name;
+    preview.appendChild(tag);
+  });
+};
+
 window.saveLog = async () => {
   const date=$('log-date').value, text=$('log-practice').value.trim(), status=$('log-status').value;
   if(!date||!text){showToast('Please fill in all fields');return;}
-  await addDoc(collection(db,'practiceLogs'), { studentId:CU.uid, studentName:CU.displayName, date, practiceText:text, completed:status==='completed', createdAt:serverTimestamp() });
+  let files=[];
+  if(logFilesToUpload.length){
+    showToast('Uploading files...');
+    for(const f of logFilesToUpload){
+      const res=await uploadToCloudinary(f);
+      files.push({name:f.name,url:res.secure_url});
+    }
+  }
+  await addDoc(collection(db,'practiceLogs'), { studentId:CU.uid, studentName:CU.displayName, date, practiceText:text, completed:status==='completed', files, createdAt:serverTimestamp() });
   $('log-practice').value='';
+  logFilesToUpload=[];
+  if($('log-files-preview'))$('log-files-preview').innerHTML='';
   closeModal('add-log-modal');
   showToast('Session logged ✓');
   loadLog();
