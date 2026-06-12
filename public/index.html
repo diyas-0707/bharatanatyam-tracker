@@ -1138,7 +1138,7 @@ async function openClassDetail(classId, classData) {
   // Build tabs based on role
   const isT = ROLE==='teacher';
   const tabs = isT
-    ? [['stream','Stream'],['assignments','Assignments'],['people','Students'],['attendance','Attendance']]
+    ? [['stream','Stream'],['assignments','Assignments'],['people','People'],['attendance','Attendance']]
     : [['stream','Stream'],['assignments','Assignments'],['people','People']];
 
   const tabBar = $('pd-tabs');
@@ -1290,7 +1290,7 @@ async function renderPeople(body) {
   }
 
   // Students
-  const lbl2=document.createElement('div'); lbl2.className='section-label'; lbl2.style.marginTop='4px'; lbl2.textContent=`Students (${studentIds.length})`;
+  const lbl2=document.createElement('div'); lbl2.className='section-label'; lbl2.style.marginTop='4px'; lbl2.textContent=`People (${studentIds.length})`;
   wrap.appendChild(lbl2);
 
   if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.style.padding='20px 0'; e.textContent='No students yet.'; wrap.appendChild(e); }
@@ -1302,7 +1302,8 @@ async function renderPeople(body) {
       const sAvImg=s.photo?`<img src="${s.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(s.name||'?')[0]}</div>`;
       const sRoleBadge=s.role==='parent'?'<span style="font-size:10px;background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:10px;margin-left:4px">Parent</span>':'<span style="font-size:10px;background:var(--gold-pale);color:var(--maroon-deep);padding:1px 7px;border-radius:10px;margin-left:4px">Student</span>';
       if (isT) {
-        row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div><button class="icon-btn primary" onclick="openStudentDetail('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}','${s.email||''}')" title="Give feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button><button class="icon-btn danger" onclick="removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+        const chatBtn = s.role==='parent' ? '' : `<button class="icon-btn primary" onclick="openStudentDetail('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}','${s.email||''}')" title="Give feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>`;
+        row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div>${chatBtn}<button class="icon-btn danger" onclick="removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
       } else {
         row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div>`;
       }
@@ -1942,7 +1943,7 @@ window.openStudentDetail = async (sid, sname, semail) => {
     const filtered = allLogs.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     const done = filtered.filter(e=>e.completed).length;
     const uniqueDays = new Set(filtered.filter(e=>e.completed).map(e=>e.date)).size;
-    statsRow.innerHTML=`<div class="stat-box" style="flex:1"><div class="stat-num">${done}</div><div class="stat-label">Completed Logs</div></div><div class="stat-box" style="flex:1"><div class="stat-num">${uniqueDays}</div><div class="stat-label">Days Practiced</div></div>`;
+    statsRow.innerHTML=`<div class="stat-box" style="flex:1"><div class="stat-num">${done}</div><div class="stat-label">Completed Logs</div></div><div class="stat-box" style="flex:1"><div class="stat-num">${uniqueDays}</div><div class="stat-label">Days Practiced This Month</div></div>`;
     logLbl.textContent = 'Practice Log — ' + filtered.length + ' entries';
     logContainer.innerHTML = '';
     if (!filtered.length) {
