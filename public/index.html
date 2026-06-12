@@ -204,9 +204,6 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .tag-announce{background:#EEF2FF;color:#4338CA}
 .tag-assign{background:var(--gold-pale);color:#92400E}
 .tag-feedback{background:var(--success-bg);color:var(--success)}
-.tts-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-soft);font-family:'DM Sans',sans-serif;transition:color .18s}
-.tts-btn:hover{color:var(--maroon)}
-.tts-btn.playing{color:var(--maroon)}
 
 /* ── ASSIGNMENT CARD ── */
 .assign-card{background:var(--card-bg);border-radius:14px;border:.5px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .18s}
@@ -459,7 +456,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0">✕</button>
     </div>
     <div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;background:var(--warm-white);flex-shrink:0">
-      <textarea id="chat-input" placeholder="Type a message..." rows="1" style="flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+      <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
     </div>
   </div>
@@ -765,7 +762,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-handle"></div>
       <div class="modal-title">Edit Comment</div>
       <div class="field">
-        <textarea id="edit-comment-text" rows="3" placeholder="Edit your comment..."></textarea>
+        <div class="field-voice"><textarea id="edit-comment-text" rows="3" placeholder="Edit your comment..."></textarea><button class="mic-btn" id="mic-edit-comment" onclick="toggleVoice('edit-comment-text','mic-edit-comment')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-comment-modal')">Cancel</button>
@@ -826,11 +823,19 @@ let attState = {};
 // ── UTILS ──
 const $ = id => document.getElementById(id);
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
-window.openModal = id => {
+window.openModal = async id => {
   $(id).classList.add('open');
-  if (id==='class-settings-modal' && currentClassData) {
+  if (id==='class-settings-modal' && currentClassId) {
     const codeEl = $('class-join-code');
-    if (codeEl) codeEl.textContent = currentClassData.joinCode || 'none';
+    if (codeEl) {
+      const cd = await getDoc(doc(db,'classes',currentClassId));
+      let code = cd.data().joinCode;
+      if (!code) {
+        code = generateJoinCode();
+        await updateDoc(doc(db,'classes',currentClassId), {joinCode: code});
+      }
+      codeEl.textContent = code;
+    }
   }
 };
 window.closeModal = id => $(id).classList.remove('open');
@@ -1178,8 +1183,7 @@ async function renderStream(body) {
         const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
         const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
-        const ttsText = (item._type==='assign' ? (item.title||'Assignment') + '. ' : '') + (item.body||item.text||'');
-        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span><button class="tts-btn" onclick="speakText(${JSON.stringify(ttsText)},this)">🔊</button></div>`;
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
         if (item._type === 'announce') {
           const commSec = await buildCommentsSection(item._id);
           post.appendChild(commSec);
@@ -1489,7 +1493,9 @@ function buildCommentInput(postId, parentId, replyToName) {
   row.className = 'comment-input-row';
   row.id = 'input-row-' + postId + (parentId ? '-' + parentId : '');
   const placeholder = replyToName ? `Reply to ${replyToName}...` : 'Add a comment...';
-  row.innerHTML = `<textarea class="comment-input" id="cinput-${postId}${parentId?'-'+parentId:''}" placeholder="${placeholder}" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea>
+  const micId = `mic-c-${postId}${parentId?'-'+parentId:''}`;
+  const inputId = `cinput-${postId}${parentId?'-'+parentId:''}`;
+  row.innerHTML = `<div class="field-voice" style="flex:1;position:relative"><textarea class="comment-input" id="${inputId}" placeholder="${placeholder}" rows="1" style="padding-right:38px;width:100%" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea><button class="mic-btn" id="${micId}" onclick="toggleVoice('${inputId}','${micId}')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
     <button class="comment-post-btn" onclick="postComment('${postId}','${parentId||''}')">Post</button>`;
   return row;
 }
@@ -2131,26 +2137,6 @@ async function loadTeacherChatList(){
     list.appendChild(el);
   }
 }
-
-// ── TEXT TO SPEECH ──
-let ttsUtterance = null;
-window.speakText = (text, btn) => {
-  if (!window.speechSynthesis) { showToast('TTS not supported in this browser'); return; }
-  if (ttsUtterance) {
-    window.speechSynthesis.cancel();
-    document.querySelectorAll('.tts-btn').forEach(b => { b.innerHTML = '🔊'; b.classList.remove('playing'); });
-    ttsUtterance = null;
-    if (btn && btn.classList.contains('was-playing')) { btn.classList.remove('was-playing'); return; }
-  }
-  ttsUtterance = new SpeechSynthesisUtterance(text);
-  ttsUtterance.lang = 'en-IN';
-  if (btn) { btn.innerHTML = '⏹'; btn.classList.add('playing'); btn.classList.add('was-playing'); }
-  ttsUtterance.onend = ttsUtterance.onerror = () => {
-    if (btn) { btn.innerHTML = '🔊'; btn.classList.remove('playing'); btn.classList.remove('was-playing'); }
-    ttsUtterance = null;
-  };
-  window.speechSynthesis.speak(ttsUtterance);
-};
 
 // ── VOICE ──
 let activeRec=null, activeMicId=null;
