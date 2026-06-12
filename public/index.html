@@ -1085,10 +1085,9 @@ async function loadClasses() {
   else snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
   if (snap.empty) { list.innerHTML=`<div class="empty">${ROLE==='teacher'?'No classes yet.\nTap "Create New Class" below!':'Not enrolled in any classes yet.\nAsk your teacher to invite you by email.'}</div>`; return; }
   list.innerHTML='';
-  snap.docs.filter(d=>!d.data().deleted).forEach(d => {
+  for (const d of snap.docs.filter(d=>!d.data().deleted)) {
     const data=d.data();
     const el=document.createElement('div'); el.className='class-card';
-    // Count students vs parents
     const memberIds = data.studentIds||[];
     const memberDocs = await Promise.all(memberIds.map(id=>getDoc(doc(db,'users',id))));
     const studentCount = memberDocs.filter(d=>d.exists()&&d.data().role!=='parent').length;
@@ -1099,7 +1098,7 @@ async function loadClasses() {
     el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${metaStr}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
     el.onclick = () => openClassDetail(d.id, data);
     list.appendChild(el);
-  });
+  }
 }
 
 window.joinWithCode = async () => {
@@ -1878,27 +1877,61 @@ window.openStudentDetail = async (sid, sname, semail) => {
   body.innerHTML='<div class="empty">Loading...</div>';
   openPanel('panel-student');
 
+  const sUserDoc = await getDoc(doc(db,'users',sid));
+  const sRole = sUserDoc.exists() ? sUserDoc.data().role : 'student';
+  const isParent = sRole === 'parent';
+
   const fbDoc=await getDoc(doc(db,'classes',currentClassId,'feedback',sid));
   $('feedback-body').value=fbDoc.exists()?fbDoc.data().text:'';
 
-  const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
-  const logs=logsSnap.docs.map(d=>d.data()).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,15);
-
   body.innerHTML='';
+
+  // General feedback card
   const fbCard=document.createElement('div'); fbCard.className='card'; fbCard.style.margin='0';
-  fbCard.innerHTML=`<div class="card-label">Personal Feedback</div>${fbDoc.exists()&&fbDoc.data().text?`<div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text-mid);line-height:1.65;font-style:italic;margin-bottom:10px">${fbDoc.data().text}</div>`:`<div style="font-size:13px;color:var(--text-soft);margin-bottom:10px">No feedback given yet.</div>`}<button class="btn btn-primary" style="font-size:13px;padding:10px" onclick="openModal('feedback-modal')">Edit Feedback</button>`;
+  fbCard.innerHTML=`<div class="card-label">General Feedback</div>${fbDoc.exists()&&fbDoc.data().text?`<div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text-mid);line-height:1.65;font-style:italic;margin-bottom:10px">${fbDoc.data().text}</div>`:`<div style="font-size:13px;color:var(--text-soft);margin-bottom:10px">No feedback given yet.</div>`}<button class="btn btn-primary" style="font-size:13px;padding:10px" onclick="openModal('feedback-modal')">Edit General Feedback</button>`;
   body.appendChild(fbCard);
+
+  if (isParent) {
+    const pe=document.createElement('div');pe.className='empty';pe.style.padding='16px 0';pe.textContent='Parents do not have practice logs.';body.appendChild(pe);
+    return;
+  }
+
+  const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
+  const logs=logsSnap.docs.map(d=>({...d.data(),_id:d.id})).filter(e=>!e.deleted).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 
   const lbl=document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='16px'; lbl.textContent='Practice Log ('+logs.length+' entries)';
   body.appendChild(lbl);
-  if(!logs.length){const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);}
-  else {
-    logs.forEach(e=>{
-      const d=new Date((e.date||'2026-01-01')+'T00:00:00');
-      const el=document.createElement('div'); el.className='log-entry';
-      el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div></div>`;
-      body.appendChild(el);
-    });
+
+  if(!logs.length){
+    const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);
+    return;
+  }
+
+  for (const e of logs) {
+    const d=new Date((e.date||'2026-01-01')+'T00:00:00');
+    const el=document.createElement('div'); el.className='log-entry'; el.style.cssText='flex-direction:column;gap:8px;align-items:stretch';
+
+    // Files
+    const filesHtml=(e.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);text-decoration:none">📎 ${f.name}</a>`).join(' ');
+
+    // Fetch per-log feedback
+    const logFbDoc = await getDoc(doc(db,'classes',currentClassId,'logFeedback',e._id));
+    const logFb = logFbDoc.exists() ? logFbDoc.data().text : '';
+
+    el.innerHTML=`
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
+        <div class="log-body">
+          <div class="log-text">${e.practiceText||'Practice'}</div>
+          ${filesHtml?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${filesHtml}</div>`:''}
+        </div>
+      </div>
+      <div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;border:.5px solid rgba(201,146,42,.2)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">Feedback on this entry</div>
+        <textarea id="lfb-${e._id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5" rows="2" placeholder="Add feedback for this log entry...">${logFb}</textarea>
+        <button onclick="saveLogFeedback('${e._id}','${sid}')" style="background:var(--maroon);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px">Save</button>
+      </div>`;
+    body.appendChild(el);
   }
 };
 
@@ -1961,8 +1994,7 @@ window.loadLog = async () => {
 let editingLogId = null;
 window.editLog = (logId, currentText) => {
   editingLogId = logId;
-  $('edit-log-text').value = currentText.replace(/\n/g,'
-');
+  $('edit-log-text').value = currentText;
   openModal('edit-log-modal');
 };
 window.saveEditLog = async () => {
