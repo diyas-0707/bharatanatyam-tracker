@@ -26,7 +26,7 @@
   --border:rgba(107,30,30,0.12);
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
-html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden}
+html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden;touch-action:manipulation}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
 
 /* ── LOADING ── */
@@ -64,7 +64,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 #main-app{display:none;flex-direction:column;height:100%;position:relative;overflow:hidden}
 
 /* ── SCREENS ── */
-.screen{position:absolute;top:0;left:0;right:0;bottom:64px;overflow-y:auto;display:none;flex-direction:column;background:var(--warm-white);-webkit-overflow-scrolling:touch}
+.screen{position:absolute;top:0;left:0;right:0;bottom:64px;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;background:var(--warm-white);-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 .screen.active{display:flex}
 .screen::-webkit-scrollbar{width:3px}
 .screen::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -84,7 +84,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .panel-back{width:36px;height:36px;border-radius:10px;background:var(--surface);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .panel-back svg{width:18px;height:18px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .panel-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--maroon-deep);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.panel-body{flex:1;overflow-y:auto;padding-bottom:20px}
+.panel-body{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:20px;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 .panel-body::-webkit-scrollbar{width:3px}
 .panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
@@ -404,11 +404,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       </select>
       <button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>
     </div>
-    <div style="padding:0 16px 10px" id="log-stats-row">
+    <div id="log-stats-row" style="padding:0 16px 10px">
       <div class="stat-row">
-        <div class="stat-box"><div class="stat-num" id="ls-done">0</div><div class="stat-label">Completed</div></div>
-        <div class="stat-box"><div class="stat-num" id="ls-miss">0</div><div class="stat-label">Missed</div></div>
-        <div class="stat-box"><div class="stat-num" id="ls-pct">0%</div><div class="stat-label">Rate</div></div>
+        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-done">0</div><div class="stat-label">Completed Logs</div></div>
+        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-days">0</div><div class="stat-label">Days Practiced This Month</div></div>
       </div>
     </div>
     <div class="ornament">✦</div>
@@ -907,7 +906,7 @@ function setupMain() {
   $('create-class-btn').style.display = isT ? 'block' : 'none';
   $('btab-log').style.display = ROLE==='student' ? 'flex' : 'none';
   if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
-  $('btab-chat').style.display = (isParent || isT) ? 'flex' : 'none';
+  $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
   goScreen('home');
 }
 
@@ -1361,9 +1360,13 @@ async function renderAttendance(body) {
   wrap.appendChild(dateRow);
   const rowsContainer=document.createElement('div'); rowsContainer.id='att-rows-container';
   wrap.appendChild(rowsContainer);
+  let attLoading = false;
   dateInput.addEventListener('change', async () => {
     if (dateInput.value > today) { dateInput.value=today; showToast('Cannot mark future attendance'); return; }
+    if (attLoading) return;
+    attLoading = true;
     await loadAttendanceRows(rowsContainer, dateInput.value);
+    attLoading = false;
   });
   await loadAttendanceRows(rowsContainer, today);
   body.appendChild(wrap);
@@ -1683,7 +1686,7 @@ window.openSubmit = async (assignId, assignTitle) => {
   if ((sub.files||[]).length > 0) {
     const unsubBtn = document.createElement('button');
     unsubBtn.className='btn btn-danger'; unsubBtn.style.marginTop='8px';
-    unsubBtn.textContent='↩ Unsubmit & Edit Assignment';
+    unsubBtn.textContent='↩ Unsubmit Assignment';
     unsubBtn.onclick = async () => {
       if (!confirm('This will remove your submitted files. You can re-upload after editing.')) return;
       await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
@@ -1977,16 +1980,23 @@ window.loadLog = async () => {
   if (ROLE==='parent') return;
   const month=$('log-month-filter').value;
   const snap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
-  const filtered=snap.docs.map(d=>d.data()).filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
-  const done=filtered.filter(e=>e.completed).length, miss=filtered.filter(e=>!e.completed).length;
-  $('ls-done').textContent=done; $('ls-miss').textContent=miss;
-  $('ls-pct').textContent=filtered.length?Math.round(done/filtered.length*100)+'%':'0%';
+  const allEntries=snap.docs.map(d=>({...d.data(),_id:d.id})).filter(e=>!e.deleted);
+  const filtered=allEntries.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+  const done=filtered.filter(e=>e.completed).length;
+  const uniqueDays=new Set(filtered.filter(e=>e.completed).map(e=>e.date)).size;
+  $('ls-done').textContent=done;
+  $('ls-days').textContent=uniqueDays;
   const list=$('log-list'); list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">No entries this month.</div>';return;}
   filtered.forEach(e=>{
     const d=new Date(e.date+'T00:00:00');
     const el=document.createElement('div'); el.className='log-entry';
-    el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div></div>`;
+    // Files
+    let filesHtml='';
+    if((e.files||[]).length){
+      filesHtml='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">'+(e.files.map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);background:var(--gold-pale);border-radius:6px;padding:2px 8px;text-decoration:none">📎 ${f.name}</a>`).join(''))+'</div>';
+    }
+    el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div>${filesHtml}<div style="display:flex;gap:8px;margin-top:6px"><button onclick="editLog('${e._id}','${(e.practiceText||'').replace(/'/g,"\\'")}')" style="font-size:11px;color:var(--text-soft);background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button><button onclick="deleteLog('${e._id}')" style="font-size:11px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✕ Delete</button></div></div>`;
     list.appendChild(el);
   });
 };
