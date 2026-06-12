@@ -204,6 +204,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .tag-announce{background:#EEF2FF;color:#4338CA}
 .tag-assign{background:var(--gold-pale);color:#92400E}
 .tag-feedback{background:var(--success-bg);color:var(--success)}
+.tts-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-soft);font-family:'DM Sans',sans-serif;transition:color .18s}
+.tts-btn:hover{color:var(--maroon)}
+.tts-btn.playing{color:var(--maroon)}
 
 /* ── ASSIGNMENT CARD ── */
 .assign-card{background:var(--card-bg);border-radius:14px;border:.5px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .18s}
@@ -385,6 +388,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
       <button class="btn btn-dashed" id="create-class-btn" style="display:none" onclick="openModal('create-class-modal')">+ Create New Class</button>
+      <button class="btn btn-dashed" id="join-code-btn" style="display:none" onclick="openModal('join-code-modal')"># Join with Code</button>
     </div>
   </div>
 
@@ -506,6 +510,19 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 
   <!-- ══ MODALS ══ -->
 
+  <!-- Join with Code -->
+  <div class="modal" id="join-code-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Join with Code</div>
+      <div class="field"><label>6-Character Code</label><input id="join-code-input" placeholder="e.g. a3k9z2" maxlength="6" style="text-transform:lowercase;letter-spacing:4px;font-size:20px;text-align:center"></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('join-code-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="joinWithCode()">Join</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Create Class -->
   <div class="modal" id="create-class-modal">
     <div class="modal-sheet">
@@ -602,6 +619,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-handle"></div>
       <div class="modal-title">Class Settings</div>
       <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--gold-pale);border-radius:12px;padding:14px 16px;text-align:center">
+          <div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Join Code</div>
+          <div id="class-join-code" style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--maroon-deep);letter-spacing:6px">------</div>
+          <div style="font-size:11px;color:var(--text-soft);margin-top:4px">Share this code with students to join</div>
+        </div>
         <button class="btn btn-danger" onclick="deleteClass()">🗑 Delete this Class</button>
         <button class="btn btn-secondary" onclick="closeModal('class-settings-modal')">Cancel</button>
       </div>
@@ -804,7 +826,13 @@ let attState = {};
 // ── UTILS ──
 const $ = id => document.getElementById(id);
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
-window.openModal = id => $(id).classList.add('open');
+window.openModal = id => {
+  $(id).classList.add('open');
+  if (id==='class-settings-modal' && currentClassData) {
+    const codeEl = $('class-join-code');
+    if (codeEl) codeEl.textContent = currentClassData.joinCode || 'none';
+  }
+};
 window.closeModal = id => $(id).classList.remove('open');
 
 // ── AUTH ──
@@ -854,6 +882,7 @@ function setupMain() {
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
   $('btab-log').style.display = ROLE==='student' ? 'flex' : 'none';
+  if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
   $('btab-chat').style.display = (isParent || isT) ? 'flex' : 'none';
   goScreen('home');
 }
@@ -885,7 +914,10 @@ async function loadHome() {
   // User chip
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `${CU.photoURL?`<img src="${CU.photoURL}" alt="">`:''}
+  const userPhotoDoc = await getDoc(doc(db,'users',CU.uid));
+  const storedPhoto = userPhotoDoc.exists() ? userPhotoDoc.data().photo : null;
+  const displayPhoto = storedPhoto || CU.photoURL;
+  chip.innerHTML = `${displayPhoto?`<img src="${displayPhoto}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover">`:''}
     <div class="uc-info"><div class="uc-name">${CU.displayName}</div><div class="uc-role">${ROLE==='teacher'?'Teacher':ROLE==='parent'?'Parent':'Student'}</div></div>
     <button class="uc-signout" onclick="doSignOut()">Sign out</button>`;
   c.appendChild(chip);
@@ -1036,6 +1068,21 @@ async function loadClasses() {
   });
 }
 
+window.joinWithCode = async () => {
+  const code = $('join-code-input').value.trim().toLowerCase();
+  if (code.length !== 6) { showToast('Please enter a 6-character code'); return; }
+  const snap = await getDocs(query(collection(db,'classes'), where('joinCode','==',code)));
+  if (snap.empty) { showToast('Invalid code — no class found'); return; }
+  const classDoc = snap.docs[0];
+  if ((classDoc.data().studentIds||[]).includes(CU.uid)) { showToast('Already in this class'); return; }
+  if (classDoc.data().deleted) { showToast('This class no longer exists'); return; }
+  await updateDoc(doc(db,'classes',classDoc.id), {studentIds: arrayUnion(CU.uid)});
+  $('join-code-input').value = '';
+  closeModal('join-code-modal');
+  showToast('Joined class! 🎉');
+  loadClasses();
+};
+
 window.respondInvite = async (invId, classId, action) => {
   if (action==='accept') {
     await updateDoc(doc(db,'classes',classId), {studentIds:arrayUnion(CU.uid)});
@@ -1128,7 +1175,11 @@ async function renderStream(body) {
         const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
         const pinnedBadge = item.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
         const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
-        post.innerHTML=`<div class="stream-post-header"><div class="stream-avatar">${(item.teacherName||'T')[0]}</div><div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
+        const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
+        const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
+        const ttsText = (item._type==='assign' ? (item.title||'Assignment') + '. ' : '') + (item.body||item.text||'');
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span><button class="tts-btn" onclick="speakText(${JSON.stringify(ttsText)},this)">🔊</button></div>`;
         if (item._type === 'announce') {
           const commSec = await buildCommentsSection(item._id);
           post.appendChild(commSec);
@@ -1229,6 +1280,38 @@ async function renderPeople(body) {
 }
 
 // ── ATTENDANCE (teacher only) ──
+window.viewStudentAttendance = async (sid, sname) => {
+  const snap = await getDocs(collection(db,'classes',currentClassId,'attendance'));
+  const records = [];
+  snap.docs.forEach(d => {
+    const status = d.data()[sid];
+    if (status) records.push({date:d.id, status});
+  });
+  records.sort((a,b)=>b.date.localeCompare(a.date));
+  const present = records.filter(r=>r.status==='present').length;
+  const absent = records.filter(r=>r.status==='absent').length;
+  const total = records.length;
+  const pct = total ? Math.round(present/total*100) : 0;
+  let html = `<div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--maroon-deep);margin-bottom:12px">${sname}</div>`;
+  html += `<div style="display:flex;gap:8px;margin-bottom:14px">
+    <div class="stat-box"><div class="stat-num">${present}</div><div class="stat-label">Present</div></div>
+    <div class="stat-box"><div class="stat-num">${absent}</div><div class="stat-label">Absent</div></div>
+    <div class="stat-box"><div class="stat-num">${pct}%</div><div class="stat-label">Rate</div></div>
+  </div>`;
+  if (!records.length) { html += '<div class="empty" style="padding:16px 0">No attendance recorded yet.</div>'; }
+  else {
+    records.forEach(r => {
+      const d = new Date(r.date+'T00:00:00');
+      const label = d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)"><span style="font-size:13px;color:var(--text-dark)">${label}</span><span style="font-size:12px;font-weight:500;color:${r.status==='present'?'var(--success)':'var(--danger)'}">${r.status==='present'?'Present':'Absent'}</span></div>`;
+    });
+  }
+  const modal = document.createElement('div'); modal.className='modal open'; modal.style.zIndex='400';
+  modal.innerHTML=`<div class="modal-sheet"><div class="modal-handle"></div><div style="max-height:60vh;overflow-y:auto">${html}</div><div style="margin-top:16px"><button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button></div></div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.getElementById('main-app').appendChild(modal);
+};
+
 async function renderAttendance(body) {
   body.innerHTML='';
   const wrap=document.createElement('div');
@@ -1259,7 +1342,9 @@ async function loadAttendanceRows(wrap, date) {
   sdocs.filter(d=>d.exists()).forEach(d=>{
     const s=d.data(); const status=existing[d.id]||'none';
     const row=document.createElement('div'); row.className='att-row';
-    row.innerHTML=`<div class="s-avatar" style="width:36px;height:36px;font-size:14px">${(s.name||'?')[0]}</div><div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
+    const sPhoto = s.photo || null;
+    const sAvatar = sPhoto ? `<img src="${sPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="s-avatar" style="width:36px;height:36px;font-size:14px">${(s.name||'?')[0]}</div>`;
+    row.innerHTML=`${sAvatar}<div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
     wrap.appendChild(row);
   });
 }
@@ -1753,10 +1838,18 @@ window.saveFeedback = async () => {
 };
 
 // ── CREATE CLASS ──
+function generateJoinCode() {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let code = '';
+  for (let i=0; i<6; i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
 window.createClass = async () => {
   const name=$('cc-name').value.trim(), desc=$('cc-desc').value.trim();
   if(!name) return;
-  await addDoc(collection(db,'classes'), { name, description:desc, teacherId:CU.uid, teacherName:CU.displayName, studentIds:[], createdAt:serverTimestamp() });
+  const joinCode = generateJoinCode();
+  await addDoc(collection(db,'classes'), { name, description:desc, teacherId:CU.uid, teacherName:CU.displayName, studentIds:[], joinCode, createdAt:serverTimestamp() });
   $('cc-name').value=''; $('cc-desc').value='';
   closeModal('create-class-modal');
   showToast('Class created! ✓');
@@ -2038,6 +2131,26 @@ async function loadTeacherChatList(){
     list.appendChild(el);
   }
 }
+
+// ── TEXT TO SPEECH ──
+let ttsUtterance = null;
+window.speakText = (text, btn) => {
+  if (!window.speechSynthesis) { showToast('TTS not supported in this browser'); return; }
+  if (ttsUtterance) {
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.tts-btn').forEach(b => { b.innerHTML = '🔊'; b.classList.remove('playing'); });
+    ttsUtterance = null;
+    if (btn && btn.classList.contains('was-playing')) { btn.classList.remove('was-playing'); return; }
+  }
+  ttsUtterance = new SpeechSynthesisUtterance(text);
+  ttsUtterance.lang = 'en-IN';
+  if (btn) { btn.innerHTML = '⏹'; btn.classList.add('playing'); btn.classList.add('was-playing'); }
+  ttsUtterance.onend = ttsUtterance.onerror = () => {
+    if (btn) { btn.innerHTML = '🔊'; btn.classList.remove('playing'); btn.classList.remove('was-playing'); }
+    ttsUtterance = null;
+  };
+  window.speechSynthesis.speak(ttsUtterance);
+};
 
 // ── VOICE ──
 let activeRec=null, activeMicId=null;
