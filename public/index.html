@@ -545,7 +545,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <div class="field"><label>What did you practice?</label>
           <div class="field-voice"><textarea id="log-practice" placeholder="Describe your practice..." rows="3"></textarea><button class="mic-btn" id="mic-log" onclick="toggleVoice('log-practice','mic-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
-        <div class="field"><label>Status</label><select id="log-status"><option value="completed">✓ Completed</option><option value="partial">◐ Partially Done</option><option value="missed">✕ Not Done</option></select></div>
+
         <div class="field"><label>Attach Files (optional)</label>
           <div id="log-files-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
           <button type="button" onclick="document.getElementById('log-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:13px">📎 Choose Files</button>
@@ -756,6 +756,21 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-message-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveEditMessage()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Log -->
+  <div class="modal" id="edit-log-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Log Entry</div>
+      <div class="field">
+        <div class="field-voice"><textarea id="edit-log-text" rows="3" placeholder="What did you practice?"></textarea><button class="mic-btn" id="mic-edit-log" onclick="toggleVoice('edit-log-text','mic-edit-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-log-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditLog()">Save</button>
       </div>
     </div>
   </div>
@@ -1073,7 +1088,15 @@ async function loadClasses() {
   snap.docs.filter(d=>!d.data().deleted).forEach(d => {
     const data=d.data();
     const el=document.createElement('div'); el.className='class-card';
-    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
+    // Count students vs parents
+    const memberIds = data.studentIds||[];
+    const memberDocs = await Promise.all(memberIds.map(id=>getDoc(doc(db,'users',id))));
+    const studentCount = memberDocs.filter(d=>d.exists()&&d.data().role!=='parent').length;
+    const parentCount = memberDocs.filter(d=>d.exists()&&d.data().role==='parent').length;
+    const metaStr = ROLE==='teacher'
+      ? `${studentCount} student${studentCount!==1?'s':''} · ${parentCount} parent${parentCount!==1?'s':''}`
+      : `Teacher: ${data.teacherName||''} · ${studentCount} student${studentCount!==1?'s':''} · ${parentCount} parent${parentCount!==1?'s':''}`;
+    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${metaStr}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
     el.onclick = () => openClassDetail(d.id, data);
     list.appendChild(el);
   });
@@ -1329,25 +1352,30 @@ async function renderAttendance(body) {
   body.innerHTML='';
   const wrap=document.createElement('div');
   wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
+  const today=new Date().toISOString().split('T')[0];
   const dateRow=document.createElement('div'); dateRow.style.cssText='display:flex;gap:8px;align-items:center';
-  const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=new Date().toISOString().split('T')[0];
+  const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=today; dateInput.max=today;
   dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:"DM Sans",sans-serif;outline:none';
   const saveBtn=document.createElement('button'); saveBtn.className='btn btn-primary'; saveBtn.style.cssText='width:auto;padding:10px 16px;font-size:13px'; saveBtn.textContent='Save';
   saveBtn.onclick=saveAttendance;
   dateRow.appendChild(dateInput); dateRow.appendChild(saveBtn);
   wrap.appendChild(dateRow);
-  dateInput.addEventListener('change', ()=>loadAttendanceRows(wrap, dateInput.value));
-  await loadAttendanceRows(wrap, dateInput.value);
+  const rowsContainer=document.createElement('div'); rowsContainer.id='att-rows-container';
+  wrap.appendChild(rowsContainer);
+  dateInput.addEventListener('change', async () => {
+    if (dateInput.value > today) { dateInput.value=today; showToast('Cannot mark future attendance'); return; }
+    await loadAttendanceRows(rowsContainer, dateInput.value);
+  });
+  await loadAttendanceRows(rowsContainer, today);
   body.appendChild(wrap);
 }
 
-async function loadAttendanceRows(wrap, date) {
-  wrap.querySelectorAll('.att-row').forEach(r=>r.remove());
-  wrap.querySelectorAll('.save-att-wrapper').forEach(r=>r.remove());
+async function loadAttendanceRows(container, date) {
+  container.innerHTML='';
   attState={};
   const classDoc=await getDoc(doc(db,'classes',currentClassId));
   const studentIds=classDoc.data().studentIds||[];
-  if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.textContent='No students yet.'; wrap.appendChild(e); return; }
+  if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.textContent='No students yet.'; container.appendChild(e); return; }
   const attDoc=await getDoc(doc(db,'classes',currentClassId,'attendance',date));
   const existing=attDoc.exists()?attDoc.data():{};
   attState={...existing};
@@ -1357,8 +1385,8 @@ async function loadAttendanceRows(wrap, date) {
     const row=document.createElement('div'); row.className='att-row';
     const sPhoto = s.photo || null;
     const sAvatar = sPhoto ? `<img src="${sPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="s-avatar" style="width:36px;height:36px;font-size:14px">${(s.name||'?')[0]}</div>`;
-    row.innerHTML=`${sAvatar}<div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
-    wrap.appendChild(row);
+    row.innerHTML=`${sAvatar}<div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
+    container.appendChild(row);
   });
 }
 
@@ -1652,22 +1680,23 @@ window.openSubmit = async (assignId, assignTitle) => {
   body.appendChild(uploadBtn);
   body.appendChild(fileInput);
 
-  // Save note button (without uploading files)
-  const saveNoteBtn = document.createElement('button');
-  saveNoteBtn.className='btn btn-secondary'; saveNoteBtn.style.marginTop='8px';
-  saveNoteBtn.textContent='💾 Save Note';
-  saveNoteBtn.onclick = async () => {
-    const noteEl = document.getElementById('sub-note-text');
-    const note = noteEl ? noteEl.value.trim() : '';
-    await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
-      assignId, studentId:CU.uid, studentName:CU.displayName, note,
-      files: sub.files||[], submittedAt:serverTimestamp()
-    }, {merge:true});
-    closeModal('submit-modal');
-    showToast('Note saved ✓');
-    switchClassTab('assignments');
-  };
-  body.appendChild(saveNoteBtn);
+  // Unsubmit button if already submitted
+  if ((sub.files||[]).length > 0) {
+    const unsubBtn = document.createElement('button');
+    unsubBtn.className='btn btn-danger'; unsubBtn.style.marginTop='8px';
+    unsubBtn.textContent='↩ Unsubmit & Edit Assignment';
+    unsubBtn.onclick = async () => {
+      if (!confirm('This will remove your submitted files. You can re-upload after editing.')) return;
+      await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
+        assignId, studentId:CU.uid, studentName:CU.displayName,
+        files:[], note:'', submittedAt:serverTimestamp()
+      }, {merge:true});
+      closeModal('submit-modal');
+      showToast('Unsubmitted ✓');
+      switchClassTab('assignments');
+    };
+    body.appendChild(unsubBtn);
+  }
 };
 
 window.viewSubmissions = async (assignId, assignTitle) => {
@@ -1867,7 +1896,7 @@ window.openStudentDetail = async (sid, sname, semail) => {
     logs.forEach(e=>{
       const d=new Date((e.date||'2026-01-01')+'T00:00:00');
       const el=document.createElement('div'); el.className='log-entry';
-      el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div><span class="badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>`;
+      el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div></div>`;
       body.appendChild(el);
     });
   }
@@ -1924,9 +1953,31 @@ window.loadLog = async () => {
   filtered.forEach(e=>{
     const d=new Date(e.date+'T00:00:00');
     const el=document.createElement('div'); el.className='log-entry';
-    el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div><span class="badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>`;
+    el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div></div>`;
     list.appendChild(el);
   });
+};
+
+let editingLogId = null;
+window.editLog = (logId, currentText) => {
+  editingLogId = logId;
+  $('edit-log-text').value = currentText.replace(/\n/g,'
+');
+  openModal('edit-log-modal');
+};
+window.saveEditLog = async () => {
+  const text = $('edit-log-text').value.trim();
+  if (!text) return;
+  await updateDoc(doc(db,'practiceLogs',editingLogId), {practiceText:text, editedAt:serverTimestamp()});
+  closeModal('edit-log-modal');
+  showToast('Log updated ✓');
+  loadLog();
+};
+window.deleteLog = async (logId) => {
+  if (!confirm('Delete this log entry?')) return;
+  await updateDoc(doc(db,'practiceLogs',logId), {deleted:true});
+  showToast('Log deleted');
+  loadLog();
 };
 
 let logFilesToUpload = [];
@@ -1943,7 +1994,7 @@ window.previewLogFiles = (input) => {
 };
 
 window.saveLog = async () => {
-  const date=$('log-date').value, text=$('log-practice').value.trim(), status=$('log-status').value;
+  const date=$('log-date').value, text=$('log-practice').value.trim(), status='completed';
   if(!date||!text){showToast('Please fill in all fields');return;}
   let files=[];
   if(logFilesToUpload.length){
