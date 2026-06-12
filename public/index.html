@@ -258,9 +258,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .field textarea{resize:none;min-height:90px;line-height:1.6}
 .field-voice{position:relative}
 .field-voice textarea{padding-right:44px}
-.mic-btn{position:absolute;right:10px;bottom:10px;width:28px;height:28px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none}
+.mic-btn{position:absolute;right:10px;bottom:10px;width:28px;height:28px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none;padding:0;line-height:1}
 .mic-btn.rec{background:var(--maroon);animation:pulse 1s infinite}
-.mic-btn svg{width:14px;height:14px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mic-btn svg{width:14px;height:14px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
 .mic-btn.rec svg{stroke:#fff}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
 
@@ -938,10 +938,11 @@ async function loadHome() {
 
 async function loadTeacherHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
+  const activeDocs = snap.docs.filter(d=>!d.data().deleted);
   let students = 0;
-  snap.forEach(d => students += (d.data().studentIds||[]).length);
+  activeDocs.forEach(d => students += (d.data().studentIds||[]).length);
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${activeDocs.length}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
   c.appendChild(sr);
   const dismissed = localStorage.getItem('hideTeacherQuickStart');
   if (!dismissed) {
@@ -961,8 +962,9 @@ async function loadStudentHome(c) {
   const today = now.toISOString().split('T')[0];
   const todayDone = logsSnap.docs.some(d=>d.data().date===today&&d.data().completed);
 
+  const activeClasses = snap.docs.filter(d=>!d.data().deleted);
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Total Sessions</div></div><div class="stat-box"><div class="stat-num">${thisMonth}</div><div class="stat-label">This Month</div></div><div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Total Sessions</div></div><div class="stat-box"><div class="stat-num">${thisMonth}</div><div class="stat-label">This Month</div></div><div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">Classes</div></div>`;
   c.appendChild(sr);
 
   // Latest assignment
@@ -1910,6 +1912,7 @@ window.createClass = async () => {
 
 // ── LOG ──
 window.loadLog = async () => {
+  if (ROLE==='parent') return;
   const month=$('log-month-filter').value;
   const snap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
   const filtered=snap.docs.map(d=>d.data()).filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
@@ -2192,9 +2195,9 @@ async function loadTeacherChatList(){
   const list=$('chat-list');list.innerHTML='<div class="empty">Loading...</div>';
   const snap=await getDocs(query(collection(db,'classes'),where('teacherId','==',CU.uid)));
   const memberIds=new Set();
-  snap.docs.forEach(d=>(d.data().studentIds||[]).forEach(id=>memberIds.add(id)));
+  snap.docs.filter(d=>!d.data().deleted).forEach(d=>(d.data().studentIds||[]).forEach(id=>memberIds.add(id)));
   if(!memberIds.size){list.innerHTML='<div class="empty">No students or parents yet.</div>';return;}
-  list.innerHTML='';
+  const entries=[];
   for(const uid of memberIds){
     const uDoc=await getDoc(doc(db,'users',uid));
     if(!uDoc.exists())continue;
@@ -2202,9 +2205,15 @@ async function loadTeacherChatList(){
     const chatId=getChatId(CU.uid,uid);
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
+    const lastTs=lastMsg?.createdAt?.seconds||0;
+    entries.push({uid,u,lastMsg,lastTs});
+  }
+  entries.sort((a,b)=>b.lastTs-a.lastTs);
+  list.innerHTML='';
+  for(const {uid,u,lastMsg} of entries){
     const roleLabel=u.role==='parent'?'Parent':u.role==='student'?'Student':'';
     const el=document.createElement('div');el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(uid,u.name||'User');
     list.appendChild(el);
   }
