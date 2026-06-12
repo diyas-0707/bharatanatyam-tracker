@@ -767,7 +767,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="field">
         <div class="field-voice"><textarea id="edit-log-text" rows="3" placeholder="What did you practice?"></textarea><button class="mic-btn" id="mic-edit-log" onclick="toggleVoice('edit-log-text','mic-edit-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
-      <div class="modal-btns" style="margin-top:16px">
+      <div id="edit-log-files-existing" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div id="edit-log-files-new-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+      <button type="button" onclick="document.getElementById('edit-log-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:13px;margin-bottom:4px">📎 Add Files</button>
+      <input type="file" id="edit-log-file-input" multiple style="display:none" onchange="previewEditLogFiles(this)">
+      <div class="modal-btns" style="margin-top:12px">
         <button class="btn btn-secondary" onclick="closeModal('edit-log-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveEditLog()">Save</button>
       </div>
@@ -1399,7 +1403,8 @@ window.setAtt = (sid, status, btn) => {
 };
 window.saveAttendance = async () => {
   const date=$('att-date-input').value;
-  await setDoc(doc(db,'classes',currentClassId,'attendance',date), attState);
+  // merge:true so students not shown in current class list keep their records
+  await setDoc(doc(db,'classes',currentClassId,'attendance',date), attState, {merge:true});
   showToast('Attendance saved ✓');
 };
 
@@ -1900,42 +1905,75 @@ window.openStudentDetail = async (sid, sname, semail) => {
   }
 
   const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
-  const logs=logsSnap.docs.map(d=>({...d.data(),_id:d.id})).filter(e=>!e.deleted).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const allLogs=logsSnap.docs.map(d=>({...d.data(),_id:d.id})).filter(e=>!e.deleted);
 
-  const lbl=document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='16px'; lbl.textContent='Practice Log ('+logs.length+' entries)';
-  body.appendChild(lbl);
-
-  if(!logs.length){
-    const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);
-    return;
+  // Month selector
+  const now = new Date();
+  const months = [];
+  for (let i=0; i<6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const val = d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');
+    const label = d.toLocaleString('en',{month:'long',year:'numeric'});
+    months.push({val,label});
   }
+  let selectedMonth = months[0].val;
 
-  for (const e of logs) {
-    const d=new Date((e.date||'2026-01-01')+'T00:00:00');
-    const el=document.createElement('div'); el.className='log-entry'; el.style.cssText='flex-direction:column;gap:8px;align-items:stretch';
+  const monthRow = document.createElement('div');
+  monthRow.style.cssText='display:flex;align-items:center;gap:8px;margin-top:16px';
+  const monthSel = document.createElement('select');
+  monthSel.style.cssText='flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--text-dark)';
+  months.forEach(m => {
+    const opt = document.createElement('option'); opt.value=m.val; opt.textContent=m.label;
+    monthSel.appendChild(opt);
+  });
+  monthRow.appendChild(monthSel);
+  body.appendChild(monthRow);
 
-    // Files
-    const filesHtml=(e.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);text-decoration:none">📎 ${f.name}</a>`).join(' ');
+  const statsRow = document.createElement('div'); statsRow.className='stat-row'; statsRow.style.marginTop='10px';
+  body.appendChild(statsRow);
 
-    // Fetch per-log feedback
-    const logFbDoc = await getDoc(doc(db,'classes',currentClassId,'logFeedback',e._id));
-    const logFb = logFbDoc.exists() ? logFbDoc.data().text : '';
+  const logLbl = document.createElement('div'); logLbl.className='section-label'; logLbl.style.marginTop='12px';
+  body.appendChild(logLbl);
 
-    el.innerHTML=`
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
-        <div class="log-body">
-          <div class="log-text">${e.practiceText||'Practice'}</div>
-          ${filesHtml?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${filesHtml}</div>`:''}
+  const logContainer = document.createElement('div'); logContainer.style.cssText='display:flex;flex-direction:column;gap:10px';
+  body.appendChild(logContainer);
+
+  async function renderStudentLogs(month) {
+    const filtered = allLogs.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const done = filtered.filter(e=>e.completed).length;
+    const uniqueDays = new Set(filtered.filter(e=>e.completed).map(e=>e.date)).size;
+    statsRow.innerHTML=`<div class="stat-box" style="flex:1"><div class="stat-num">${done}</div><div class="stat-label">Completed Logs</div></div><div class="stat-box" style="flex:1"><div class="stat-num">${uniqueDays}</div><div class="stat-label">Days Practiced</div></div>`;
+    logLbl.textContent = 'Practice Log — ' + filtered.length + ' entries';
+    logContainer.innerHTML = '';
+    if (!filtered.length) {
+      const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No logs this month.';logContainer.appendChild(e);
+      return;
+    }
+    for (const e of filtered) {
+      const d=new Date((e.date||'2026-01-01')+'T00:00:00');
+      const el=document.createElement('div'); el.className='log-entry'; el.style.cssText='flex-direction:column;gap:8px;align-items:stretch';
+      const filesHtml=(e.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);text-decoration:none">📎 ${f.name}</a>`).join(' ');
+      const logFbDoc = await getDoc(doc(db,'classes',currentClassId,'logFeedback',e._id));
+      const logFb = logFbDoc.exists() ? logFbDoc.data().text : '';
+      el.innerHTML=`
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
+          <div class="log-body">
+            <div class="log-text">${e.practiceText||'Practice'}</div>
+            ${filesHtml?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${filesHtml}</div>`:''}
+          </div>
         </div>
-      </div>
-      <div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;border:.5px solid rgba(201,146,42,.2)">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">Feedback on this entry</div>
-        <textarea id="lfb-${e._id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5" rows="2" placeholder="Add feedback for this log entry...">${logFb}</textarea>
-        <button onclick="saveLogFeedback('${e._id}','${sid}')" style="background:var(--maroon);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px">Save</button>
-      </div>`;
-    body.appendChild(el);
+        <div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;border:.5px solid rgba(201,146,42,.2)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">Feedback on this entry</div>
+          <textarea id="lfb-${e._id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5" rows="2" placeholder="Add feedback for this log entry...">${logFb}</textarea>
+          <button onclick="saveLogFeedback('${e._id}','${sid}')" style="background:var(--maroon);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px">Save</button>
+        </div>`;
+      logContainer.appendChild(el);
+    }
   }
+
+  monthSel.addEventListener('change', () => { selectedMonth = monthSel.value; renderStudentLogs(selectedMonth); });
+  await renderStudentLogs(selectedMonth);
 };
 
 window.saveLogFeedback = async (logId, studentId) => {
@@ -2002,15 +2040,70 @@ window.loadLog = async () => {
 };
 
 let editingLogId = null;
-window.editLog = (logId, currentText) => {
+let editLogCurrentFiles = []; // existing files from Firestore
+let editLogNewFiles = [];     // newly chosen files to upload
+
+window.editLog = async (logId, currentText) => {
   editingLogId = logId;
+  editLogNewFiles = [];
   $('edit-log-text').value = currentText;
+  $('edit-log-files-new-preview').innerHTML = '';
+  $('edit-log-file-input').value = '';
+
+  // Load existing files from Firestore
+  const logDoc = await getDoc(doc(db,'practiceLogs',logId));
+  editLogCurrentFiles = logDoc.exists() ? [...(logDoc.data().files||[])] : [];
+
+  // Render existing files with delete buttons
+  renderEditLogExistingFiles();
   openModal('edit-log-modal');
 };
+
+function renderEditLogExistingFiles() {
+  const container = $('edit-log-files-existing');
+  container.innerHTML = '';
+  if (!editLogCurrentFiles.length) return;
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);font-weight:500;margin-bottom:4px';
+  lbl.textContent = 'Attached Files';
+  container.appendChild(lbl);
+  editLogCurrentFiles.forEach((f, i) => {
+    const row = document.createElement('div');
+    row.className = 'submission-file';
+    row.innerHTML = `<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a><button onclick="removeEditLogFile(${i})" style="background:var(--danger-bg);border:none;border-radius:6px;padding:4px 8px;font-size:11px;color:var(--danger);cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif">✕</button>`;
+    container.appendChild(row);
+  });
+}
+
+window.removeEditLogFile = (index) => {
+  editLogCurrentFiles.splice(index, 1);
+  renderEditLogExistingFiles();
+};
+
+window.previewEditLogFiles = (input) => {
+  editLogNewFiles = Array.from(input.files);
+  const preview = $('edit-log-files-new-preview');
+  preview.innerHTML = '';
+  editLogNewFiles.forEach(f => {
+    const tag = document.createElement('span');
+    tag.style.cssText = 'font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
+    tag.textContent = '📎 ' + f.name;
+    preview.appendChild(tag);
+  });
+};
+
 window.saveEditLog = async () => {
   const text = $('edit-log-text').value.trim();
   if (!text) return;
-  await updateDoc(doc(db,'practiceLogs',editingLogId), {practiceText:text, editedAt:serverTimestamp()});
+  let files = [...editLogCurrentFiles];
+  if (editLogNewFiles.length) {
+    showToast('Uploading files...');
+    for (const f of editLogNewFiles) {
+      const res = await uploadToCloudinary(f);
+      files.push({name: f.name, url: res.secure_url});
+    }
+  }
+  await updateDoc(doc(db,'practiceLogs',editingLogId), {practiceText:text, files, editedAt:serverTimestamp()});
   closeModal('edit-log-modal');
   showToast('Log updated ✓');
   loadLog();
