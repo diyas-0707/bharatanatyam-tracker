@@ -1253,7 +1253,8 @@ async function renderPeople(body) {
     const lbl=document.createElement('div'); lbl.className='section-label'; lbl.textContent='Teacher';
     wrap.appendChild(lbl);
     const row=document.createElement('div'); row.className='student-row';
-    row.innerHTML=`<div class="s-avatar">${(td.name||'T')[0]}</div><div class="s-info"><div class="s-name">${td.name||'Teacher'}</div><div class="s-email">${td.email||''}</div></div>`;
+    const tAvatar=td.photo?`<img src="${td.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(td.name||'T')[0]}</div>`;
+    row.innerHTML=`${tAvatar}<div class="s-info"><div class="s-name">${td.name||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:#EEF2FF;color:#4338CA;padding:1px 7px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="s-email">${td.email||''}</div></div>`;
     wrap.appendChild(row);
   }
 
@@ -1592,6 +1593,16 @@ window.openSubmit = async (assignId, assignTitle) => {
     body.appendChild(fb);
   }
 
+  // Note/text box
+  const noteLbl = document.createElement('div'); noteLbl.className='card-label'; noteLbl.style.marginTop='8px';
+  noteLbl.textContent = 'Add a Note (optional)';
+  body.appendChild(noteLbl);
+  const noteWrap = document.createElement('div'); noteWrap.className='field-voice'; noteWrap.style.marginBottom='10px';
+  const micNoteId = 'mic-sub-note';
+  const noteId = 'sub-note-text';
+  noteWrap.innerHTML=`<textarea id="${noteId}" placeholder="Add a message or note to your teacher..." rows="3" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:11px 44px 11px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:none;line-height:1.6">${sub.note||''}</textarea><button class="mic-btn" id="${micNoteId}" onclick="toggleVoice('${noteId}','${micNoteId}')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>`;
+  body.appendChild(noteWrap);
+
   // Upload area
   const uploadLbl = document.createElement('div'); uploadLbl.className='card-label'; uploadLbl.style.marginTop='8px';
   uploadLbl.textContent = (sub.files||[]).length ? 'Add More Files' : 'Upload Files';
@@ -1615,9 +1626,11 @@ window.openSubmit = async (assignId, assignTitle) => {
       } catch(e) { showToast('Upload failed: '+e.message); return; }
     }
     const existing = sub.files||[];
+    const noteEl = document.getElementById('sub-note-text');
+    const note = noteEl ? noteEl.value.trim() : '';
     await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
       assignId, studentId:CU.uid, studentName:CU.displayName,
-      files:[...existing,...uploaded], submittedAt:serverTimestamp()
+      files:[...existing,...uploaded], note, submittedAt:serverTimestamp()
     }, {merge:true});
     closeModal('submit-modal');
     showToast('Submitted! ✓');
@@ -1630,6 +1643,23 @@ window.openSubmit = async (assignId, assignTitle) => {
   uploadBtn.onclick = () => fileInput.click();
   body.appendChild(uploadBtn);
   body.appendChild(fileInput);
+
+  // Save note button (without uploading files)
+  const saveNoteBtn = document.createElement('button');
+  saveNoteBtn.className='btn btn-secondary'; saveNoteBtn.style.marginTop='8px';
+  saveNoteBtn.textContent='💾 Save Note';
+  saveNoteBtn.onclick = async () => {
+    const noteEl = document.getElementById('sub-note-text');
+    const note = noteEl ? noteEl.value.trim() : '';
+    await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
+      assignId, studentId:CU.uid, studentName:CU.displayName, note,
+      files: sub.files||[], submittedAt:serverTimestamp()
+    }, {merge:true});
+    closeModal('submit-modal');
+    showToast('Note saved ✓');
+    switchClassTab('assignments');
+  };
+  body.appendChild(saveNoteBtn);
 };
 
 window.viewSubmissions = async (assignId, assignTitle) => {
@@ -1649,6 +1679,7 @@ window.viewSubmissions = async (assignId, assignTitle) => {
     const userDoc = await getDoc(doc(db,'users',sub.studentId));
     const name = userDoc.exists() ? userDoc.data().name : sub.studentName||'Student';
     let filesHtml = (sub.files||[]).map(f=>`<div class="submission-file"><div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a></div>`).join('');
+    if (sub.note) filesHtml += `<div style="background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text-mid);margin-bottom:6px;border:.5px solid var(--border)">📝 ${sub.note}</div>`;
     const fbVal = sub.privateFeedback||'';
     card.innerHTML=`<div class="card-label">${name}</div>${filesHtml}
       <div style="margin-top:8px">
@@ -2025,7 +2056,9 @@ async function loadChatList() {
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
     const el=document.createElement('div'); el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${(data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'}</div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    const tDoc=await getDoc(doc(db,'users',tid));
+    const tPhoto=tDoc.exists()?tDoc.data().photo:null;
+    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(tid,data.teacherName||'Teacher');
     list.appendChild(el);
   }
@@ -2120,20 +2153,21 @@ window.deleteMsg=async(msgId,chatId)=>{
 async function loadTeacherChatList(){
   const list=$('chat-list');list.innerHTML='<div class="empty">Loading...</div>';
   const snap=await getDocs(query(collection(db,'classes'),where('teacherId','==',CU.uid)));
-  const parentIds=new Set();
-  snap.docs.forEach(d=>(d.data().studentIds||[]).forEach(id=>parentIds.add(id)));
-  if(!parentIds.size){list.innerHTML='<div class="empty">No parents to chat with yet.</div>';return;}
+  const memberIds=new Set();
+  snap.docs.forEach(d=>(d.data().studentIds||[]).forEach(id=>memberIds.add(id)));
+  if(!memberIds.size){list.innerHTML='<div class="empty">No students or parents yet.</div>';return;}
   list.innerHTML='';
-  for(const pid of parentIds){
-    const uDoc=await getDoc(doc(db,'users',pid));
-    if(!uDoc.exists()||uDoc.data().role!=='parent')continue;
+  for(const uid of memberIds){
+    const uDoc=await getDoc(doc(db,'users',uid));
+    if(!uDoc.exists())continue;
     const u=uDoc.data();
-    const chatId=getChatId(CU.uid,pid);
+    const chatId=getChatId(CU.uid,uid);
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
+    const roleLabel=u.role==='parent'?'Parent':u.role==='student'?'Student':'';
     const el=document.createElement('div');el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${(u.name||'P')[0]}</div><div class="chat-info"><div class="chat-name">${u.name||'Parent'}</div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'No messages yet'}</div></div>`;
-    el.onclick=()=>openChatWith(pid,u.name||'Parent');
+    el.innerHTML=`<div class="chat-av">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.onclick=()=>openChatWith(uid,u.name||'User');
     list.appendChild(el);
   }
 }
