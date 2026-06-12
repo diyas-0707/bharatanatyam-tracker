@@ -453,7 +453,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <span style="flex:1">Replying...</span>
       <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0">✕</button>
     </div>
+    <div id="chat-file-preview" style="display:none;padding:8px 16px 0;gap:6px;flex-wrap:wrap;flex-shrink:0"></div>
     <div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;background:var(--warm-white);flex-shrink:0">
+      <input type="file" id="chat-file-input" multiple style="display:none" onchange="previewChatFiles(this)">
+      <button onclick="document.getElementById('chat-file-input').click()" style="padding:9px 10px;background:var(--surface);border:.5px solid var(--border);border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Attach files"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
       <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
     </div>
@@ -2296,6 +2299,10 @@ async function openChatWith(otherId,otherName){
   currentChatOtherId=otherId;
   $('chat-panel-name').textContent=otherName;
   $('chat-messages').innerHTML='<div class="empty" style="padding:20px">Loading...</div>';
+  // Reset file state
+  chatFilesToUpload=[];
+  const fp=$('chat-file-preview');if(fp){fp.style.display='none';fp.innerHTML='';}
+  const fi=$('chat-file-input');if(fi)fi.value='';
   openPanel('panel-chat');
   const chatId=getChatId(CU.uid,otherId);
   if(chatUnsubscribe)chatUnsubscribe();
@@ -2330,7 +2337,8 @@ async function openChatWith(otherId,otherName){
           ${isMine?`<button onclick="startEditMsg('${d.id}','${chatId}','${m.text.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:10px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button>`:''}
           ${isMine?`<button onclick="deleteMsg('${d.id}','${chatId}')" style="font-size:10px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>`:''}
         </div>`;
-        wrap.innerHTML=`<div class="bubble ${isMine?'mine':'theirs'}">${replyHtml}${m.text}${editedTag}<div class="bubble-time">${time}</div></div>${actionsHtml}`;
+        const filesHtml=(m.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:${isMine?'rgba(255,255,255,0.85)':'var(--maroon)'};background:${isMine?'rgba(255,255,255,0.15)':'var(--gold-pale)'};border-radius:6px;padding:3px 8px;text-decoration:none;margin-top:4px">📎 ${f.name}</a>`).join('<br>');
+        wrap.innerHTML=`<div class="bubble ${isMine?'mine':'theirs'}">${replyHtml}${m.text?m.text+editedTag:''}${filesHtml?`<div style="display:flex;flex-direction:column;gap:3px;${m.text?'margin-top:6px':''}">${filesHtml}</div>`:''}<div class="bubble-time">${time}</div></div>${actionsHtml}`;
         msgs.appendChild(wrap);
       });
       msgs.scrollTop=msgs.scrollHeight;
@@ -2338,14 +2346,50 @@ async function openChatWith(otherId,otherName){
   );
 }
 
+let chatFilesToUpload = [];
+
+window.previewChatFiles = (input) => {
+  chatFilesToUpload = Array.from(input.files);
+  const preview = $('chat-file-preview');
+  if (!chatFilesToUpload.length) { preview.style.display='none'; return; }
+  preview.style.display='flex';
+  preview.innerHTML = chatFilesToUpload.map((f,i) =>
+    `<div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--text-dark)">📎 ${f.name}<button onclick="removeChatFile(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:13px;padding:0 0 0 4px;line-height:1">✕</button></div>`
+  ).join('');
+};
+
+window.removeChatFile = (index) => {
+  chatFilesToUpload.splice(index, 1);
+  // rebuild preview
+  const preview = $('chat-file-preview');
+  if (!chatFilesToUpload.length) { preview.style.display='none'; $('chat-file-input').value=''; return; }
+  preview.innerHTML = chatFilesToUpload.map((f,i) =>
+    `<div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--text-dark)">📎 ${f.name}<button onclick="removeChatFile(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:13px;padding:0 0 0 4px;line-height:1">✕</button></div>`
+  ).join('');
+};
+
 window.sendChatMessage=async()=>{
   const input=$('chat-input');
   if(!input||!currentChatOtherId)return;
-  const text=input.value.trim(); if(!text)return;
+  const text=input.value.trim();
+  if(!text && !chatFilesToUpload.length)return;
   input.value='';
   const chatId=getChatId(CU.uid,currentChatOtherId);
-  const msgData={text,senderId:CU.uid,senderName:CU.displayName,createdAt:serverTimestamp()};
+  const msgData={text:text||'',senderId:CU.uid,senderName:CU.displayName,createdAt:serverTimestamp()};
   if(replyingToMsg){msgData.replyTo=replyingToMsg;replyingToMsg=null;const rb=$('chat-reply-bar');if(rb)rb.style.display='none';}
+  if(chatFilesToUpload.length){
+    showToast('Uploading...');
+    const uploaded=[];
+    for(const f of chatFilesToUpload){
+      const res=await uploadToCloudinary(f);
+      uploaded.push({name:f.name,url:res.secure_url});
+    }
+    msgData.files=uploaded;
+    chatFilesToUpload=[];
+    const preview=$('chat-file-preview');
+    if(preview){preview.style.display='none';preview.innerHTML='';}
+    $('chat-file-input').value='';
+  }
   await addDoc(collection(db,'chats',chatId,'messages'),msgData);
 };
 
