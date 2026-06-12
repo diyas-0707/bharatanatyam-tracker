@@ -31,23 +31,23 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 
 /* ── LOADING ── */
 #loading-screen{position:absolute;inset:0;background:var(--warm-white);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
-.loading-logo{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--maroon-deep);font-weight:600}
+.loading-logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--maroon-deep);font-weight:600}
 .loading-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;animation:ldot 1s infinite}
 @keyframes ldot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
 
 /* ── AUTH ── */
 #auth-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;background:linear-gradient(160deg,var(--cream) 0%,var(--gold-pale) 100%)}
-.auth-ornament{font-size:12px;color:var(--gold);letter-spacing:6px;margin-bottom:24px;opacity:.8}
-.auth-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--maroon-deep);text-align:center;line-height:1.2;margin-bottom:8px}
-.auth-sub{font-size:13px;color:var(--text-soft);text-align:center;margin-bottom:48px;font-weight:300;line-height:1.6}
-.google-btn{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 24px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text-dark);cursor:pointer;box-shadow:var(--shadow);transition:all .2s;width:100%;justify-content:center;font-weight:500}
+.auth-ornament{font-size:13px;color:var(--gold);letter-spacing:6px;margin-bottom:24px;opacity:.8}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--maroon-deep);text-align:center;line-height:1.2;margin-bottom:8px}
+.auth-sub{font-size:14px;color:var(--text-soft);text-align:center;margin-bottom:48px;font-weight:300;line-height:1.6}
+.google-btn{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 24px;font-size:16px;font-family:'DM Sans',sans-serif;color:var(--text-dark);cursor:pointer;box-shadow:var(--shadow);transition:all .2s;width:100%;justify-content:center;font-weight:500}
 .google-btn:active{transform:scale(.97)}
 .google-btn svg{width:20px;height:20px;flex-shrink:0}
 
 /* ── ROLE ── */
 #role-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;background:linear-gradient(160deg,var(--cream),var(--gold-pale))}
-.role-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep);margin-bottom:6px;text-align:center}
-.role-sub{font-size:13px;color:var(--text-soft);margin-bottom:32px;text-align:center}
+.role-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:var(--maroon-deep);margin-bottom:6px;text-align:center}
+.role-sub{font-size:14px;color:var(--text-soft);margin-bottom:32px;text-align:center}
 .role-cards{display:flex;flex-direction:column;gap:14px;width:100%}
 .role-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow)}
 .role-card.selected{border-color:var(--maroon);background:var(--gold-pale)}
@@ -55,9 +55,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .role-icon.t{background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft))}
 .role-icon.s{background:linear-gradient(135deg,var(--gold),var(--gold-light))}
 .role-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.role-info h3{font-size:16px;font-weight:500;color:var(--text-dark);margin-bottom:3px}
-.role-info p{font-size:12px;color:var(--text-soft);line-height:1.4}
-.role-btn{margin-top:24px;width:100%;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;opacity:.4;pointer-events:none;transition:opacity .2s}
+.role-info h3{font-size:17px;font-weight:500;color:var(--text-dark);margin-bottom:3px}
+.role-info p{font-size:13px;color:var(--text-soft);line-height:1.4}
+.role-btn{margin-top:24px;width:100%;padding:16px;background:var(--maroon);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;opacity:.4;pointer-events:none;transition:opacity .2s}
 .role-btn.ready{opacity:1;pointer-events:all}
 
 /* ── MAIN APP ── */
@@ -73,7 +73,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .bnav{position:absolute;bottom:0;left:0;right:0;height:64px;background:var(--card-bg);border-top:.5px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
 .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:none;background:none;transition:all .2s;padding:8px 0}
 .bnav-tab svg{width:22px;height:22px;stroke:var(--text-soft);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
-.bnav-tab span{font-size:10px;color:var(--text-soft);font-weight:400;letter-spacing:.3px;transition:color .2s}
+.bnav-tab span{font-size:11px;color:var(--text-soft);font-weight:400;letter-spacing:.3px;transition:color .2s}
 .bnav-tab.active svg{stroke:var(--maroon)}
 .bnav-tab.active span{color:var(--maroon);font-weight:500}
 
@@ -83,7 +83,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .panel-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);flex-shrink:0;background:var(--warm-white)}
 .panel-back{width:36px;height:36px;border-radius:10px;background:var(--surface);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .panel-back svg{width:18px;height:18px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.panel-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--maroon-deep);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel-title{font-family:'Cormorant Garamond',serif;font-size:21.5px;font-weight:600;color:var(--maroon-deep);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .panel-body{flex:1;overflow-y:auto;padding-bottom:20px}
 .panel-body::-webkit-scrollbar{width:3px}
 .panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -91,116 +91,116 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 /* ── TAB BAR (inside panel) ── */
 .tab-bar{display:flex;border-bottom:.5px solid var(--border);flex-shrink:0;background:var(--warm-white);overflow-x:auto}
 .tab-bar::-webkit-scrollbar{display:none}
-.tbtn{padding:12px 16px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-weight:400;transition:all .2s;flex-shrink:0}
+.tbtn{padding:12px 16px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-weight:400;transition:all .2s;flex-shrink:0}
 .tbtn.active{color:var(--maroon);border-bottom-color:var(--maroon);font-weight:500}
 .tpane{display:none;padding:16px;flex-direction:column;gap:12px}
 .tpane.active{display:flex}
 
 /* ── PAGE HEADER ── */
 .pg-header{padding:20px 16px 0;flex-shrink:0}
-.pg-ornament{font-size:10px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
-.pg-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
-.pg-sub{font-size:13px;color:var(--text-soft);margin-top:3px;font-weight:300}
+.pg-ornament{font-size:11px;color:var(--gold);letter-spacing:4px;opacity:.8;margin-bottom:4px}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep);line-height:1.2}
+.pg-sub{font-size:14px;color:var(--text-soft);margin-top:3px;font-weight:300}
 
 /* ── CARDS ── */
 .card{background:var(--card-bg);border-radius:16px;padding:16px 18px;border:.5px solid var(--border);box-shadow:var(--shadow)}
-.card-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-soft);font-weight:500;margin-bottom:8px}
-.card-title2{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text-dark);margin-bottom:4px}
+.card-label{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-soft);font-weight:500;margin-bottom:8px}
+.card-title2{font-family:'Cormorant Garamond',serif;font-size:20.5px;font-weight:600;color:var(--text-dark);margin-bottom:4px}
 
 /* ── CLASS CARD ── */
 .class-card{background:var(--card-bg);border-radius:16px;overflow:hidden;border:.5px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:transform .18s}
 .class-card:active{transform:scale(.98)}
 .class-card-banner{height:72px;display:flex;align-items:flex-end;padding:12px 16px;position:relative}
 .class-card-banner-bg{position:absolute;inset:0;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft))}
-.class-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:#fff;position:relative;z-index:1;line-height:1.2}
-.class-card-teacher{font-size:12px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
+.class-card-name{font-family:'Cormorant Garamond',serif;font-size:20.5px;font-weight:600;color:#fff;position:relative;z-index:1;line-height:1.2}
+.class-card-teacher{font-size:13px;color:rgba(255,255,255,.75);position:relative;z-index:1;margin-top:2px}
 .class-card-body{padding:12px 16px}
-.class-card-meta{font-size:12px;color:var(--text-soft)}
+.class-card-meta{font-size:13px;color:var(--text-soft)}
 
 
 /* ── STREAM POST ── */
 .stream-post{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border)}
 .stream-post.pinned{border-color:rgba(201,146,42,0.4);background:linear-gradient(135deg,#fff 0%,#fdf8ec 100%)}
-.pinned-badge{display:inline-flex;align-items:center;background:var(--gold-pale);color:var(--gold);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:6px}
+.pinned-badge{display:inline-flex;align-items:center;background:var(--gold-pale);color:var(--gold);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:6px}
 .poll-card{background:var(--card-bg);border-radius:14px;padding:14px 16px;border:.5px solid var(--border)}
-.poll-question{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text-dark);margin-bottom:12px;line-height:1.3}
+.poll-question{font-family:'Cormorant Garamond',serif;font-size:18.5px;font-weight:600;color:var(--text-dark);margin-bottom:12px;line-height:1.3}
 .poll-option{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:.5px solid var(--border);margin-bottom:8px;cursor:pointer;overflow:hidden;background:var(--surface);transition:border-color .2s}
 .poll-option:hover{border-color:var(--maroon)}
 .poll-option.voted{border-color:var(--maroon)}
 .poll-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(201,146,42,0.18);transition:width .4s;z-index:0;pointer-events:none}
-.poll-option-text{font-size:13px;color:var(--text-dark);position:relative;z-index:1;flex:1}
-.poll-pct{font-size:11px;color:var(--text-soft);position:relative;z-index:1;font-weight:500;white-space:nowrap}
-.poll-check{font-size:14px;position:relative;z-index:1}
-.poll-meta{font-size:11px;color:var(--text-soft);margin-top:8px}
+.poll-option-text{font-size:14px;color:var(--text-dark);position:relative;z-index:1;flex:1}
+.poll-pct{font-size:12px;color:var(--text-soft);position:relative;z-index:1;font-weight:500;white-space:nowrap}
+.poll-check{font-size:15px;position:relative;z-index:1}
+.poll-meta{font-size:12px;color:var(--text-soft);margin-top:8px}
 .poll-closed .poll-option{pointer-events:none;opacity:.8}
 .bubble-wrap{display:flex;flex-direction:column}
 .bubble-wrap.mine{align-items:flex-end}
 .bubble-wrap.theirs{align-items:flex-start}
 .bubble-actions{display:flex;gap:8px;margin-top:3px;opacity:0;transition:opacity .2s}
 .bubble-wrap:hover .bubble-actions{opacity:1}
-.bubble-action-btn{font-size:10px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:2px 6px;border-radius:6px;background:var(--surface)}
+.bubble-action-btn{font-size:11px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:2px 6px;border-radius:6px;background:var(--surface)}
 .bubble-action-btn:hover{color:var(--maroon)}
-.reply-preview{background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:4px 8px;margin-bottom:4px;font-size:11px;color:var(--text-soft)}
+.reply-preview{background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:4px 8px;margin-bottom:4px;font-size:12px;color:var(--text-soft)}
 .bubble.mine .reply-preview{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.5);color:rgba(255,255,255,0.8)}
-.edited-tag{font-size:10px;opacity:.5;margin-left:4px}
-.chat-reply-bar{background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:12px;color:var(--text-soft);display:none;align-items:center;gap:8px}
+.edited-tag{font-size:11px;opacity:.5;margin-left:4px}
+.chat-reply-bar{background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:13px;color:var(--text-soft);display:none;align-items:center;gap:8px}
 .chat-reply-bar.show{display:flex}
 .chat-reply-bar span{flex:1}
-.chat-reply-cancel{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0}
+.chat-reply-cancel{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-soft);padding:0}
 .settings-section{background:var(--card-bg);border-radius:16px;border:.5px solid var(--border);overflow:hidden}
 .settings-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .18s}
 .settings-row:last-child{border-bottom:none}
 .settings-row:active{background:var(--surface)}
 .settings-row-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .settings-row-icon svg{width:18px;height:18px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.settings-row-label{flex:1;font-size:14px;color:var(--text-dark);font-weight:400}
-.settings-row-value{font-size:13px;color:var(--text-soft)}
-.settings-row-arrow{font-size:16px;color:var(--text-soft)}
-.settings-profile-pic{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;margin:0 auto 8px;position:relative;cursor:pointer;overflow:hidden}
+.settings-row-label{flex:1;font-size:15px;color:var(--text-dark);font-weight:400}
+.settings-row-value{font-size:14px;color:var(--text-soft)}
+.settings-row-arrow{font-size:17px;color:var(--text-soft)}
+.settings-profile-pic{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin:0 auto 8px;position:relative;cursor:pointer;overflow:hidden}
 .settings-profile-pic img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .settings-profile-pic-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%}
 .settings-profile-pic:hover .settings-profile-pic-overlay{opacity:1}
 .chat-list-item{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .18s}
 .chat-list-item:active{transform:scale(.98)}
-.chat-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;flex-shrink:0}
+.chat-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:19.5px;font-weight:600;flex-shrink:0}
 .chat-info{flex:1;min-width:0}
-.chat-name{font-size:14px;font-weight:500;color:var(--text-dark)}
-.chat-preview{font-size:12px;color:var(--text-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-name{font-size:15px;font-weight:500;color:var(--text-dark)}
+.chat-preview{font-size:13px;color:var(--text-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
 .bubble.mine{background:var(--maroon);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .bubble.theirs{background:var(--surface);color:var(--text-dark);align-self:flex-start;border-bottom-left-radius:4px;border:.5px solid var(--border)}
-.bubble-time{font-size:10px;opacity:.6;margin-top:3px;text-align:right}
-.submit-btn{display:inline-block;margin-top:10px;padding:8px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
+.bubble-time{font-size:11px;opacity:.6;margin-top:3px;text-align:right}
+.submit-btn{display:inline-block;margin-top:10px;padding:8px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
 .submit-btn.done{background:var(--success)}
 .submission-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border-radius:8px;border:.5px solid var(--border);margin-bottom:6px}
-.submission-file-name{font-size:12px;color:var(--text-dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.submission-file-link{font-size:11px;color:var(--maroon);text-decoration:none;flex-shrink:0}
+.submission-file-name{font-size:13px;color:var(--text-dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.submission-file-link{font-size:12px;color:var(--maroon);text-decoration:none;flex-shrink:0}
 .upload-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
 .upload-bar{height:100%;background:var(--maroon);border-radius:2px;transition:width .3s}
 .private-fb-box{background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:10px;padding:10px 12px;margin-top:8px}
-.private-fb-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);font-weight:500;margin-bottom:4px}
+.private-fb-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);font-weight:500;margin-bottom:4px}
 .comments-section{margin-top:12px;padding-top:12px;border-top:.5px solid var(--border)}
 .comment{display:flex;gap:8px;margin-bottom:10px}
-.comment-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0;font-family:'Cormorant Garamond',serif}
+.comment-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;flex-shrink:0;font-family:'Cormorant Garamond',serif}
 .comment-body{flex:1;min-width:0}
-.comment-author{font-size:11px;font-weight:500;color:var(--text-dark)}
-.comment-text{font-size:13px;color:var(--text-mid);margin-top:2px;line-height:1.5;word-break:break-word}
+.comment-author{font-size:12px;font-weight:500;color:var(--text-dark)}
+.comment-text{font-size:14px;color:var(--text-mid);margin-top:2px;line-height:1.5;word-break:break-word}
 .comment-actions{display:flex;gap:10px;margin-top:4px}
-.comment-action{font-size:11px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+.comment-action{font-size:12px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
 .comment-action:hover{color:var(--maroon)}
 .reply-indent{margin-left:34px}
 .comment-input-row{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
-.comment-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4;min-height:36px;max-height:100px}
+.comment-input{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4;min-height:36px;max-height:100px}
 .comment-input:focus{border-color:var(--maroon)}
-.comment-post-btn{padding:8px 14px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.comment-post-btn{padding:8px 14px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .stream-post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.stream-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0}
+.stream-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;flex-shrink:0}
 .stream-avatar img{width:36px;height:36px;border-radius:50%;object-fit:cover}
 .stream-meta{flex:1}
-.stream-author{font-size:13px;font-weight:500;color:var(--text-dark)}
-.stream-date{font-size:11px;color:var(--text-soft)}
-.stream-body{font-size:14px;color:var(--text-mid);line-height:1.65}
-.stream-tag{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:8px}
+.stream-author{font-size:14px;font-weight:500;color:var(--text-dark)}
+.stream-date{font-size:12px;color:var(--text-soft)}
+.stream-body{font-size:15px;color:var(--text-mid);line-height:1.65}
+.stream-tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:8px}
 .tag-announce{background:#EEF2FF;color:#4338CA}
 .tag-assign{background:var(--gold-pale);color:#92400E}
 .tag-feedback{background:var(--success-bg);color:var(--success)}
@@ -209,16 +209,16 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .assign-card{background:var(--card-bg);border-radius:14px;border:.5px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .18s}
 .assign-card:active{transform:scale(.98)}
 .assign-card-top{background:linear-gradient(135deg,var(--gold),var(--gold-light));padding:14px 16px}
-.assign-card-top-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--maroon-deep)}
-.assign-card-top-date{font-size:11px;color:var(--maroon-soft);margin-top:3px}
-.assign-card-body{padding:12px 16px;font-size:13px;color:var(--text-mid);line-height:1.6}
+.assign-card-top-title{font-family:'Cormorant Garamond',serif;font-size:19.5px;font-weight:600;color:var(--maroon-deep)}
+.assign-card-top-date{font-size:12px;color:var(--maroon-soft);margin-top:3px}
+.assign-card-body{padding:12px 16px;font-size:14px;color:var(--text-mid);line-height:1.6}
 
 /* ── STUDENT ROW ── */
 .student-row{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:12px}
-.s-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0}
+.s-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;flex-shrink:0}
 .s-info{flex:1;min-width:0}
-.s-name{font-size:14px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.s-email{font-size:11px;color:var(--text-soft);margin-top:2px}
+.s-name{font-size:15px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-email{font-size:12px;color:var(--text-soft);margin-top:2px}
 .icon-btn{width:32px;height:32px;border-radius:8px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
 .icon-btn svg{width:15px;height:15px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .icon-btn.danger{background:var(--danger-bg)}
@@ -229,43 +229,44 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 /* ── ATTENDANCE ── */
 .att-row{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:10px}
 .att-toggle{display:flex;gap:6px;margin-left:auto}
-.att-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:.5px solid var(--border);background:var(--surface);color:var(--text-soft);transition:all .15s}
+.att-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:.5px solid var(--border);background:var(--surface);color:var(--text-soft);transition:all .15s}
 .att-btn.present{background:var(--success-bg);color:var(--success);border-color:transparent}
 .att-btn.absent{background:var(--danger-bg);color:var(--danger);border-color:transparent}
 
 /* ── LOG ENTRY ── */
 .log-entry{background:var(--card-bg);border-radius:12px;padding:12px 14px;border:.5px solid var(--border);display:flex;gap:12px;align-items:flex-start}
 .log-date-col{text-align:center;min-width:36px}
-.log-day{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--maroon);line-height:1}
-.log-mon{font-size:9px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px}
+.log-day{font-family:'Cormorant Garamond',serif;font-size:23.5px;font-weight:600;color:var(--maroon);line-height:1}
+.log-mon{font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px}
 .log-body{flex:1}
-.log-text{font-size:13px;font-weight:500;color:var(--text-dark);line-height:1.4}
-.badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:5px}
+.log-text{font-size:14px;font-weight:500;color:var(--text-dark);line-height:1.4}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;margin-top:5px}
 .badge-done{background:var(--success-bg);color:var(--success)}
 .badge-miss{background:var(--danger-bg);color:var(--danger)}
 
 /* ── STAT ROW ── */
 .stat-row{display:flex;gap:8px}
 .stat-box{flex:1;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.25);border-radius:12px;padding:12px;text-align:center}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--maroon-deep)}
-.stat-label{font-size:10px;color:var(--text-soft);margin-top:2px}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--maroon-deep)}
+.stat-label{font-size:11px;color:var(--text-soft);margin-top:2px}
 
 /* ── FORMS ── */
 .field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
-.field input,.field textarea,.field select{background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-dark);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%}
+.field label{font-size:12px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.field input,.field textarea,.field select{background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:15px;color:var(--text-dark);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%}
 .field input:focus,.field textarea:focus{border-color:var(--maroon)}
 .field textarea{resize:none;min-height:90px;line-height:1.6}
 .field-voice{position:relative}
 .field-voice textarea{padding-right:44px}
-.mic-btn{position:absolute;right:10px;bottom:10px;width:28px;height:28px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none}
+.mic-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none}
+.mic-btn.bottom{top:auto;bottom:10px;transform:none}
 .mic-btn.rec{background:var(--maroon);animation:pulse 1s infinite}
 .mic-btn svg{width:14px;height:14px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mic-btn.rec svg{stroke:#fff}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
 
 /* ── BUTTONS ── */
-.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--maroon);color:#fff}
 .btn-secondary{background:var(--surface);color:var(--text-dark);border:.5px solid var(--border)}
@@ -279,40 +280,40 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .modal.open{display:flex}
 .modal-sheet{background:var(--warm-white);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto}
 .modal-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--maroon-deep);margin-bottom:16px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:23.5px;color:var(--maroon-deep);margin-bottom:16px}
 .modal-btns{display:flex;gap:10px;margin-top:4px}
 .modal-btns .btn{flex:1}
 
 /* ── INVITE CARD ── */
 .invite-card{background:var(--gold-pale);border:1px solid rgba(201,146,42,.35);border-radius:14px;padding:14px 16px}
-.invite-card h4{font-size:14px;font-weight:500;color:var(--text-dark);margin-bottom:3px}
-.invite-card p{font-size:12px;color:var(--text-soft);margin-bottom:10px}
+.invite-card h4{font-size:15px;font-weight:500;color:var(--text-dark);margin-bottom:3px}
+.invite-card p{font-size:13px;color:var(--text-soft);margin-bottom:10px}
 .invite-btns{display:flex;gap:8px}
-.invite-accept{flex:1;padding:9px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
-.invite-decline{flex:1;padding:9px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.invite-accept{flex:1;padding:9px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
+.invite-decline{flex:1;padding:9px;background:var(--danger-bg);color:var(--danger);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
 
 /* ── USER CHIP ── */
 .user-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gold-pale);border-radius:12px}
 .user-chip img{width:30px;height:30px;border-radius:50%;object-fit:cover}
 .uc-info{flex:1}
-.uc-name{font-size:13px;font-weight:500;color:var(--text-dark)}
-.uc-role{font-size:11px;color:var(--text-soft)}
-.uc-signout{font-size:12px;color:var(--maroon);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline}
+.uc-name{font-size:14px;font-weight:500;color:var(--text-dark)}
+.uc-role{font-size:12px;color:var(--text-soft)}
+.uc-signout{font-size:13px;color:var(--maroon);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline}
 
 /* ── TOAST ── */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A0A0A;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A0A0A;color:#fff;padding:10px 20px;border-radius:30px;font-size:14px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
 .toast.show{opacity:1}
 
 /* ── MISC ── */
-.ornament{text-align:center;padding:8px 0;font-size:11px;color:var(--gold);letter-spacing:5px;opacity:.6}
-.empty{text-align:center;padding:36px 20px;color:var(--text-soft);font-size:13px;line-height:1.8}
+.ornament{text-align:center;padding:8px 0;font-size:12px;color:var(--gold);letter-spacing:5px;opacity:.6}
+.empty{text-align:center;padding:36px 20px;color:var(--text-soft);font-size:14px;line-height:1.8}
 .divider{height:.5px;background:var(--border);margin:4px 0}
-.section-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500;padding:0 0 8px}
+.section-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500;padding:0 0 8px}
 .home-hero{background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));border-radius:16px;padding:18px 20px;color:#fff}
-.home-hero .label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-bottom:6px}
-.home-hero h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px}
-.home-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.65}
-.gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:10px}
+.home-hero .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-bottom:6px}
+.home-hero h2{font-family:'Cormorant Garamond',serif;font-size:23.5px;font-weight:600;color:#fff;margin-bottom:8px}
+.home-hero p{font-size:14px;color:rgba(255,255,255,.78);line-height:1.65}
+.gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:11px}
 
 </style>
 </head>
@@ -396,13 +397,13 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="pg-sub">Your journey, session by session</div>
     </div>
     <div style="padding:0 16px 12px;display:flex;gap:8px;align-items:center">
-      <select id="log-month-filter" onchange="loadLog()" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark)">
+      <select id="log-month-filter" onchange="loadLog()" style="flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-dark)">
         <option value="2026-06">June 2026</option>
         <option value="2026-05">May 2026</option>
         <option value="2026-04">April 2026</option>
         <option value="2026-03">March 2026</option>
       </select>
-      <button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="openModal('add-log-modal')">+ Log</button>
+      <button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:14px" onclick="openModal('add-log-modal')">+ Log</button>
     </div>
     <div style="padding:0 16px 10px" id="log-stats-row">
       <div class="stat-row">
@@ -450,13 +451,13 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <span id="chat-reply-preview">Replying to...</span>
       <button class="chat-reply-cancel" onclick="cancelReply()">✕</button>
     </div>
-    <div id="chat-reply-bar" style="display:none;background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:12px;color:var(--text-soft);align-items:center;gap:8px;flex-shrink:0">
+    <div id="chat-reply-bar" style="display:none;background:var(--gold-pale);border-left:3px solid var(--maroon);padding:6px 12px;font-size:13px;color:var(--text-soft);align-items:center;gap:8px;flex-shrink:0">
       <span style="flex:1">Replying...</span>
-      <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0">✕</button>
+      <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-soft);padding:0">✕</button>
     </div>
     <div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;background:var(--warm-white);flex-shrink:0">
-      <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
-      <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
+      <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
     </div>
   </div>
 
@@ -511,7 +512,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">Join with Code</div>
-      <div class="field"><label>6-Character Code</label><input id="join-code-input" placeholder="e.g. a3k9z2" maxlength="6" style="text-transform:lowercase;letter-spacing:4px;font-size:20px;text-align:center"></div>
+      <div class="field"><label>6-Character Code</label><input id="join-code-input" placeholder="e.g. a3k9z2" maxlength="6" style="text-transform:lowercase;letter-spacing:4px;font-size:21.5px;text-align:center"></div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('join-code-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="joinWithCode()">Join</button>
@@ -543,12 +544,12 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label>Date</label><input type="date" id="log-date"></div>
         <div class="field"><label>What did you practice?</label>
-          <div class="field-voice"><textarea id="log-practice" placeholder="Describe your practice..." rows="3"></textarea><button class="mic-btn" id="mic-log" onclick="toggleVoice('log-practice','mic-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+          <div class="field-voice"><textarea id="log-practice" placeholder="Describe your practice..." rows="3"></textarea><button class="mic-btn bottom" id="mic-log" onclick="toggleVoice('log-practice','mic-log')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Status</label><select id="log-status"><option value="completed">✓ Completed</option><option value="partial">◐ Partially Done</option><option value="missed">✕ Not Done</option></select></div>
         <div class="field"><label>Attach Files (optional)</label>
           <div id="log-files-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
-          <button type="button" onclick="document.getElementById('log-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:13px">📎 Choose Files</button>
+          <button type="button" onclick="document.getElementById('log-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:14px">📎 Choose Files</button>
           <input type="file" id="log-file-input" multiple style="display:none" onchange="previewLogFiles(this)">
         </div>
       </div>
@@ -567,7 +568,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label>Title</label><input id="assign-title" placeholder="e.g. Alarippu Practice"></div>
         <div class="field"><label>Instructions</label>
-          <div class="field-voice"><textarea id="assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-assign" onclick="toggleVoice('assign-body','mic-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+          <div class="field-voice"><textarea id="assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn bottom" id="mic-assign" onclick="toggleVoice('assign-body','mic-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Due Date (optional)</label><input type="date" id="assign-due"></div>
       </div>
@@ -585,11 +586,11 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-title">Post Announcement</div>
       <div class="field">
         <label>Message</label>
-        <div class="field-voice"><textarea id="announce-body" placeholder="Share something with your class..." rows="4"></textarea><button class="mic-btn" id="mic-announce" onclick="toggleVoice('announce-body','mic-announce')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+        <div class="field-voice"><textarea id="announce-body" placeholder="Share something with your class..." rows="4"></textarea><button class="mic-btn bottom" id="mic-announce" onclick="toggleVoice('announce-body','mic-announce')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
         <input type="checkbox" id="announce-pin" style="width:16px;height:16px;accent-color:var(--maroon)">
-        <label for="announce-pin" style="font-size:13px;color:var(--text-soft);cursor:pointer">📌 Pin this announcement</label>
+        <label for="announce-pin" style="font-size:14px;color:var(--text-soft);cursor:pointer">📌 Pin this announcement</label>
       </div>
       <div class="modal-btns" style="margin-top:12px">
         <button class="btn btn-secondary" onclick="closeModal('post-announce-modal')">Cancel</button>
@@ -605,7 +606,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-title" id="feedback-modal-title">Give Feedback</div>
       <div class="field">
         <label>Personal Feedback</label>
-        <div class="field-voice"><textarea id="feedback-body" placeholder="e.g. Great progress on aramandi! Work on..." rows="4"></textarea><button class="mic-btn" id="mic-feedback" onclick="toggleVoice('feedback-body','mic-feedback')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+        <div class="field-voice"><textarea id="feedback-body" placeholder="e.g. Great progress on aramandi! Work on..." rows="4"></textarea><button class="mic-btn bottom" id="mic-feedback" onclick="toggleVoice('feedback-body','mic-feedback')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('feedback-modal')">Cancel</button>
@@ -621,9 +622,9 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-title">Class Settings</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="background:var(--gold-pale);border-radius:12px;padding:14px 16px;text-align:center">
-          <div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Join Code</div>
-          <div id="class-join-code" style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--maroon-deep);letter-spacing:6px">------</div>
-          <div style="font-size:11px;color:var(--text-soft);margin-top:4px">Share this code with students to join</div>
+          <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Join Code</div>
+          <div id="class-join-code" style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--maroon-deep);letter-spacing:6px">------</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-top:4px">Share this code with students to join</div>
         </div>
         <button class="btn btn-danger" onclick="deleteClass()">🗑 Delete this Class</button>
         <button class="btn btn-secondary" onclick="closeModal('class-settings-modal')">Cancel</button>
@@ -639,7 +640,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label>Title</label><input id="edit-assign-title" placeholder="e.g. Alarippu Practice"></div>
         <div class="field"><label>Instructions</label>
-          <div class="field-voice"><textarea id="edit-assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-edit-assign" onclick="toggleVoice('edit-assign-body','mic-edit-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+          <div class="field-voice"><textarea id="edit-assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn bottom" id="mic-edit-assign" onclick="toggleVoice('edit-assign-body','mic-edit-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Due Date (optional)</label><input type="date" id="edit-assign-due"></div>
       </div>
@@ -657,7 +658,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-title" id="poll-modal-title">Create Poll</div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label>Question</label>
-          <div class="field-voice"><textarea id="poll-question" placeholder="Ask your class something..." rows="2"></textarea><button class="mic-btn" id="mic-poll" onclick="toggleVoice('poll-question','mic-poll')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+          <div class="field-voice"><textarea id="poll-question" placeholder="Ask your class something..." rows="2"></textarea><button class="mic-btn bottom" id="mic-poll" onclick="toggleVoice('poll-question','mic-poll')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Options (one per line, min 2)</label><textarea id="poll-options" placeholder="Option A&#10;Option B&#10;Option C" rows="4" style="min-height:100px"></textarea></div>
         <div class="field"><label>Poll closes on (optional)</label><input type="date" id="poll-closes"></div>
@@ -711,7 +712,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">Change Role</div>
-      <p style="font-size:13px;color:var(--text-soft);margin-bottom:16px">Changing your role will affect what features you can access.</p>
+      <p style="font-size:14px;color:var(--text-soft);margin-bottom:16px">Changing your role will affect what features you can access.</p>
       <div style="display:flex;flex-direction:column;gap:10px">
         <button class="btn btn-secondary" onclick="changeRoleTo('teacher')">👩‍🏫 Switch to Teacher</button>
         <button class="btn btn-secondary" onclick="changeRoleTo('student')">🎓 Switch to Student</button>
@@ -726,7 +727,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title" style="color:var(--danger)">Delete Account</div>
-      <p style="font-size:13px;color:var(--text-soft);margin-bottom:16px">This will permanently delete your account data. This cannot be undone.</p>
+      <p style="font-size:14px;color:var(--text-soft);margin-bottom:16px">This will permanently delete your account data. This cannot be undone.</p>
       <div style="display:flex;flex-direction:column;gap:10px">
         <button class="btn btn-danger" onclick="confirmDeleteAccount()">Yes, Delete My Account</button>
         <button class="btn btn-secondary" onclick="closeModal('delete-account-modal')">Cancel</button>
@@ -766,7 +767,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <div class="modal-handle"></div>
       <div class="modal-title">Edit Comment</div>
       <div class="field">
-        <div class="field-voice"><textarea id="edit-comment-text" rows="3" placeholder="Edit your comment..."></textarea><button class="mic-btn" id="mic-edit-comment" onclick="toggleVoice('edit-comment-text','mic-edit-comment')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+        <div class="field-voice"><textarea id="edit-comment-text" rows="3" placeholder="Edit your comment..."></textarea><button class="mic-btn bottom" id="mic-edit-comment" onclick="toggleVoice('edit-comment-text','mic-edit-comment')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-comment-modal')">Cancel</button>
@@ -938,21 +939,24 @@ async function loadHome() {
 
 async function loadTeacherHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
+  const activeClasses = snap.docs.filter(d => !d.data().deleted);
   let students = 0;
-  snap.forEach(d => students += (d.data().studentIds||[]).length);
+  activeClasses.forEach(d => students += (d.data().studentIds||[]).length);
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
   c.appendChild(sr);
   const dismissed = localStorage.getItem('hideTeacherQuickStart');
   if (!dismissed) {
     const hero = document.createElement('div'); hero.className='home-hero'; hero.style.position='relative';
-    hero.innerHTML=`<button onclick="dismissQuickStart('teacher',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Teacher Quick Start</div><h2>Manage your classes</h2><p class="gold-bullet">Invite students by email</p><p class="gold-bullet">Post assignments with due dates</p><p class="gold-bullet">Give personal feedback to students</p><p class="gold-bullet">Track attendance per session</p>`;
+    hero.innerHTML=`<button onclick="dismissQuickStart('teacher',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:17px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Teacher Quick Start</div><h2>Manage your classes</h2><p class="gold-bullet">Invite students by email</p><p class="gold-bullet">Post assignments with due dates</p><p class="gold-bullet">Give personal feedback to students</p><p class="gold-bullet">Track attendance per session</p>`;
     c.appendChild(hero);
   }
 }
 
 async function loadStudentHome(c) {
-  const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  const snapRaw = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  const snap = {docs: snapRaw.docs.filter(d=>!d.data().deleted), size: 0};
+  snap.size = snap.docs.length;
   const logsSnap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
   const done = logsSnap.docs.filter(d=>d.data().completed).length;
   const now = new Date();
@@ -982,21 +986,21 @@ async function loadStudentHome(c) {
     const dismissed2 = localStorage.getItem('hideStudentQuickStart');
     if (!dismissed2) {
       const a = document.createElement('div'); a.className='home-hero'; a.style.position='relative';
-      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Practice'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:12px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
+      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:17px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Practice'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:13px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
       c.appendChild(a);
     }
   } else {
     const dismissed2 = localStorage.getItem('hideStudentQuickStart');
     if (!dismissed2) {
       const a = document.createElement('div'); a.className='home-hero'; a.style.position='relative';
-      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Quick Start</div><h2>Welcome!</h2><p class="gold-bullet">View assignments from your teacher</p><p class="gold-bullet">Log your daily practice sessions</p><p class="gold-bullet">Check personal feedback from your teacher</p>`;
+      a.innerHTML=`<button onclick="dismissQuickStart('student',this.closest('.home-hero'))" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:17px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">✕</button><div class="label">Quick Start</div><h2>Welcome!</h2><p class="gold-bullet">View assignments from your teacher</p><p class="gold-bullet">Log your daily practice sessions</p><p class="gold-bullet">Check personal feedback from your teacher</p>`;
       c.appendChild(a);
     }
   }
 
   if (latestFeedback) {
     const fb = document.createElement('div'); fb.className='card';
-    fb.innerHTML=`<div class="card-label">Latest Teacher Feedback</div><div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-mid);line-height:1.65;font-style:italic">${latestFeedback.text}</div><div style="font-size:11px;color:var(--text-soft);margin-top:8px">From ${latestFeedback.teacherName||'your teacher'}</div>`;
+    fb.innerHTML=`<div class="card-label">Latest Teacher Feedback</div><div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text-mid);line-height:1.65;font-style:italic">${latestFeedback.text}</div><div style="font-size:12px;color:var(--text-soft);margin-top:8px">From ${latestFeedback.teacherName||'your teacher'}</div>`;
     c.appendChild(fb);
   }
 
@@ -1009,7 +1013,9 @@ async function loadStudentHome(c) {
 }
 
 async function loadParentHome(c) {
-  const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  const snapRaw = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  const snap = {docs: snapRaw.docs.filter(d=>!d.data().deleted), size: 0};
+  snap.size = snap.docs.length;
   const sr = document.createElement('div'); sr.className='stat-row';
   sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div>`;
   c.appendChild(sr);
@@ -1023,7 +1029,7 @@ async function loadParentHome(c) {
   }
   if (latestAssign) {
     const a = document.createElement('div'); a.className='home-hero';
-    a.innerHTML=`<div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Assignment'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:12px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
+    a.innerHTML=`<div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Assignment'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:13px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
     c.appendChild(a);
   }
   const chatBtn = document.createElement('button');
@@ -1071,7 +1077,7 @@ async function loadClasses() {
   snap.docs.filter(d=>!d.data().deleted).forEach(d => {
     const data=d.data();
     const el=document.createElement('div'); el.className='class-card';
-    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:12px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
+    el.innerHTML=`<div class="class-card-banner"><div class="class-card-banner-bg"></div><div><div class="class-card-name">${data.name}</div><div class="class-card-teacher">${ROLE==='teacher'?((data.studentIds||[]).length+' student'+(((data.studentIds||[]).length)!==1?'s':'')):'Teacher: '+(data.teacherName||'')}</div></div></div>${data.description?`<div class="class-card-body"><div style="font-size:13px;color:var(--text-soft)">${data.description}</div></div>`:''}`;
     el.onclick = () => openClassDetail(d.id, data);
     list.appendChild(el);
   });
@@ -1149,7 +1155,7 @@ async function renderStream(body) {
   if (isT) {
     const actions = document.createElement('div');
     actions.style.cssText='display:flex;gap:8px';
-    actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button><button class="btn btn-secondary" style="font-size:13px;padding:11px" onclick="openCreatePoll()">📊 Poll</button>`;
+    actions.innerHTML=`<button class="btn btn-primary" style="font-size:14px;padding:11px" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:14px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button><button class="btn btn-secondary" style="font-size:14px;padding:11px" onclick="openCreatePoll()">📊 Poll</button>`;
     wrap.appendChild(actions);
   }
 
@@ -1183,7 +1189,7 @@ async function renderStream(body) {
         post.className = 'stream-post' + (item.pinned ? ' pinned' : '');
         const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
         const pinnedBadge = item.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
-        const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
+        const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:19.5px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
         const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
         const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
@@ -1223,9 +1229,9 @@ async function renderAssignments(body) {
         const hasSub = subDoc.exists() && (subDoc.data().files||[]).length > 0;
         subBtn = `<div style="padding:0 16px 14px"><button class="submit-btn${hasSub?' done':''}" onclick="openSubmit('${d.id}','${(a.title||'').replace(/'/g,"\\'")}')"> ${hasSub?'✓ View/Edit Submission':'📎 Submit Work'}</button></div>`;
       } else if (ROLE==='teacher') {
-        subBtn = `<div style="padding:0 16px 14px"><button onclick="viewSubmissions('${d.id}','${(a.title||'').replace(/'/g,"\\'")}');" style="background:none;border:none;color:var(--maroon);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">View submissions</button></div>`;
+        subBtn = `<div style="padding:0 16px 14px"><button onclick="viewSubmissions('${d.id}','${(a.title||'').replace(/'/g,"\\'")}');" style="background:none;border:none;color:var(--maroon);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">View submissions</button></div>`;
       }
-      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>${subBtn}`;
+      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:12px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>${subBtn}`;
       wrap.appendChild(el);
     }
   }
@@ -1243,7 +1249,7 @@ async function renderPeople(body) {
     // Invite section
     const inv = document.createElement('div');
     inv.style.cssText='display:flex;gap:8px';
-    inv.innerHTML=`<input id="invite-email-input" placeholder="Student email address" style="flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><button class="btn btn-primary" style="width:auto;padding:10px 16px;font-size:13px" onclick="inviteByEmail()">Invite</button>`;
+    inv.innerHTML=`<input id="invite-email-input" placeholder="Student email address" style="flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none"><button class="btn btn-primary" style="width:auto;padding:10px 16px;font-size:14px" onclick="inviteByEmail()">Invite</button>`;
     wrap.appendChild(inv);
   }
 
@@ -1258,7 +1264,7 @@ async function renderPeople(body) {
     wrap.appendChild(lbl);
     const row=document.createElement('div'); row.className='student-row';
     const tAvatar=td.photo?`<img src="${td.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(td.name||'T')[0]}</div>`;
-    row.innerHTML=`${tAvatar}<div class="s-info"><div class="s-name">${td.name||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:#EEF2FF;color:#4338CA;padding:1px 7px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="s-email">${td.email||''}</div></div>`;
+    row.innerHTML=`${tAvatar}<div class="s-info"><div class="s-name">${td.name||'Teacher'} <span style="font-size:11px;color:var(--text-soft);background:#EEF2FF;color:#4338CA;padding:1px 7px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="s-email">${td.email||''}</div></div>`;
     wrap.appendChild(row);
   }
 
@@ -1273,7 +1279,7 @@ async function renderPeople(body) {
       const s=d.data();
       const row=document.createElement('div'); row.className='student-row';
       const sAvImg=s.photo?`<img src="${s.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(s.name||'?')[0]}</div>`;
-      const sRoleBadge=s.role==='parent'?'<span style="font-size:10px;background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:10px;margin-left:4px">Parent</span>':'<span style="font-size:10px;background:var(--gold-pale);color:var(--maroon-deep);padding:1px 7px;border-radius:10px;margin-left:4px">Student</span>';
+      const sRoleBadge=s.role==='parent'?'<span style="font-size:11px;background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:10px;margin-left:4px">Parent</span>':'<span style="font-size:11px;background:var(--gold-pale);color:var(--maroon-deep);padding:1px 7px;border-radius:10px;margin-left:4px">Student</span>';
       if (isT) {
         row.innerHTML=`${sAvImg}<div class="s-info"><div class="s-name">${s.name||'Unknown'}${sRoleBadge}</div><div class="s-email">${s.email||''}</div></div><button class="icon-btn primary" onclick="openStudentDetail('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}','${s.email||''}')" title="Give feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button><button class="icon-btn danger" onclick="removeStudent('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
       } else {
@@ -1303,7 +1309,7 @@ window.viewStudentAttendance = async (sid, sname) => {
   const absent = records.filter(r=>r.status==='absent').length;
   const total = records.length;
   const pct = total ? Math.round(present/total*100) : 0;
-  let html = `<div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--maroon-deep);margin-bottom:12px">${sname}</div>`;
+  let html = `<div style="font-family:'Cormorant Garamond',serif;font-size:21.5px;font-weight:600;color:var(--maroon-deep);margin-bottom:12px">${sname}</div>`;
   html += `<div style="display:flex;gap:8px;margin-bottom:14px">
     <div class="stat-box"><div class="stat-num">${present}</div><div class="stat-label">Present</div></div>
     <div class="stat-box"><div class="stat-num">${absent}</div><div class="stat-label">Absent</div></div>
@@ -1314,7 +1320,7 @@ window.viewStudentAttendance = async (sid, sname) => {
     records.forEach(r => {
       const d = new Date(r.date+'T00:00:00');
       const label = d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)"><span style="font-size:13px;color:var(--text-dark)">${label}</span><span style="font-size:12px;font-weight:500;color:${r.status==='present'?'var(--success)':'var(--danger)'}">${r.status==='present'?'Present':'Absent'}</span></div>`;
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)"><span style="font-size:14px;color:var(--text-dark)">${label}</span><span style="font-size:13px;font-weight:500;color:${r.status==='present'?'var(--success)':'var(--danger)'}">${r.status==='present'?'Present':'Absent'}</span></div>`;
     });
   }
   const modal = document.createElement('div'); modal.className='modal open'; modal.style.zIndex='400';
@@ -1329,8 +1335,8 @@ async function renderAttendance(body) {
   wrap.style.cssText='padding:16px;display:flex;flex-direction:column;gap:12px';
   const dateRow=document.createElement('div'); dateRow.style.cssText='display:flex;gap:8px;align-items:center';
   const dateInput=document.createElement('input'); dateInput.type='date'; dateInput.id='att-date-input'; dateInput.value=new Date().toISOString().split('T')[0];
-  dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:"DM Sans",sans-serif;outline:none';
-  const saveBtn=document.createElement('button'); saveBtn.className='btn btn-primary'; saveBtn.style.cssText='width:auto;padding:10px 16px;font-size:13px'; saveBtn.textContent='Save';
+  dateInput.style.cssText='flex:1;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;font-family:"DM Sans",sans-serif;outline:none';
+  const saveBtn=document.createElement('button'); saveBtn.className='btn btn-primary'; saveBtn.style.cssText='width:auto;padding:10px 16px;font-size:14px'; saveBtn.textContent='Save';
   saveBtn.onclick=saveAttendance;
   dateRow.appendChild(dateInput); dateRow.appendChild(saveBtn);
   wrap.appendChild(dateRow);
@@ -1354,8 +1360,8 @@ async function loadAttendanceRows(wrap, date) {
     const s=d.data(); const status=existing[d.id]||'none';
     const row=document.createElement('div'); row.className='att-row';
     const sPhoto = s.photo || null;
-    const sAvatar = sPhoto ? `<img src="${sPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="s-avatar" style="width:36px;height:36px;font-size:14px">${(s.name||'?')[0]}</div>`;
-    row.innerHTML=`${sAvatar}<div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
+    const sAvatar = sPhoto ? `<img src="${sPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="s-avatar" style="width:36px;height:36px;font-size:15px">${(s.name||'?')[0]}</div>`;
+    row.innerHTML=`${sAvatar}<div style="flex:1;font-size:14px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:12px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
     wrap.appendChild(row);
   });
 }
@@ -1502,7 +1508,7 @@ function buildCommentInput(postId, parentId, replyToName) {
   const placeholder = replyToName ? `Reply to ${replyToName}...` : 'Add a comment...';
   const micId = `mic-c-${postId}${parentId?'-'+parentId:''}`;
   const inputId = `cinput-${postId}${parentId?'-'+parentId:''}`;
-  row.innerHTML = `<div class="field-voice" style="flex:1;position:relative"><textarea class="comment-input" id="${inputId}" placeholder="${placeholder}" rows="1" style="padding-right:38px;width:100%" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea><button class="mic-btn" id="${micId}" onclick="toggleVoice('${inputId}','${micId}')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+  row.innerHTML = `<div class="field-voice" style="flex:1;position:relative"><textarea class="comment-input" id="${inputId}" placeholder="${placeholder}" rows="1" style="padding-right:38px;width:100%" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea><button class="mic-btn" id="${micId}" onclick="toggleVoice('${inputId}','${micId}')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
     <button class="comment-post-btn" onclick="postComment('${postId}','${parentId||''}')">Post</button>`;
   return row;
 }
@@ -1587,7 +1593,7 @@ window.openSubmit = async (assignId, assignTitle) => {
     body.appendChild(lbl);
     sub.files.forEach((f, i) => {
       const row = document.createElement('div'); row.className='submission-file';
-      row.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a><button onclick="removeSubmissionFile('${assignId}','${subId}',${i})" style="background:var(--danger-bg);border:none;border-radius:6px;padding:4px 8px;font-size:11px;color:var(--danger);cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif">✕</button>`;
+      row.innerHTML=`<div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a><button onclick="removeSubmissionFile('${assignId}','${subId}',${i})" style="background:var(--danger-bg);border:none;border-radius:6px;padding:4px 8px;font-size:12px;color:var(--danger);cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif">✕</button>`;
       body.appendChild(row);
     });
   }
@@ -1595,7 +1601,7 @@ window.openSubmit = async (assignId, assignTitle) => {
   // Show private feedback if any
   if (sub.privateFeedback) {
     const fb = document.createElement('div'); fb.className='private-fb-box';
-    fb.innerHTML=`<div class="private-fb-label">Teacher Feedback</div><div style="font-size:13px;color:var(--text-mid)">${sub.privateFeedback}</div>`;
+    fb.innerHTML=`<div class="private-fb-label">Teacher Feedback</div><div style="font-size:14px;color:var(--text-mid)">${sub.privateFeedback}</div>`;
     body.appendChild(fb);
   }
 
@@ -1606,7 +1612,7 @@ window.openSubmit = async (assignId, assignTitle) => {
   const noteWrap = document.createElement('div'); noteWrap.className='field-voice'; noteWrap.style.marginBottom='10px';
   const micNoteId = 'mic-sub-note';
   const noteId = 'sub-note-text';
-  noteWrap.innerHTML=`<textarea id="${noteId}" placeholder="Add a message or note to your teacher..." rows="3" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:11px 44px 11px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:none;line-height:1.6">${sub.note||''}</textarea><button class="mic-btn" id="${micNoteId}" onclick="toggleVoice('${noteId}','${micNoteId}')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>`;
+  noteWrap.innerHTML=`<textarea id="${noteId}" placeholder="Add a message or note to your teacher..." rows="3" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:11px 44px 11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:none;line-height:1.6">${sub.note||''}</textarea><button class="mic-btn bottom" id="${micNoteId}" onclick="toggleVoice('${noteId}','${micNoteId}')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>`;
   body.appendChild(noteWrap);
 
   // Upload area
@@ -1622,7 +1628,7 @@ window.openSubmit = async (assignId, assignTitle) => {
     const progWrap = document.createElement('div'); progWrap.className='upload-progress';
     const bar = document.createElement('div'); bar.className='upload-bar'; bar.style.width='0%';
     progWrap.appendChild(bar); body.appendChild(progWrap);
-    const statusLbl = document.createElement('div'); statusLbl.style.cssText='font-size:12px;color:var(--text-soft);margin-top:4px'; statusLbl.textContent='Uploading...';
+    const statusLbl = document.createElement('div'); statusLbl.style.cssText='font-size:13px;color:var(--text-soft);margin-top:4px'; statusLbl.textContent='Uploading...';
     body.appendChild(statusLbl);
     const uploaded = [];
     for (let i=0; i<files.length; i++) {
@@ -1685,13 +1691,13 @@ window.viewSubmissions = async (assignId, assignTitle) => {
     const userDoc = await getDoc(doc(db,'users',sub.studentId));
     const name = userDoc.exists() ? userDoc.data().name : sub.studentName||'Student';
     let filesHtml = (sub.files||[]).map(f=>`<div class="submission-file"><div class="submission-file-name">📎 ${f.name}</div><a href="${f.url}" target="_blank" class="submission-file-link">View</a></div>`).join('');
-    if (sub.note) filesHtml += `<div style="background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text-mid);margin-bottom:6px;border:.5px solid var(--border)">📝 ${sub.note}</div>`;
+    if (sub.note) filesHtml += `<div style="background:var(--surface);border-radius:8px;padding:8px 12px;font-size:14px;color:var(--text-mid);margin-bottom:6px;border:.5px solid var(--border)">📝 ${sub.note}</div>`;
     const fbVal = sub.privateFeedback||'';
     card.innerHTML=`<div class="card-label">${name}</div>${filesHtml}
       <div style="margin-top:8px">
-        <div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Private Feedback</div>
-        <textarea id="pfb-${sub.id}" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5" rows="2" placeholder="Add private feedback...">${fbVal}</textarea>
-        <button class="btn btn-primary" style="font-size:12px;padding:8px;margin-top:6px" onclick="savePrivateFeedback('${sub.id}','${sub.studentId}')">Save Feedback</button>
+        <div style="font-size:12px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Private Feedback</div>
+        <textarea id="pfb-${sub.id}" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5" rows="2" placeholder="Add private feedback...">${fbVal}</textarea>
+        <button class="btn btn-primary" style="font-size:13px;padding:8px;margin-top:6px" onclick="savePrivateFeedback('${sub.id}','${sub.studentId}')">Save Feedback</button>
       </div>`;
     body.appendChild(card);
   }
@@ -1735,7 +1741,7 @@ function buildPollCard(poll, isT) {
 
   let html = `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
     <div class="poll-question">${poll.question}</div>
-    ${isT ? `<div style="display:flex;gap:6px;flex-shrink:0"><button onclick="openEditPoll('${poll._id}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏ Edit</button><button onclick="deletePoll('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button></div>` : ''}
+    ${isT ? `<div style="display:flex;gap:6px;flex-shrink:0"><button onclick="openEditPoll('${poll._id}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:12px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏ Edit</button><button onclick="deletePoll('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:12px;color:var(--danger);cursor:pointer">✕</button></div>` : ''}
   </div>`;
 
   (poll.options||[]).forEach(opt => {
@@ -1750,7 +1756,7 @@ function buildPollCard(poll, isT) {
     </div>`;
   });
 
-  html += `<div class="poll-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed ? 'Poll closed' : poll.closes ? `Closes ${poll.closes}` : 'No closing date'} · Posted ${dt}</span>${userVote && !closed ? `<button onclick="removeVote('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif">Remove vote</button>` : ''}</div>`;
+  html += `<div class="poll-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed ? 'Poll closed' : poll.closes ? `Closes ${poll.closes}` : 'No closing date'} · Posted ${dt}</span>${userVote && !closed ? `<button onclick="removeVote('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:4px 10px;font-size:12px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif">Remove vote</button>` : ''}</div>`;
   wrap.innerHTML = html;
   return wrap;
 }
@@ -1850,24 +1856,32 @@ window.openStudentDetail = async (sid, sname, semail) => {
   const fbDoc=await getDoc(doc(db,'classes',currentClassId,'feedback',sid));
   $('feedback-body').value=fbDoc.exists()?fbDoc.data().text:'';
 
-  const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
-  const logs=logsSnap.docs.map(d=>d.data()).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,15);
+  const memberDoc=await getDoc(doc(db,'users',sid));
+  const memberRole=memberDoc.exists()?memberDoc.data().role:null;
+
+  let logs=[];
+  if(memberRole!=='parent'){
+    const logsSnap=await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',sid)));
+    logs=logsSnap.docs.map(d=>d.data()).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,15);
+  }
 
   body.innerHTML='';
   const fbCard=document.createElement('div'); fbCard.className='card'; fbCard.style.margin='0';
-  fbCard.innerHTML=`<div class="card-label">Personal Feedback</div>${fbDoc.exists()&&fbDoc.data().text?`<div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text-mid);line-height:1.65;font-style:italic;margin-bottom:10px">${fbDoc.data().text}</div>`:`<div style="font-size:13px;color:var(--text-soft);margin-bottom:10px">No feedback given yet.</div>`}<button class="btn btn-primary" style="font-size:13px;padding:10px" onclick="openModal('feedback-modal')">Edit Feedback</button>`;
+  fbCard.innerHTML=`<div class="card-label">Personal Feedback</div>${fbDoc.exists()&&fbDoc.data().text?`<div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-mid);line-height:1.65;font-style:italic;margin-bottom:10px">${fbDoc.data().text}</div>`:`<div style="font-size:14px;color:var(--text-soft);margin-bottom:10px">No feedback given yet.</div>`}<button class="btn btn-primary" style="font-size:14px;padding:10px" onclick="openModal('feedback-modal')">Edit Feedback</button>`;
   body.appendChild(fbCard);
 
-  const lbl=document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='16px'; lbl.textContent='Practice Log ('+logs.length+' entries)';
-  body.appendChild(lbl);
-  if(!logs.length){const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);}
-  else {
-    logs.forEach(e=>{
-      const d=new Date((e.date||'2026-01-01')+'T00:00:00');
-      const el=document.createElement('div'); el.className='log-entry';
-      el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div><span class="badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>`;
-      body.appendChild(el);
-    });
+  if(memberRole!=='parent'){
+    const lbl=document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='16px'; lbl.textContent='Practice Log ('+logs.length+' entries)';
+    body.appendChild(lbl);
+    if(!logs.length){const e=document.createElement('div');e.className='empty';e.style.padding='16px 0';e.textContent='No practice logs yet.';body.appendChild(e);}
+    else {
+      logs.forEach(e=>{
+        const d=new Date((e.date||'2026-01-01')+'T00:00:00');
+        const el=document.createElement('div'); el.className='log-entry';
+        el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div><span class="badge ${e.completed?'badge-done':'badge-miss'}">${e.completed?'Completed':'Not Completed'}</span></div>`;
+        body.appendChild(el);
+      });
+    }
   }
 };
 
@@ -1933,7 +1947,7 @@ window.previewLogFiles = (input) => {
   preview.innerHTML = '';
   logFilesToUpload.forEach(f => {
     const tag = document.createElement('span');
-    tag.style.cssText='font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
+    tag.style.cssText='font-size:12px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
     tag.textContent='📎 '+f.name;
     preview.appendChild(tag);
   });
@@ -1995,12 +2009,12 @@ async function loadSettings() {
   profileSec.appendChild(picInput);
 
   const nameEl = document.createElement('div');
-  nameEl.style.cssText='font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:600;color:var(--maroon-deep);text-align:center';
+  nameEl.style.cssText='font-family:"Cormorant Garamond",serif;font-size:23.5px;font-weight:600;color:var(--maroon-deep);text-align:center';
   nameEl.textContent = CU.displayName||'';
   profileSec.appendChild(nameEl);
 
   const roleEl = document.createElement('div');
-  roleEl.style.cssText='font-size:12px;color:var(--text-soft);margin-top:3px;text-align:center';
+  roleEl.style.cssText='font-size:13px;color:var(--text-soft);margin-top:3px;text-align:center';
   roleEl.textContent = ROLE==='teacher'?'Teacher':ROLE==='parent'?'Parent':'Student';
   profileSec.appendChild(roleEl);
   c.appendChild(profileSec);
@@ -2085,21 +2099,27 @@ async function loadChatList() {
   const list=$('chat-list'); list.innerHTML='<div class="empty">Loading...</div>';
   const snap=await getDocs(query(collection(db,'classes'),where('studentIds','array-contains',CU.uid)));
   if(snap.empty){list.innerHTML='<div class="empty">Not enrolled in any classes yet.</div>';return;}
-  list.innerHTML='';
   const seen=new Set();
+  const items=[];
   for(const cd of snap.docs){
     const data=cd.data(); const tid=data.teacherId;
     if(seen.has(tid))continue; seen.add(tid);
     const chatId=getChatId(CU.uid,tid);
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
-    const el=document.createElement('div'); el.className='chat-list-item';
     const tDoc=await getDoc(doc(db,'users',tid));
     const tPhoto=tDoc.exists()?tDoc.data().photo:null;
-    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    const lastTime=lastMsg&&lastMsg.createdAt?lastMsg.createdAt.seconds:-1;
+    items.push({tid,data,lastMsg,tPhoto,lastTime});
+  }
+  items.sort((a,b)=>b.lastTime-a.lastTime);
+  list.innerHTML='';
+  items.forEach(({tid,data,lastMsg,tPhoto})=>{
+    const el=document.createElement('div'); el.className='chat-list-item';
+    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:11px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(tid,data.teacherName||'Teacher');
     list.appendChild(el);
-  }
+  });
 }
 
 async function openChatWith(otherId,otherName){
@@ -2121,7 +2141,7 @@ async function openChatWith(otherId,otherName){
         const m={...d.data(),id:d.id};
         if(m.deleted){
           const del=document.createElement('div');
-          del.style.cssText='text-align:center;font-size:11px;color:var(--text-soft);padding:2px 0;font-style:italic';
+          del.style.cssText='text-align:center;font-size:12px;color:var(--text-soft);padding:2px 0;font-style:italic';
           del.textContent='Message deleted';
           msgs.appendChild(del); return;
         }
@@ -2132,13 +2152,13 @@ async function openChatWith(otherId,otherName){
         let replyHtml='';
         if(m.replyTo&&allMsgs[m.replyTo]&&!allMsgs[m.replyTo].deleted){
           const orig=allMsgs[m.replyTo];
-          replyHtml=`<div style="background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:3px 8px;margin-bottom:4px;font-size:11px;color:var(--text-soft)">↩ ${orig.senderName}: ${orig.text.substring(0,50)}${orig.text.length>50?'...':''}</div>`;
+          replyHtml=`<div style="background:rgba(107,30,30,0.08);border-left:3px solid var(--maroon);border-radius:6px;padding:3px 8px;margin-bottom:4px;font-size:12px;color:var(--text-soft)">↩ ${orig.senderName}: ${orig.text.substring(0,50)}${orig.text.length>50?'...':''}</div>`;
         }
-        const editedTag=m.edited?'<span style="font-size:10px;opacity:.5;margin-left:4px">(edited)</span>':'';
+        const editedTag=m.edited?'<span style="font-size:11px;opacity:.5;margin-left:4px">(edited)</span>':'';
         const actionsHtml=`<div style="display:flex;gap:6px;margin-top:3px">
-          <button onclick="startReplyMsg('${d.id}','${(m.senderName||'').replace(/'/g,"\\'")}','${m.text.replace(/'/g,"\\'").replace(/\n/g,' ').substring(0,40)}')" style="font-size:10px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Reply</button>
-          ${isMine?`<button onclick="startEditMsg('${d.id}','${chatId}','${m.text.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:10px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button>`:''}
-          ${isMine?`<button onclick="deleteMsg('${d.id}','${chatId}')" style="font-size:10px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>`:''}
+          <button onclick="startReplyMsg('${d.id}','${(m.senderName||'').replace(/'/g,"\\'")}','${m.text.replace(/'/g,"\\'").replace(/\n/g,' ').substring(0,40)}')" style="font-size:11px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">↩ Reply</button>
+          ${isMine?`<button onclick="startEditMsg('${d.id}','${chatId}','${m.text.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--text-soft);background:var(--surface);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button>`:''}
+          ${isMine?`<button onclick="deleteMsg('${d.id}','${chatId}')" style="font-size:11px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif">✕</button>`:''}
         </div>`;
         wrap.innerHTML=`<div class="bubble ${isMine?'mine':'theirs'}">${replyHtml}${m.text}${editedTag}<div class="bubble-time">${time}</div></div>${actionsHtml}`;
         msgs.appendChild(wrap);
@@ -2194,7 +2214,7 @@ async function loadTeacherChatList(){
   const memberIds=new Set();
   snap.docs.forEach(d=>(d.data().studentIds||[]).forEach(id=>memberIds.add(id)));
   if(!memberIds.size){list.innerHTML='<div class="empty">No students or parents yet.</div>';return;}
-  list.innerHTML='';
+  const items=[];
   for(const uid of memberIds){
     const uDoc=await getDoc(doc(db,'users',uid));
     if(!uDoc.exists())continue;
@@ -2202,12 +2222,18 @@ async function loadTeacherChatList(){
     const chatId=getChatId(CU.uid,uid);
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
+    const lastTime=lastMsg&&lastMsg.createdAt?lastMsg.createdAt.seconds:-1;
+    items.push({uid,u,lastMsg,lastTime});
+  }
+  items.sort((a,b)=>b.lastTime-a.lastTime);
+  list.innerHTML='';
+  items.forEach(({uid,u,lastMsg})=>{
     const roleLabel=u.role==='parent'?'Parent':u.role==='student'?'Student':'';
     const el=document.createElement('div');el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.innerHTML=`<div class="chat-av">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:11px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(uid,u.name||'User');
     list.appendChild(el);
-  }
+  });
 }
 
 // ── VOICE ──
