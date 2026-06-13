@@ -2279,8 +2279,27 @@ async function loadSettings() {
   c.appendChild(sec);
 
   // Notification preferences
-  const notifPrefs = await getDoc(doc(db,'users',CU.uid));
-  const prefs = (notifPrefs.exists() && notifPrefs.data().notifPrefs) || {};
+  const notifPrefsDoc = await getDoc(doc(db,'users',CU.uid));
+  const prefs = (notifPrefsDoc.exists() && notifPrefsDoc.data().notifPrefs) || {};
+  const notifStatus = Notification.permission;
+  const notifSec = document.createElement('div'); notifSec.className='settings-section';
+  const notifHeader = document.createElement('div');
+  notifHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
+  notifHeader.textContent='Notification Preferences';
+  notifSec.appendChild(notifHeader);
+
+  if (notifStatus !== 'granted') {
+    const enableRow = document.createElement('div'); enableRow.className='settings-row';
+    enableRow.innerHTML=`<div class="settings-row-icon" style="background:#FFF7ED"><svg viewBox="0 0 24 24" stroke="#EA580C" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">Enable Notifications</div><div class="settings-row-value" style="font-size:12px;color:#EA580C">${notifStatus==='denied'?'Blocked':'Tap to enable'}</div><div class="settings-row-arrow">›</div>`;
+    if (notifStatus !== 'denied') enableRow.onclick = () => enableNotifications();
+    else enableRow.onclick = () => showToast('Go to browser/phone settings to unblock notifications');
+    notifSec.appendChild(enableRow);
+  } else {
+    const enabledRow = document.createElement('div'); enabledRow.className='settings-row';
+    enabledRow.style.cursor='default';
+    enabledRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">Notifications</div><div class="settings-row-value" style="color:#16A34A">Enabled ✓</div>`;
+    notifSec.appendChild(enabledRow);
+  }
 
   const studentNotifs = [
     { key:'announcements', label:'New Announcements', icon:'📢' },
@@ -2305,11 +2324,6 @@ async function loadSettings() {
     { key:'chat',          label:'Chat Messages',     icon:'✉️' },
   ];
   const allNotifTypes = ROLE==='teacher' ? teacherNotifs : ROLE==='parent' ? parentNotifs : studentNotifs;
-  const notifSec = document.createElement('div'); notifSec.className='settings-section';
-  const notifHeader = document.createElement('div');
-  notifHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
-  notifHeader.textContent='Notification Preferences';
-  notifSec.appendChild(notifHeader);
 
   allNotifTypes.forEach(({key, label, icon}) => {
     const enabled = prefs[key] !== false; // default on
@@ -2610,12 +2624,33 @@ function urlBase64ToUint8Array(base64String) {
 
 async function setupPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission === 'granted') {
+    // Already granted — just refresh subscription silently
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) await existing.unsubscribe();
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+      });
+      await setDoc(doc(db,'users',CU.uid), { pushSub: JSON.parse(JSON.stringify(sub)) }, {merge:true});
+    } catch(e) { console.warn('Push refresh failed:', e); }
+  }
+  // If denied or default, do nothing — let the settings button handle it
+}
+
+window.enableNotifications = async () => {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast('Push notifications not supported on this browser');
+    return;
+  }
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    // Unsubscribe existing first to force fresh sub
+    if (permission !== 'granted') { showToast('Notifications blocked — please allow in browser settings'); return; }
     const existing = await reg.pushManager.getSubscription();
     if (existing) await existing.unsubscribe();
     const sub = await reg.pushManager.subscribe({
@@ -2623,8 +2658,10 @@ async function setupPushNotifications() {
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
     });
     await setDoc(doc(db,'users',CU.uid), { pushSub: JSON.parse(JSON.stringify(sub)) }, {merge:true});
-  } catch(e) { console.warn('Push setup failed:', e); }
-}
+    showToast('Notifications enabled ✓');
+    loadSettings(); // refresh to show updated status
+  } catch(e) { console.warn('Push setup failed:', e); showToast('Could not enable notifications'); }
+};
 
 window.saveNotifPref = async (key, enabled) => {
   const track = $(`notif-track-${key}`);
