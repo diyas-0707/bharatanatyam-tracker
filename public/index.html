@@ -739,7 +739,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
   </div>
 
   <!-- Feedback -->
-  <div class="modal" id="feedback-modal">
+  <div class="modal" id="app-feedback-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">Feedback & Questions</div>
@@ -749,7 +749,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
         <textarea id="feedback-text" rows="5" placeholder="e.g. I'd love it if students could... / Why does X work this way?"></textarea>
       </div>
       <div class="modal-btns" style="margin-top:16px">
-        <button class="btn btn-secondary" onclick="closeModal('feedback-modal')">Cancel</button>
+        <button class="btn btn-secondary" onclick="closeModal('app-feedback-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="sendFeedback()">Send</button>
       </div>
     </div>
@@ -2229,7 +2229,7 @@ async function loadSettings() {
   // Feedback
   const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
   feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
-  feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('feedback-modal'); };
+  feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('app-feedback-modal'); };
   sec.appendChild(feedbackRow);
 
   c.appendChild(sec);
@@ -2258,8 +2258,7 @@ window.sendFeedback = async () => {
       subject: `Bharatanatyam Tracker Feedback — ${name}`,
       message: text
     });
-    closeModal('feedback-modal');
-    showToast('Feedback sent ✓');
+    closeModal('app-feedback-modal');
   } catch(e) {
     showToast('Failed to send — try again');
     console.error(e);
