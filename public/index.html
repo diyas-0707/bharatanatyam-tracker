@@ -315,6 +315,8 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .gold-bullet::before{content:'✦';color:var(--gold-light);margin-right:8px;font-size:11px}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('oCvLTLfFvGeirSl8B');</script>
 </head>
 <body>
 <div id="app">
@@ -736,20 +738,25 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     </div>
   </div>
 
-  <!-- Edit Message -->
-  <div class="modal" id="edit-message-modal">
+  <!-- Feedback -->
+  <div class="modal" id="feedback-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
-      <div class="modal-title">Edit Message</div>
-      <div class="field"><textarea id="edit-message-text" rows="3"></textarea></div>
+      <div class="modal-title">Feedback & Questions</div>
+      <p style="font-size:13px;color:var(--text-soft);margin-bottom:14px;line-height:1.6">Have a question or something to share? Write it below and it'll be sent directly to the app developer.</p>
+      <div class="field">
+        <label>Your message</label>
+        <textarea id="feedback-text" rows="5" placeholder="e.g. I'd love it if students could... / Why does X work this way?"></textarea>
+      </div>
       <div class="modal-btns" style="margin-top:16px">
-        <button class="btn btn-secondary" onclick="closeModal('edit-message-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveEditMessage()">Save</button>
+        <button class="btn btn-secondary" onclick="closeModal('feedback-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="sendFeedback()">Send</button>
       </div>
     </div>
   </div>
 
   <!-- Edit Message -->
+  <div class="modal" id="edit-message-modal">
   <div class="modal" id="edit-message-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
@@ -2219,6 +2226,12 @@ async function loadSettings() {
   signOutRow.onclick = () => doSignOut();
   sec.appendChild(signOutRow);
 
+  // Feedback
+  const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
+  feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
+  feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('feedback-modal'); };
+  sec.appendChild(feedbackRow);
+
   c.appendChild(sec);
 
   // Danger zone
@@ -2229,6 +2242,29 @@ async function loadSettings() {
   dangerSec.appendChild(deleteRow);
   c.appendChild(dangerSec);
 }
+
+window.sendFeedback = async () => {
+  const text = $('feedback-text').value.trim();
+  if (!text) { showToast('Please write a message first'); return; }
+  const name = CU.displayName || 'Unknown';
+  const email = CU.email || 'no email';
+  const role = ROLE==='teacher'?'Teacher':ROLE==='parent'?'Parent':'Student';
+  showToast('Sending...');
+  try {
+    await emailjs.send('service_awoncra', 'template_0i8cusn', {
+      from_name: name,
+      from_email: email,
+      role: role,
+      subject: `Bharatanatyam Tracker Feedback — ${name}`,
+      message: text
+    });
+    closeModal('feedback-modal');
+    showToast('Feedback sent ✓');
+  } catch(e) {
+    showToast('Failed to send — try again');
+    console.error(e);
+  }
+};
 
 window.saveDisplayName = async () => {
   const name = $('new-display-name').value.trim();
