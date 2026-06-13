@@ -933,6 +933,7 @@ function setupMain() {
   if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
   $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
   goScreen('home');
+  setupPushNotifications();
 }
 
 // ── NAVIGATION ──
@@ -1436,6 +1437,8 @@ window.postAnnouncement = async () => {
   const pinned=$('announce-pin').checked;
   if(!body) return;
   await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  const memberIds = await getClassMemberIds(currentClassId);
+  await sendPushToUsers(memberIds, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`);
   $('announce-body').value=''; $('announce-pin').checked=false;
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
@@ -1445,6 +1448,8 @@ window.postAssignment = async () => {
   const title=$('assign-title').value.trim(), body=$('assign-body').value.trim(), due=$('assign-due').value;
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
   await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  const memberIds = await getClassMemberIds(currentClassId);
+  await sendPushToUsers(memberIds, `📝 New Assignment`, `${title} — due ${due}`);
   $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value='';
   closeModal('post-assign-modal');
   showToast('Assignment posted ✓');
@@ -1588,6 +1593,8 @@ window.postComment = async (postId, parentId) => {
     authorId: CU.uid, authorName: CU.displayName,
     createdAt: serverTimestamp()
   });
+  const memberIds = await getClassMemberIds(currentClassId);
+  await sendPushToUsers(memberIds, `💬 New Comment`, `${CU.displayName}: ${text.substring(0,80)}`);
   // Refresh just the comments section
   const sec = document.getElementById('comments-'+postId);
   if (sec) {
@@ -2007,6 +2014,7 @@ window.saveLogFeedback = async (logId, studentId) => {
   await setDoc(doc(db,'classes',currentClassId,'logFeedback',logId), {
     text, teacherId:CU.uid, teacherName:CU.displayName, studentId, updatedAt:serverTimestamp()
   });
+  await sendPushToUsers([studentId], `📝 Feedback on your log`, `${CU.displayName}: ${text.substring(0,80)}`);
   showToast('Feedback saved ✓');
 };
 
@@ -2440,6 +2448,7 @@ window.sendChatMessage=async()=>{
     $('chat-file-input').value='';
   }
   await addDoc(collection(db,'chats',chatId,'messages'),msgData);
+  await sendPushToUsers([currentChatOtherId], `💬 ${CU.displayName}`, msgData.text ? msgData.text.substring(0,80) : '📎 Sent a file');
 };
 
 window.startReplyMsg=(msgId,senderName,preview)=>{
@@ -2517,6 +2526,54 @@ window.toggleVoice=(fieldId,micId)=>{
 document.querySelectorAll('.modal').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
 });
+
+// ── PUSH NOTIFICATIONS ──
+const VAPID_PUBLIC = 'BI_wd-lRgyALbvn2UPBT0fUrcgfHblMfwSe3EPJT5cNn_bBOioOqo0PnGZkkELNk-nmGga_4Q0CO-ELJQSaeo8c';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function setupPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+    });
+    // Save subscription to Firestore under user doc
+    await setDoc(doc(db,'users',CU.uid), { pushSub: JSON.parse(JSON.stringify(sub)) }, {merge:true});
+  } catch(e) { console.warn('Push setup failed:', e); }
+}
+
+async function sendPushToUsers(userIds, title, body) {
+  // Get subscriptions for all target users and send via /api/notify
+  const uniqueIds = [...new Set(userIds)].filter(id => id !== CU.uid);
+  for (const uid of uniqueIds) {
+    try {
+      const udoc = await getDoc(doc(db,'users',uid));
+      if (!udoc.exists()) continue;
+      const sub = udoc.data().pushSub;
+      if (!sub) continue;
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ subscription: sub, title, body })
+      });
+    } catch(e) { console.warn('Failed to notify', uid, e); }
+  }
+}
+
+async function getClassMemberIds(classId) {
+  const cdoc = await getDoc(doc(db,'classes',classId));
+  return cdoc.exists() ? (cdoc.data().studentIds || []) : [];
+}
 
 // ── INIT LOG DATE ──
 $('log-date').value = new Date().toISOString().split('T')[0];
