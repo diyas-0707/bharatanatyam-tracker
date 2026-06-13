@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+img{border:none;display:block}
 :root{
   --maroon:#6B1E1E;--maroon-deep:#4A1010;--maroon-soft:#8B3030;
   --gold:#C9922A;--gold-light:#E8B84B;--gold-pale:#FDF3DC;
@@ -163,6 +164,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .chat-list-item{background:var(--card-bg);border-radius:14px;padding:14px 18px;border:.5px solid var(--border);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .18s}
 .chat-list-item:active{transform:scale(.98)}
 .chat-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;flex-shrink:0;overflow:hidden}
+.chat-av img{width:46px;height:46px;object-fit:cover;border:none;display:block}
 .chat-info{flex:1;min-width:0}
 .chat-name{font-size:15px;font-weight:500;color:var(--text-dark)}
 .chat-preview{font-size:13px;color:var(--text-soft);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1525,28 +1527,38 @@ async function buildCommentsSection(postId) {
   ));
 
   const comments = commSnap.docs.map(d=>({id:d.id,...d.data()}));
-  const topLevel = comments.filter(c=>!c.parentId);
 
+  // Batch-fetch user photos
+  const uniqueAuthorIds = [...new Set(comments.map(c=>c.authorId).filter(Boolean))];
+  const photoMap = {};
+  await Promise.all(uniqueAuthorIds.map(async uid => {
+    const udoc = await getDoc(doc(db,'users',uid));
+    if (udoc.exists()) photoMap[uid] = udoc.data().photo || null;
+  }));
+
+  const topLevel = comments.filter(c=>!c.parentId);
   topLevel.forEach(c => {
-    sec.appendChild(buildCommentEl(c, postId, false));
-    // replies
+    sec.appendChild(buildCommentEl(c, postId, false, photoMap));
     comments.filter(r=>r.parentId===c.id).forEach(r => {
-      sec.appendChild(buildCommentEl(r, postId, true));
+      sec.appendChild(buildCommentEl(r, postId, true, photoMap));
     });
   });
 
-  // Input row
   const inputRow = buildCommentInput(postId, null, null);
   sec.appendChild(inputRow);
   return sec;
 }
 
-function buildCommentEl(c, postId, isReply) {
+function buildCommentEl(c, postId, isReply, photoMap) {
   const isOwn = c.authorId === CU.uid;
   const wrap = document.createElement('div');
   wrap.className = 'comment' + (isReply ? ' reply-indent' : '');
   wrap.id = 'comment-el-' + c.id;
-  wrap.innerHTML = `<div class="comment-av">${(c.authorName||'?')[0]}</div>
+  const photo = photoMap && photoMap[c.authorId];
+  const avatarHtml = photo
+    ? `<img src="${photo}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;border:none;display:block">`
+    : `<div class="comment-av">${(c.authorName||'?')[0]}</div>`;
+  wrap.innerHTML = `${avatarHtml}
     <div class="comment-body">
       <div class="comment-author">${c.authorName||'User'}</div>
       <div class="comment-text" id="comment-text-${c.id}">${c.text}</div>
@@ -2573,13 +2585,16 @@ async function setupPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
+    // Unsubscribe existing first to force fresh sub
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) await existing.unsubscribe();
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
     });
-    // Save subscription to Firestore under user doc
     await setDoc(doc(db,'users',CU.uid), { pushSub: JSON.parse(JSON.stringify(sub)) }, {merge:true});
   } catch(e) { console.warn('Push setup failed:', e); }
 }
