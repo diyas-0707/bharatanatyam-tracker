@@ -646,6 +646,21 @@ button.rec:not(.btn) svg{stroke:#fff!important}
   </div>
 
   <!-- Edit Assignment -->
+  <!-- Edit Announcement -->
+  <div class="modal" id="edit-announce-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Edit Announcement</div>
+      <div class="field">
+        <div class="field-voice"><textarea id="edit-announce-body" rows="4" placeholder="Announcement text..."></textarea><button class="mic-btn" id="mic-edit-announce" onclick="toggleVoice('edit-announce-body','mic-edit-announce')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      </div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('edit-announce-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditAnnouncement()">Save</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="edit-assign-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
@@ -1236,11 +1251,16 @@ async function renderStream(body) {
         post.className = 'stream-post' + (item.pinned ? ' pinned' : '');
         const dt = item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
         const pinnedBadge = item.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
-        const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin-left:auto" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
+        const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
+        const editDeleteBtns = isT ? `<div style="display:flex;gap:6px;margin-left:auto;align-items:center">
+          ${item._type==='announce' ? pinBtn : ''}
+          <button onclick="openEditAnnouncement('${item._id}','${(item.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏</button>
+          <button onclick="deleteAnnouncement('${item._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button>
+        </div>` : '';
         const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
         const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
-        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${pinBtn}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
         if (item._type === 'announce') {
           const commSec = await buildCommentsSection(item._id);
           post.appendChild(commSec);
@@ -1908,6 +1928,33 @@ window.castVote = async (pollId, option, closes) => {
 };
 
 // ── EDIT ASSIGNMENT ──
+let editingAnnounceId = null;
+window.openEditAnnouncement = (id, body) => {
+  editingAnnounceId = id;
+  $('edit-announce-body').value = body.replace(/\\n/g,'\n');
+  openModal('edit-announce-modal');
+};
+window.saveEditAnnouncement = async () => {
+  const body = $('edit-announce-body').value.trim();
+  if (!body) return;
+  await updateDoc(doc(db,'classes',currentClassId,'announcements',editingAnnounceId), { body, editedAt:serverTimestamp() });
+  closeModal('edit-announce-modal');
+  showToast('Announcement updated ✓');
+  switchClassTab('stream');
+};
+window.deleteAnnouncement = async (id) => {
+  if (!confirm('Delete this announcement?')) return;
+  await updateDoc(doc(db,'classes',currentClassId,'announcements',id), { deleted:true });
+  showToast('Deleted ✓');
+  switchClassTab('stream');
+};
+window.deleteAssignment = async (id) => {
+  if (!confirm('Delete this assignment?')) return;
+  await updateDoc(doc(db,'classes',currentClassId,'assignments',id), { deleted:true });
+  showToast('Deleted ✓');
+  switchClassTab('assignments');
+};
+
 window.openEditAssignment = (id, title, body, due) => {
   editingAssignId = id;
   $('edit-assign-title').value = title;
@@ -2283,23 +2330,20 @@ async function loadSettings() {
   const prefs = (notifPrefsDoc.exists() && notifPrefsDoc.data().notifPrefs) || {};
   const notifStatus = Notification.permission;
   const notifSec = document.createElement('div'); notifSec.className='settings-section';
-  const notifHeader = document.createElement('div');
-  notifHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
-  notifHeader.textContent='Notification Preferences';
-  notifSec.appendChild(notifHeader);
 
-  if (notifStatus !== 'granted') {
-    const enableRow = document.createElement('div'); enableRow.className='settings-row';
-    enableRow.innerHTML=`<div class="settings-row-icon" style="background:#FFF7ED"><svg viewBox="0 0 24 24" stroke="#EA580C" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">Enable Notifications</div><div class="settings-row-value" style="font-size:12px;color:#EA580C">${notifStatus==='denied'?'Blocked':'Tap to enable'}</div><div class="settings-row-arrow">›</div>`;
-    if (notifStatus !== 'denied') enableRow.onclick = () => enableNotifications();
-    else enableRow.onclick = () => showToast('Go to browser/phone settings to unblock notifications');
-    notifSec.appendChild(enableRow);
-  } else {
-    const enabledRow = document.createElement('div'); enabledRow.className='settings-row';
-    enabledRow.style.cursor='default';
-    enabledRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">Notifications</div><div class="settings-row-value" style="color:#16A34A">Enabled ✓</div>`;
-    notifSec.appendChild(enabledRow);
-  }
+  // Top row — enable/status + expand toggle
+  const notifTopRow = document.createElement('div'); notifTopRow.className='settings-row';
+  notifTopRow.style.cursor = notifStatus === 'granted' ? 'pointer' : (notifStatus === 'denied' ? 'default' : 'pointer');
+  const bellBg = notifStatus === 'granted' ? '#F0FDF4' : '#FFF7ED';
+  const bellStroke = notifStatus === 'granted' ? '#16A34A' : '#EA580C';
+  const bellLabel = notifStatus === 'granted' ? 'Notifications' : 'Enable Notifications';
+  const bellValue = notifStatus === 'granted' ? '<span style="color:#16A34A">Enabled ✓</span>' : `<span style="color:#EA580C">${notifStatus==='denied'?'Blocked':'Tap to enable'}</span>`;
+  notifTopRow.innerHTML=`<div class="settings-row-icon" style="background:${bellBg}"><svg viewBox="0 0 24 24" stroke="${bellStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">${bellLabel}</div><div class="settings-row-value">${bellValue}</div><div class="settings-row-arrow" id="notif-chevron" style="transition:transform .25s">›</div>`;
+
+  // Collapsible toggles panel
+  const notifPanel = document.createElement('div');
+  notifPanel.id = 'notif-panel';
+  notifPanel.style.cssText = 'display:none;border-top:.5px solid var(--border)';
 
   const studentNotifs = [
     { key:'announcements', label:'New Announcements', icon:'📢' },
@@ -2310,11 +2354,11 @@ async function loadSettings() {
     { key:'logFeedback',   label:'Log Feedback',      icon:'⭐' },
   ];
   const teacherNotifs = [
-    { key:'teacherComments', label:'Comments on Posts',         icon:'💬' },
-    { key:'studentSubmit',   label:'Student Submits Assignment', icon:'📝' },
-    { key:'studentLog',      label:'Student Logs Practice',      icon:'⭐' },
-    { key:'chat',            label:'Chat Messages',              icon:'✉️' },
-    { key:'studentJoin',     label:'New Student/Parent Joins',   icon:'🎉' },
+    { key:'teacherComments', label:'Comments on Posts',          icon:'💬' },
+    { key:'studentSubmit',   label:'Student Submits Assignment',  icon:'📝' },
+    { key:'studentLog',      label:'Student Logs Practice',       icon:'⭐' },
+    { key:'chat',            label:'Chat Messages',               icon:'✉️' },
+    { key:'studentJoin',     label:'New Student/Parent Joins',    icon:'🎉' },
   ];
   const parentNotifs = [
     { key:'announcements', label:'New Announcements', icon:'📢' },
@@ -2325,20 +2369,34 @@ async function loadSettings() {
   ];
   const allNotifTypes = ROLE==='teacher' ? teacherNotifs : ROLE==='parent' ? parentNotifs : studentNotifs;
 
-  allNotifTypes.forEach(({key, label, icon}) => {
-    const enabled = prefs[key] !== false; // default on
-    const row = document.createElement('div'); row.className='settings-row';
-    row.style.cursor='default';
-    row.innerHTML=`
-      <div class="settings-row-icon" style="background:var(--gold-pale);font-size:18px;display:flex;align-items:center;justify-content:center">${icon}</div>
-      <div class="settings-row-label">${label}</div>
-      <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
-        <input type="checkbox" id="notif-${key}" ${enabled?'checked':''} style="opacity:0;width:0;height:0" onchange="saveNotifPref('${key}',this.checked)">
-        <span style="position:absolute;cursor:pointer;inset:0;background:${enabled?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="notif-track-${key}"></span>
-        <span style="position:absolute;content:'';height:18px;width:18px;left:${enabled?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="notif-thumb-${key}"></span>
-      </label>`;
-    notifSec.appendChild(row);
-  });
+  if (notifStatus === 'granted') {
+    allNotifTypes.forEach(({key, label, icon}) => {
+      const enabled = prefs[key] !== false;
+      const row = document.createElement('div'); row.className='settings-row'; row.style.cursor='default';
+      row.innerHTML=`
+        <div class="settings-row-icon" style="background:var(--gold-pale);font-size:18px;display:flex;align-items:center;justify-content:center">${icon}</div>
+        <div class="settings-row-label">${label}</div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+          <input type="checkbox" id="notif-${key}" ${enabled?'checked':''} style="opacity:0;width:0;height:0" onchange="saveNotifPref('${key}',this.checked)">
+          <span style="position:absolute;cursor:pointer;inset:0;background:${enabled?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="notif-track-${key}"></span>
+          <span style="position:absolute;height:18px;width:18px;left:${enabled?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="notif-thumb-${key}"></span>
+        </label>`;
+      notifPanel.appendChild(row);
+    });
+    notifTopRow.onclick = () => {
+      const open = notifPanel.style.display !== 'none';
+      notifPanel.style.display = open ? 'none' : 'block';
+      const chevron = document.getElementById('notif-chevron');
+      if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+    };
+  } else if (notifStatus !== 'denied') {
+    notifTopRow.onclick = () => enableNotifications();
+  } else {
+    notifTopRow.onclick = () => showToast('Go to browser/phone settings to unblock notifications');
+  }
+
+  notifSec.appendChild(notifTopRow);
+  notifSec.appendChild(notifPanel);
   c.appendChild(notifSec);
 
   // Danger zone
