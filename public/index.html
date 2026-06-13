@@ -257,10 +257,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .field input:focus,.field textarea:focus{border-color:var(--maroon)}
 .field textarea{resize:none;min-height:90px;line-height:1.6}
 .field-voice{position:relative}
-.field-voice textarea{padding-right:44px}
-.mic-btn{position:absolute;right:10px;bottom:10px;width:28px;height:28px;background:var(--gold-pale);border:.5px solid rgba(201,146,42,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none;padding:0;line-height:1}
+.field-voice textarea,.field-voice .comment-input{padding-right:48px}
+.mic-btn{position:absolute;top:50%;right:10px;transform:translateY(-50%);width:30px;height:30px;background:var(--gold-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;border:none;padding:0;line-height:1}
 .mic-btn.rec{background:var(--maroon);animation:pulse 1s infinite}
-.mic-btn svg{width:14px;height:14px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.mic-btn svg{width:15px;height:15px;stroke:var(--maroon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
 .mic-btn.rec svg{stroke:#fff}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,30,30,.4)}50%{box-shadow:0 0 0 8px rgba(107,30,30,0)}}
 
@@ -459,7 +459,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
     <div style="padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;background:var(--warm-white);flex-shrink:0">
       <input type="file" id="chat-file-input" multiple style="display:none" onchange="previewChatFiles(this)">
       <button onclick="document.getElementById('chat-file-input').click()" style="padding:9px 10px;background:var(--surface);border:.5px solid var(--border);border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Attach files"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
-      <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+      <div class="field-voice" style="flex:1;position:relative"><textarea id="chat-input" placeholder="Type a message..." rows="1" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:9px 38px 9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);outline:none;resize:none;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea><button class="mic-btn" id="mic-chat" onclick="toggleVoice('chat-input','mic-chat')" ><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
       <button onclick="sendChatMessage()" style="padding:9px 16px;background:var(--maroon);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0">Send</button>
     </div>
   </div>
@@ -746,7 +746,10 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
       <p style="font-size:13px;color:var(--text-soft);margin-bottom:14px;line-height:1.6">Have a question or something to share? Write it below and it'll be sent directly to the app developer.</p>
       <div class="field">
         <label>Your message</label>
-        <textarea id="feedback-text" rows="5" placeholder="e.g. I'd love it if students could... / Why does X work this way?"></textarea>
+        <div class="field-voice">
+          <textarea id="feedback-text" rows="5" placeholder="e.g. I'd love it if students could... / Why does X work this way?"></textarea>
+          <button class="mic-btn" id="mic-feedback" onclick="toggleVoice('feedback-text','mic-feedback')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('app-feedback-modal')">Cancel</button>
@@ -1550,7 +1553,7 @@ function buildCommentInput(postId, parentId, replyToName) {
   const placeholder = replyToName ? `Reply to ${replyToName}...` : 'Add a comment...';
   const micId = `mic-c-${postId}${parentId?'-'+parentId:''}`;
   const inputId = `cinput-${postId}${parentId?'-'+parentId:''}`;
-  row.innerHTML = `<div class="field-voice" style="flex:1;position:relative"><textarea class="comment-input" id="${inputId}" placeholder="${placeholder}" rows="1" style="padding-right:38px;width:100%" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea><button class="mic-btn" id="${micId}" onclick="toggleVoice('${inputId}','${micId}')" style="bottom:6px;right:6px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
+  row.innerHTML = `<div class="field-voice" style="flex:1;position:relative"><textarea class="comment-input" id="${inputId}" placeholder="${placeholder}" rows="1" style="padding-right:38px;width:100%" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postComment('${postId}','${parentId||''}');}"></textarea><button class="mic-btn" id="${micId}" onclick="toggleVoice('${inputId}','${micId}')" ><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
     <button class="comment-post-btn" onclick="postComment('${postId}','${parentId||''}')">Post</button>`;
   return row;
 }
