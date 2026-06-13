@@ -1137,6 +1137,7 @@ window.joinWithCode = async () => {
   if ((classDoc.data().studentIds||[]).includes(CU.uid)) { showToast('Already in this class'); return; }
   if (classDoc.data().deleted) { showToast('This class no longer exists'); return; }
   await updateDoc(doc(db,'classes',classDoc.id), {studentIds: arrayUnion(CU.uid)});
+  await notifyTeacher(classDoc.id, `🎉 ${CU.displayName} joined your class`, `${ROLE==='parent'?'Parent':'Student'} joined via code`, 'studentJoin', `/?screen=people&class=${classDoc.id}`);
   $('join-code-input').value = '';
   closeModal('join-code-modal');
   showToast('Joined class! 🎉');
@@ -1146,6 +1147,7 @@ window.joinWithCode = async () => {
 window.respondInvite = async (invId, classId, action) => {
   if (action==='accept') {
     await updateDoc(doc(db,'classes',classId), {studentIds:arrayUnion(CU.uid)});
+    await notifyTeacher(classId, `🎉 ${CU.displayName} joined your class`, `${ROLE==='parent'?'Parent':'Student'} accepted your invite`, 'studentJoin', `/?screen=people&class=${classId}`);
     showToast('Joined class! 🎉');
   } else showToast('Invite declined');
   await updateDoc(doc(db,'classInvites',invId), {status:action==='accept'?'accepted':'declined'});
@@ -1440,7 +1442,7 @@ window.postAnnouncement = async () => {
   if(!body) return;
   await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
+  await notifyClassMembers(currentClassId, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
   $('announce-body').value=''; $('announce-pin').checked=false;
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
@@ -1451,7 +1453,7 @@ window.postAssignment = async () => {
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
   await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `📝 New Assignment`, `${title} — due ${due}`, 'assignments', `/?screen=assignments&class=${currentClassId}`);
+  await notifyClassMembers(currentClassId, `📝 New Assignment`, `${title} — due ${due}`, 'assignments', `/?screen=assignments&class=${currentClassId}`);
   $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value='';
   closeModal('post-assign-modal');
   showToast('Assignment posted ✓');
@@ -1605,8 +1607,11 @@ window.postComment = async (postId, parentId) => {
     authorId: CU.uid, authorName: CU.displayName,
     createdAt: serverTimestamp()
   });
-  const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `💬 New Comment`, `${CU.displayName}: ${text.substring(0,80)}`, 'comments', `/?screen=stream&class=${currentClassId}`);
+  if (ROLE === 'teacher') {
+    await notifyClassMembers(currentClassId, `💬 ${CU.displayName} commented`, text.substring(0,80), 'comments', `/?screen=stream&class=${currentClassId}`);
+  } else {
+    await notifyTeacher(currentClassId, `💬 ${CU.displayName} commented`, text.substring(0,80), 'teacherComments', `/?screen=stream&class=${currentClassId}`);
+  }
   // Refresh just the comments section
   const sec = document.getElementById('comments-'+postId);
   if (sec) {
@@ -1716,6 +1721,7 @@ window.openSubmit = async (assignId, assignTitle) => {
       assignId, studentId:CU.uid, studentName:CU.displayName,
       files:[...existing,...uploaded], note, submittedAt:serverTimestamp()
     }, {merge:true});
+    await notifyTeacher(currentClassId, `📝 ${CU.displayName} submitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
     closeModal('submit-modal');
     showToast('Submitted! ✓');
     switchClassTab('assignments');
@@ -1867,6 +1873,7 @@ window.savePoll = async () => {
     showToast('Poll updated ✓');
   } else {
     await addDoc(collection(db,'classes',currentClassId,'polls'), { question, options, closes, votes:{}, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+    await notifyClassMembers(currentClassId, `📊 New Poll`, `${CU.displayName}: ${question.substring(0,80)}`, 'polls', `/?screen=stream&class=${currentClassId}`);
     showToast('Poll posted ✓');
   }
   $('poll-question').value=''; $('poll-options').value=''; $('poll-closes').value='';
@@ -2185,6 +2192,9 @@ window.saveLog = async () => {
     }
   }
   await addDoc(collection(db,'practiceLogs'), { studentId:CU.uid, studentName:CU.displayName, date, practiceText:text, completed:status==='completed', files, createdAt:serverTimestamp() });
+  // Notify teachers of all classes this student is in
+  const classSnap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  await Promise.all(classSnap.docs.map(cd => notifyTeacher(cd.id, `⭐ ${CU.displayName} logged a practice`, text.substring(0,80), 'studentLog', `/?screen=people&class=${cd.id}`)));
   $('log-practice').value='';
   logFilesToUpload=[];
   if($('log-files-preview'))$('log-files-preview').innerHTML='';
@@ -2271,13 +2281,30 @@ async function loadSettings() {
   // Notification preferences
   const notifPrefs = await getDoc(doc(db,'users',CU.uid));
   const prefs = (notifPrefs.exists() && notifPrefs.data().notifPrefs) || {};
-  const allNotifTypes = [
+
+  const studentNotifs = [
     { key:'announcements', label:'New Announcements', icon:'📢' },
     { key:'assignments',   label:'New Assignments',   icon:'📝' },
+    { key:'polls',         label:'New Polls',         icon:'📊' },
     { key:'comments',      label:'Comments on Posts', icon:'💬' },
     { key:'chat',          label:'Chat Messages',     icon:'✉️' },
     { key:'logFeedback',   label:'Log Feedback',      icon:'⭐' },
   ];
+  const teacherNotifs = [
+    { key:'teacherComments', label:'Comments on Posts',         icon:'💬' },
+    { key:'studentSubmit',   label:'Student Submits Assignment', icon:'📝' },
+    { key:'studentLog',      label:'Student Logs Practice',      icon:'⭐' },
+    { key:'chat',            label:'Chat Messages',              icon:'✉️' },
+    { key:'studentJoin',     label:'New Student/Parent Joins',   icon:'🎉' },
+  ];
+  const parentNotifs = [
+    { key:'announcements', label:'New Announcements', icon:'📢' },
+    { key:'assignments',   label:'New Assignments',   icon:'📝' },
+    { key:'polls',         label:'New Polls',         icon:'📊' },
+    { key:'comments',      label:'Comments on Posts', icon:'💬' },
+    { key:'chat',          label:'Chat Messages',     icon:'✉️' },
+  ];
+  const allNotifTypes = ROLE==='teacher' ? teacherNotifs : ROLE==='parent' ? parentNotifs : studentNotifs;
   const notifSec = document.createElement('div'); notifSec.className='settings-section';
   const notifHeader = document.createElement('div');
   notifHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
@@ -2600,7 +2627,6 @@ async function setupPushNotifications() {
 }
 
 window.saveNotifPref = async (key, enabled) => {
-  // Animate toggle
   const track = $(`notif-track-${key}`);
   const thumb = $(`notif-thumb-${key}`);
   if (track) track.style.background = enabled ? 'var(--maroon)' : '#ccc';
@@ -2608,23 +2634,55 @@ window.saveNotifPref = async (key, enabled) => {
   await setDoc(doc(db,'users',CU.uid), { notifPrefs: { [key]: enabled } }, {merge:true});
 };
 
+// Core push sender — checks prefs before sending
+async function pushToUser(uid, title, body, notifType, deepLink) {
+  if (uid === CU.uid) return;
+  try {
+    const udoc = await getDoc(doc(db,'users',uid));
+    if (!udoc.exists()) return;
+    const data = udoc.data();
+    if (!data.pushSub) return;
+    if (notifType && data.notifPrefs && data.notifPrefs[notifType] === false) return;
+    await fetch('/api/notify', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ subscription: data.pushSub, title, body, url: deepLink||'/' })
+    });
+  } catch(e) { console.warn('Push failed for', uid, e); }
+}
+
+async function getClassTeacherId(classId) {
+  const cdoc = await getDoc(doc(db,'classes',classId));
+  return cdoc.exists() ? cdoc.data().teacherId : null;
+}
+
+async function getClassStudentIds(classId) {
+  const cdoc = await getDoc(doc(db,'classes',classId));
+  return cdoc.exists() ? (cdoc.data().studentIds||[]) : [];
+}
+
+// Notify all students + parents in a class (optionally with a pref key)
+async function notifyClassMembers(classId, title, body, notifType, deepLink) {
+  const ids = await getClassStudentIds(classId);
+  await Promise.all(ids.map(uid => pushToUser(uid, title, body, notifType, deepLink)));
+}
+
+// Notify only students (not parents) in a class
+async function notifyStudentsOnly(classId, title, body, notifType, deepLink) {
+  const ids = await getClassStudentIds(classId);
+  const studentDocs = await Promise.all(ids.map(uid => getDoc(doc(db,'users',uid))));
+  const studentIds = studentDocs.filter(d=>d.exists()&&d.data().role==='student').map(d=>d.id);
+  await Promise.all(studentIds.map(uid => pushToUser(uid, title, body, notifType, deepLink)));
+}
+
+// Notify the teacher of a class
+async function notifyTeacher(classId, title, body, notifType, deepLink) {
+  const tid = await getClassTeacherId(classId);
+  if (tid) await pushToUser(tid, title, body, notifType, deepLink);
+}
+
+// Legacy wrapper kept for chat (direct user-to-user)
 async function sendPushToUsers(userIds, title, body, notifType, deepLink) {
-  const uniqueIds = [...new Set(userIds)].filter(id => id !== CU.uid);
-  for (const uid of uniqueIds) {
-    try {
-      const udoc = await getDoc(doc(db,'users',uid));
-      if (!udoc.exists()) continue;
-      const data = udoc.data();
-      const sub = data.pushSub;
-      if (!sub) continue;
-      if (notifType && data.notifPrefs && data.notifPrefs[notifType] === false) continue;
-      await fetch('/api/notify', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ subscription: sub, title, body, url: deepLink || '/' })
-      });
-    } catch(e) { console.warn('Failed to notify', uid, e); }
-  }
+  await Promise.all(userIds.map(uid => pushToUser(uid, title, body, notifType, deepLink)));
 }
 
 async function getClassMemberIds(classId) {
