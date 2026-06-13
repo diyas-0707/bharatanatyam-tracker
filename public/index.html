@@ -756,7 +756,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
         <label>Your message</label>
         <div class="field-voice">
           <textarea id="feedback-text" rows="5" placeholder="e.g. I'd love it if students could... / Why does X work this way?"></textarea>
-          <button class="mic-btn" id="mic-feedback" onclick="toggleVoice('feedback-text','mic-feedback')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+          <button class="mic-btn" id="mic-feedback" onclick="toggleVoice('feedback-text','mic-feedback')" style="bottom:14px;right:10px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
@@ -1408,9 +1408,9 @@ async function loadAttendanceRows(container, date) {
   const existing=attDoc.exists()?attDoc.data():{};
   attState={...existing};
   const sdocs=await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
-  sdocs.filter(d=>d.exists()).forEach(d=>{
+  sdocs.filter(d=>d.exists() && d.data().role !== 'parent').forEach(d=>{
     const s=d.data(); const status=existing[d.id]||'none';
-    const row=document.createElement('div'); row.className='att-row';
+    const row=document.createElement('div'); row.className='att-row'; row.style.marginBottom='10px';
     const sPhoto = s.photo || null;
     const sAvatar = sPhoto ? `<img src="${sPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="s-avatar" style="width:36px;height:36px;font-size:14px">${(s.name||'?')[0]}</div>`;
     row.innerHTML=`${sAvatar}<div style="flex:1;font-size:13px;font-weight:500">${s.name||s.email}</div><button onclick="viewStudentAttendance('${d.id}','${(s.name||'Student').replace(/'/g,"\\'")}');" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 9px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:4px">📋</button><div class="att-toggle"><button class="att-btn ${status==='present'?'present':''}" onclick="setAtt('${d.id}','present',this)">Present</button><button class="att-btn ${status==='absent'?'absent':''}" onclick="setAtt('${d.id}','absent',this)">Absent</button></div>`;
@@ -1987,7 +1987,10 @@ window.openStudentDetail = async (sid, sname, semail) => {
         </div>
         <div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;border:.5px solid rgba(201,146,42,.2)">
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">Feedback on this entry</div>
-          <textarea id="lfb-${e._id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5" rows="2" placeholder="Add feedback for this log entry...">${logFb}</textarea>
+          <div class="field-voice" style="position:relative">
+            <textarea id="lfb-${e._id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5;padding-right:40px" rows="2" placeholder="Add feedback for this log entry...">${logFb}</textarea>
+            <button class="mic-btn" id="mic-lfb-${e._id}" onclick="toggleVoice('lfb-${e._id}','mic-lfb-${e._id}')" style="bottom:8px;right:4px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+          </div>
           <button onclick="saveLogFeedback('${e._id}','${sid}')" style="background:var(--maroon);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px">Save</button>
         </div>`;
       logContainer.appendChild(el);
