@@ -10,9 +10,9 @@ webpush.setVapidDetails(
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
-  const { subscription, title, body } = req.body;
+  const { subscription, title, body, url } = req.body;
   try {
-    await webpush.sendNotification(subscription, JSON.stringify({ title, body }));
+    await webpush.sendNotification(subscription, JSON.stringify({ title, body, url: url || '/' }));
     res.status(200).json({ ok: true });
   } catch(e) {
     res.status(500).json({ error: e.message });
