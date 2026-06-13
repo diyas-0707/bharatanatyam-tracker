@@ -162,7 +162,7 @@ html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;c
 .settings-profile-pic:hover .settings-profile-pic-overlay{opacity:1}
 .chat-list-item{background:var(--card-bg);border-radius:14px;padding:14px 18px;border:.5px solid var(--border);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .18s}
 .chat-list-item:active{transform:scale(.98)}
-.chat-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;flex-shrink:0}
+.chat-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--maroon-deep),var(--maroon-soft));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;flex-shrink:0;overflow:hidden}
 .chat-info{flex:1;min-width:0}
 .chat-name{font-size:15px;font-weight:500;color:var(--text-dark)}
 .chat-preview{font-size:13px;color:var(--text-soft);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1438,7 +1438,7 @@ window.postAnnouncement = async () => {
   if(!body) return;
   await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`);
+  await sendPushToUsers(memberIds, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
   $('announce-body').value=''; $('announce-pin').checked=false;
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
@@ -1449,7 +1449,7 @@ window.postAssignment = async () => {
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
   await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `📝 New Assignment`, `${title} — due ${due}`);
+  await sendPushToUsers(memberIds, `📝 New Assignment`, `${title} — due ${due}`, 'assignments', `/?screen=assignments&class=${currentClassId}`);
   $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value='';
   closeModal('post-assign-modal');
   showToast('Assignment posted ✓');
@@ -1594,7 +1594,7 @@ window.postComment = async (postId, parentId) => {
     createdAt: serverTimestamp()
   });
   const memberIds = await getClassMemberIds(currentClassId);
-  await sendPushToUsers(memberIds, `💬 New Comment`, `${CU.displayName}: ${text.substring(0,80)}`);
+  await sendPushToUsers(memberIds, `💬 New Comment`, `${CU.displayName}: ${text.substring(0,80)}`, 'comments', `/?screen=stream&class=${currentClassId}`);
   // Refresh just the comments section
   const sec = document.getElementById('comments-'+postId);
   if (sec) {
@@ -2014,7 +2014,7 @@ window.saveLogFeedback = async (logId, studentId) => {
   await setDoc(doc(db,'classes',currentClassId,'logFeedback',logId), {
     text, teacherId:CU.uid, teacherName:CU.displayName, studentId, updatedAt:serverTimestamp()
   });
-  await sendPushToUsers([studentId], `📝 Feedback on your log`, `${CU.displayName}: ${text.substring(0,80)}`);
+  await sendPushToUsers([studentId], `📝 Feedback on your log`, `${CU.displayName}: ${text.substring(0,80)}`, 'logFeedback', `/?screen=log`);
   showToast('Feedback saved ✓');
 };
 
@@ -2256,6 +2256,38 @@ async function loadSettings() {
 
   c.appendChild(sec);
 
+  // Notification preferences
+  const notifPrefs = await getDoc(doc(db,'users',CU.uid));
+  const prefs = (notifPrefs.exists() && notifPrefs.data().notifPrefs) || {};
+  const allNotifTypes = [
+    { key:'announcements', label:'New Announcements', icon:'📢' },
+    { key:'assignments',   label:'New Assignments',   icon:'📝' },
+    { key:'comments',      label:'Comments on Posts', icon:'💬' },
+    { key:'chat',          label:'Chat Messages',     icon:'✉️' },
+    { key:'logFeedback',   label:'Log Feedback',      icon:'⭐' },
+  ];
+  const notifSec = document.createElement('div'); notifSec.className='settings-section';
+  const notifHeader = document.createElement('div');
+  notifHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
+  notifHeader.textContent='Notification Preferences';
+  notifSec.appendChild(notifHeader);
+
+  allNotifTypes.forEach(({key, label, icon}) => {
+    const enabled = prefs[key] !== false; // default on
+    const row = document.createElement('div'); row.className='settings-row';
+    row.style.cursor='default';
+    row.innerHTML=`
+      <div class="settings-row-icon" style="background:var(--gold-pale);font-size:18px;display:flex;align-items:center;justify-content:center">${icon}</div>
+      <div class="settings-row-label">${label}</div>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+        <input type="checkbox" id="notif-${key}" ${enabled?'checked':''} style="opacity:0;width:0;height:0" onchange="saveNotifPref('${key}',this.checked)">
+        <span style="position:absolute;cursor:pointer;inset:0;background:${enabled?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="notif-track-${key}"></span>
+        <span style="position:absolute;content:'';height:18px;width:18px;left:${enabled?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="notif-thumb-${key}"></span>
+      </label>`;
+    notifSec.appendChild(row);
+  });
+  c.appendChild(notifSec);
+
   // Danger zone
   const dangerSec = document.createElement('div'); dangerSec.className='settings-section';
   const deleteRow = document.createElement('div'); deleteRow.className='settings-row';
@@ -2346,7 +2378,7 @@ async function loadChatList() {
     const el=document.createElement('div'); el.className='chat-list-item';
     const tDoc=await getDoc(doc(db,'users',tid));
     const tPhoto=tDoc.exists()?tDoc.data().photo:null;
-    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.innerHTML=`<div class="chat-av">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(tid,data.teacherName||'Teacher');
     list.appendChild(el);
   }
@@ -2448,7 +2480,7 @@ window.sendChatMessage=async()=>{
     $('chat-file-input').value='';
   }
   await addDoc(collection(db,'chats',chatId,'messages'),msgData);
-  await sendPushToUsers([currentChatOtherId], `💬 ${CU.displayName}`, msgData.text ? msgData.text.substring(0,80) : '📎 Sent a file');
+  await sendPushToUsers([currentChatOtherId], `💬 ${CU.displayName}`, msgData.text ? msgData.text.substring(0,80) : '📎 Sent a file', 'chat', `/?screen=chat&with=${CU.uid}`);
 };
 
 window.startReplyMsg=(msgId,senderName,preview)=>{
@@ -2502,7 +2534,7 @@ async function loadTeacherChatList(){
   for(const {uid,u,lastMsg} of entries){
     const roleLabel=u.role==='parent'?'Parent':u.role==='student'?'Student':'';
     const el=document.createElement('div');el.className='chat-list-item';
-    el.innerHTML=`<div class="chat-av" style="overflow:hidden">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.innerHTML=`<div class="chat-av">${u.photo?`<img src="${u.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:u.name?.[0]||'?'}</div><div class="chat-info"><div class="chat-name">${u.name||'User'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(uid,u.name||'User');
     list.appendChild(el);
   }
@@ -2552,19 +2584,29 @@ async function setupPushNotifications() {
   } catch(e) { console.warn('Push setup failed:', e); }
 }
 
-async function sendPushToUsers(userIds, title, body) {
-  // Get subscriptions for all target users and send via /api/notify
+window.saveNotifPref = async (key, enabled) => {
+  // Animate toggle
+  const track = $(`notif-track-${key}`);
+  const thumb = $(`notif-thumb-${key}`);
+  if (track) track.style.background = enabled ? 'var(--maroon)' : '#ccc';
+  if (thumb) thumb.style.left = enabled ? '23px' : '3px';
+  await setDoc(doc(db,'users',CU.uid), { notifPrefs: { [key]: enabled } }, {merge:true});
+};
+
+async function sendPushToUsers(userIds, title, body, notifType, deepLink) {
   const uniqueIds = [...new Set(userIds)].filter(id => id !== CU.uid);
   for (const uid of uniqueIds) {
     try {
       const udoc = await getDoc(doc(db,'users',uid));
       if (!udoc.exists()) continue;
-      const sub = udoc.data().pushSub;
+      const data = udoc.data();
+      const sub = data.pushSub;
       if (!sub) continue;
+      if (notifType && data.notifPrefs && data.notifPrefs[notifType] === false) continue;
       await fetch('/api/notify', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ subscription: sub, title, body })
+        body: JSON.stringify({ subscription: sub, title, body, url: deepLink || '/' })
       });
     } catch(e) { console.warn('Failed to notify', uid, e); }
   }
@@ -2574,6 +2616,37 @@ async function getClassMemberIds(classId) {
   const cdoc = await getDoc(doc(db,'classes',classId));
   return cdoc.exists() ? (cdoc.data().studentIds || []) : [];
 }
+
+// ── HANDLE DEEP LINK FROM NOTIFICATION ──
+function handleDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const screen = params.get('screen');
+  const classId = params.get('class');
+  const withUser = params.get('with');
+  if (!screen) return;
+  // Wait for auth then navigate
+  const unsub = onAuthStateChanged(auth, async user => {
+    if (!user) return;
+    unsub();
+    await new Promise(r => setTimeout(r, 800)); // let setupMain run
+    if (screen === 'stream' && classId) {
+      const cdoc = await getDoc(doc(db,'classes',classId));
+      if (cdoc.exists()) { currentClassId = classId; openClassDetail(classId, cdoc.data().name); }
+    } else if (screen === 'assignments' && classId) {
+      const cdoc = await getDoc(doc(db,'classes',classId));
+      if (cdoc.exists()) { currentClassId = classId; openClassDetail(classId, cdoc.data().name); setTimeout(()=>switchClassTab('assignments'),400); }
+    } else if (screen === 'log') {
+      goScreen('log');
+    } else if (screen === 'chat' && withUser) {
+      goScreen('chat');
+      const udoc = await getDoc(doc(db,'users',withUser));
+      if (udoc.exists()) openChatWith(withUser, udoc.data().name||'User');
+    }
+    // Clean URL
+    window.history.replaceState({}, '', '/');
+  });
+}
+handleDeepLink();
 
 // ── INIT LOG DATE ──
 $('log-date').value = new Date().toISOString().split('T')[0];
