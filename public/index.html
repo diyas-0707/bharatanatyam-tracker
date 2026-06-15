@@ -1709,6 +1709,7 @@ window.openSubmit = async (assignId, assignTitle) => {
   const subDoc = await getDoc(doc(db,'classes',currentClassId,'submissions',subId));
   const sub = subDoc.exists() ? subDoc.data() : {files:[]};
   body.innerHTML = '';
+  body.style.cssText = 'display:flex;flex-direction:column;gap:8px';
 
   // Show existing files
   if ((sub.files||[]).length) {
@@ -1729,17 +1730,17 @@ window.openSubmit = async (assignId, assignTitle) => {
   }
 
   // Note/text box
-  const noteLbl = document.createElement('div'); noteLbl.className='card-label'; noteLbl.style.marginTop='8px';
+  const noteLbl = document.createElement('div'); noteLbl.className='card-label';
   noteLbl.textContent = 'Add a Note';
   body.appendChild(noteLbl);
-  const noteWrap = document.createElement('div'); noteWrap.className='field-voice'; noteWrap.style.marginBottom='10px';
+  const noteWrap = document.createElement('div'); noteWrap.className='field-voice';
   const micNoteId = 'mic-sub-note';
   const noteId = 'sub-note-text';
   noteWrap.innerHTML=`<textarea id="${noteId}" placeholder="Add a message or note to your teacher..." rows="3" style="width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:10px;padding:11px 44px 11px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:none;line-height:1.6">${sub.note||''}</textarea><button class="mic-btn" id="${micNoteId}" onclick="toggleVoice('${noteId}','${micNoteId}')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>`;
   body.appendChild(noteWrap);
 
   // Upload area
-  const uploadLbl = document.createElement('div'); uploadLbl.className='card-label'; uploadLbl.style.marginTop='8px';
+  const uploadLbl = document.createElement('div'); uploadLbl.className='card-label';
   uploadLbl.textContent = (sub.files||[]).length ? 'Add More Files' : 'Upload Files';
   body.appendChild(uploadLbl);
 
@@ -1766,54 +1767,64 @@ window.openSubmit = async (assignId, assignTitle) => {
   body.appendChild(uploadBtn);
   body.appendChild(fileInput);
 
-  // Submit button
-  const submitBtn = document.createElement('button');
-  submitBtn.className='btn btn-primary'; submitBtn.style.marginTop='10px';
-  submitBtn.textContent='Submit';
-  submitBtn.onclick = async () => {
-    stopVoice();
-    submitBtn.disabled=true; submitBtn.textContent='Submitting...';
-    const noteEl = document.getElementById('sub-note-text');
-    const note = noteEl ? noteEl.value.trim() : '';
-    const newFiles = Array.from(fileInput.files);
-    const existing = sub.files||[];
-    const uploaded = [];
-    if (newFiles.length) {
-      showToast('Uploading files...');
-      for (const f of newFiles) {
-        try {
-          const res = await uploadToCloudinary(f);
-          uploaded.push({name:f.name, url:res.secure_url});
-        } catch(e) { showToast('Upload failed: '+e.message); submitBtn.disabled=false; submitBtn.textContent='Submit'; return; }
-      }
-    }
-    await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
-      assignId, studentId:CU.uid, studentName:CU.displayName,
-      files:[...existing,...uploaded], note, submittedAt:serverTimestamp()
-    }, {merge:true});
-    await notifyTeacher(currentClassId, `📝 ${CU.displayName} submitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
-    closeModal('submit-modal');
-    showToast('Submitted! ✓');
-    switchClassTab('assignments');
-  };
-  body.appendChild(submitBtn);
+  const hasSubmission = (sub.files||[]).length > 0 || sub.submittedAt;
 
-  // Unsubmit button if already submitted
-  if ((sub.files||[]).length > 0) {
-    const unsubBtn = document.createElement('button');
-    unsubBtn.className='btn btn-danger'; unsubBtn.style.marginTop='8px';
-    unsubBtn.textContent='↩ Unsubmit Assignment';
-    unsubBtn.onclick = async () => {
-      if (!confirm('This will remove your submitted files. You can re-upload after editing.')) return;
+  if (!hasSubmission) {
+    // First time — show Submit button
+    const submitBtn = document.createElement('button');
+    submitBtn.className='btn btn-primary'; submitBtn.style.marginTop='8px';
+    submitBtn.textContent='Submit';
+    submitBtn.onclick = async () => {
+      stopVoice();
+      submitBtn.disabled=true; submitBtn.textContent='Submitting...';
+      const note = document.getElementById('sub-note-text')?.value.trim()||'';
+      const newFiles = Array.from(fileInput.files);
+      const uploaded = [];
+      if (newFiles.length) {
+        showToast('Uploading files...');
+        for (const f of newFiles) {
+          try { const res = await uploadToCloudinary(f); uploaded.push({name:f.name, url:res.secure_url}); }
+          catch(e) { showToast('Upload failed: '+e.message); submitBtn.disabled=false; submitBtn.textContent='Submit'; return; }
+        }
+      }
       await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
         assignId, studentId:CU.uid, studentName:CU.displayName,
-        files:[], note:'', submittedAt:serverTimestamp()
+        files:[...(sub.files||[]),...uploaded], note, submittedAt:serverTimestamp()
       }, {merge:true});
+      await notifyTeacher(currentClassId, `📝 ${CU.displayName} submitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
       closeModal('submit-modal');
-      showToast('Unsubmitted ✓');
+      showToast('Submitted! ✓');
       switchClassTab('assignments');
     };
-    body.appendChild(unsubBtn);
+    body.appendChild(submitBtn);
+  } else {
+    // Already submitted — show Resubmit button (saves edits + any new files)
+    const resubBtn = document.createElement('button');
+    resubBtn.className='btn btn-primary'; resubBtn.style.marginTop='8px';
+    resubBtn.textContent='Resubmit';
+    resubBtn.onclick = async () => {
+      stopVoice();
+      resubBtn.disabled=true; resubBtn.textContent='Resubmitting...';
+      const note = document.getElementById('sub-note-text')?.value.trim()||'';
+      const newFiles = Array.from(fileInput.files);
+      const uploaded = [];
+      if (newFiles.length) {
+        showToast('Uploading files...');
+        for (const f of newFiles) {
+          try { const res = await uploadToCloudinary(f); uploaded.push({name:f.name, url:res.secure_url}); }
+          catch(e) { showToast('Upload failed: '+e.message); resubBtn.disabled=false; resubBtn.textContent='Resubmit'; return; }
+        }
+      }
+      await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
+        assignId, studentId:CU.uid, studentName:CU.displayName,
+        files:[...(sub.files||[]),...uploaded], note, submittedAt:serverTimestamp()
+      }, {merge:true});
+      await notifyTeacher(currentClassId, `📝 ${CU.displayName} resubmitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
+      closeModal('submit-modal');
+      showToast('Resubmitted! ✓');
+      switchClassTab('assignments');
+    };
+    body.appendChild(resubBtn);
   }
 };
 
@@ -2371,34 +2382,6 @@ async function loadSettings() {
   feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
   feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('app-feedback-modal'); };
   sec.appendChild(feedbackRow);
-
-  // Voice input toggle
-  const voiceRow = document.createElement('div'); voiceRow.className='settings-row'; voiceRow.style.cursor='default';
-  const micBg = voiceEnabled ? '#F0FDF4' : '#FFF4F4';
-  const micStroke = voiceEnabled ? '#16A34A' : 'var(--danger)';
-  const micActionLabel = voiceEnabled
-    ? `<span style="color:var(--danger);font-size:13px;font-weight:500">Disable</span>`
-    : `<span style="color:#16A34A;font-size:13px;font-weight:500">Enable</span>`;
-  voiceRow.innerHTML=`
-    <div class="settings-row-icon" style="background:${micBg}">
-      <svg viewBox="0 0 24 24" stroke="${micStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="9" y="2" width="6" height="12" rx="3"/>
-        <path d="M19 10a7 7 0 01-14 0"/>
-        <line x1="12" y1="19" x2="12" y2="22"/>
-        <line x1="8" y1="22" x2="16" y2="22"/>
-        ${!voiceEnabled ? '<line x1="1" y1="1" x2="23" y2="23"/>' : ''}
-      </svg>
-    </div>
-    <div class="settings-row-label">Voice Input (Mic)</div>
-    <div class="settings-row-value">${micActionLabel}</div>`;
-  voiceRow.onclick = () => {
-    voiceEnabled = !voiceEnabled;
-    localStorage.setItem('voiceEnabled', voiceEnabled);
-    if (!voiceEnabled) stopVoice();
-    applyVoiceState();
-    loadSettings();
-  };
-  sec.appendChild(voiceRow);
 
   c.appendChild(sec);
 
