@@ -1580,12 +1580,14 @@ function buildCommentEl(c, postId, isReply, photoMap) {
   const avatarHtml = photo
     ? `<img src="${photo}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;border:none;display:block">`
     : `<div class="comment-av">${(c.authorName||'?')[0]}</div>`;
+  const safeText = (c.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeName = (c.authorName||'').replace(/'/g,'&#39;');
   wrap.innerHTML = `${avatarHtml}
     <div class="comment-body">
       <div class="comment-author">${c.authorName||'User'}</div>
-      <div class="comment-text" id="comment-text-${c.id}">${c.text}</div>
+      <div class="comment-text" id="comment-text-${c.id}">${safeText}</div>
       <div class="comment-actions">
-        ${!isReply ? `<button class="comment-action" onclick="showReplyInput('${postId}','${c.id}','${(c.authorName||'').replace(/'/g,"\'")}')">Reply</button>` : ''}
+        ${!isReply ? `<button class="comment-action" onclick="showReplyInput('${postId}','${c.id}','${safeName}')">Reply</button>` : ''}
         ${isOwn ? `<button class="comment-action" onclick="startEditComment('${c.id}','${postId}')">Edit</button>` : ''}
         ${isOwn ? `<button class="comment-action" style="color:var(--danger)" onclick="deleteComment('${c.id}','${postId}')">Delete</button>` : ''}
       </div>
