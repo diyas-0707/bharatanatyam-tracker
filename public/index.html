@@ -838,7 +838,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyD8UJlf7N95PSfbWIFmKRkww-qduDcExp0",
@@ -1548,7 +1548,7 @@ async function buildCommentsSection(postId) {
     orderBy('createdAt','asc')
   ));
 
-  const comments = commSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const comments = commSnap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>!c.deleted);
 
   // Batch-fetch user photos
   const uniqueAuthorIds = [...new Set(comments.map(c=>c.authorId).filter(Boolean))];
@@ -1641,11 +1641,11 @@ window.postComment = async (postId, parentId) => {
   }
 };
 
-window.startEditComment = (commentId, postId) => {
+window.startEditComment = async (commentId, postId) => {
   editingCommentId = commentId;
   editingCommentPostId = postId;
-  const textEl = document.getElementById('comment-text-'+commentId);
-  $('edit-comment-text').value = textEl ? textEl.textContent : '';
+  const cdoc = await getDoc(doc(db,'classes',currentClassId,'comments',commentId));
+  $('edit-comment-text').value = cdoc.exists() ? cdoc.data().text : '';
   openModal('edit-comment-modal');
 };
 
@@ -1664,13 +1664,10 @@ window.saveEditComment = async () => {
 
 window.deleteComment = async (commentId, postId) => {
   if (!confirm('Delete this comment?')) return;
-  await updateDoc(doc(db,'classes',currentClassId,'comments',commentId), {text:'[deleted]', deleted:true});
+  await deleteDoc(doc(db,'classes',currentClassId,'comments',commentId));
   showToast('Comment deleted');
   const sec = document.getElementById('comments-'+postId);
-  if (sec) {
-    const newSec = await buildCommentsSection(postId);
-    sec.replaceWith(newSec);
-  }
+  if (sec) { const newSec = await buildCommentsSection(postId); sec.replaceWith(newSec); }
 };
 
 // ── SUBMISSIONS ──
@@ -2329,31 +2326,36 @@ async function loadSettings() {
   // Notification preferences
   const notifPrefsDoc = await getDoc(doc(db,'users',CU.uid));
   const prefs = (notifPrefsDoc.exists() && notifPrefsDoc.data().notifPrefs) || {};
-  const notifStatus = Notification.permission;
+  const pushSub = notifPrefsDoc.exists() ? notifPrefsDoc.data().pushSub : null;
+  const notifEnabled = Notification.permission === 'granted' && !!pushSub;
+
   const notifSec = document.createElement('div'); notifSec.className='settings-section';
 
-  const bellBg = notifStatus === 'granted' ? '#F0FDF4' : '#FFF7ED';
-  const bellStroke = notifStatus === 'granted' ? '#16A34A' : '#EA580C';
-  const bellLabel = 'Notifications';
-  const bellValue = notifStatus === 'granted'
-    ? '<span style="color:#16A34A">Enabled ✓</span>'
-    : `<span style="color:#EA580C">${notifStatus==='denied'?'Blocked':'Off'}</span>`;
-
   const notifTopRow = document.createElement('div'); notifTopRow.className='settings-row';
-  notifTopRow.innerHTML=`<div class="settings-row-icon" style="background:${bellBg}"><svg viewBox="0 0 24 24" stroke="${bellStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">${bellLabel}</div><div class="settings-row-value">${bellValue}</div><div class="settings-row-arrow" id="notif-chevron" style="transition:transform .25s">›</div>`;
+  const bellBg = notifEnabled ? '#F0FDF4' : '#FFF4F4';
+  const bellStroke = notifEnabled ? '#16A34A' : 'var(--danger)';
+  const actionLabel = notifEnabled
+    ? `<span style="color:var(--danger);font-size:13px;font-weight:500">Disable</span>`
+    : `<span style="color:#16A34A;font-size:13px;font-weight:500">Enable</span>`;
+  notifTopRow.innerHTML=`
+    <div class="settings-row-icon" style="background:${bellBg}">
+      <svg viewBox="0 0 24 24" stroke="${bellStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        ${!notifEnabled ? '<line x1="1" y1="1" x2="23" y2="23"/>' : ''}
+      </svg>
+    </div>
+    <div class="settings-row-label">Notifications</div>
+    <div class="settings-row-value" style="display:flex;align-items:center;gap:10px">
+      ${actionLabel}
+      <span id="notif-chevron" style="color:var(--text-soft);transition:transform .25s;font-size:16px">›</span>
+    </div>`;
 
   const notifPanel = document.createElement('div');
   notifPanel.id = 'notif-panel';
   notifPanel.style.cssText = 'display:none;border-top:.5px solid var(--border)';
 
-  if (notifStatus === 'granted') {
-    // Disable row
-    const disableRow = document.createElement('div'); disableRow.className='settings-row';
-    disableRow.innerHTML=`<div class="settings-row-icon" style="background:var(--danger-bg)"><svg viewBox="0 0 24 24" stroke="var(--danger)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div><div class="settings-row-label" style="color:var(--danger)">Disable Notifications</div><div class="settings-row-arrow" style="color:var(--danger)">›</div>`;
-    disableRow.onclick = () => disableNotifications();
-    notifPanel.appendChild(disableRow);
-
-    // Individual toggles
+  if (notifEnabled) {
     const studentNotifs = [
       { key:'announcements', label:'New Announcements', icon:'📢' },
       { key:'assignments',   label:'New Assignments',   icon:'📝' },
@@ -2392,35 +2394,31 @@ async function loadSettings() {
       notifPanel.appendChild(row);
     });
 
-    notifTopRow.onclick = () => {
-      const open = notifPanel.style.display !== 'none';
-      notifPanel.style.display = open ? 'none' : 'block';
-      const chevron = document.getElementById('notif-chevron');
-      if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
-    };
-  } else if (notifStatus === 'denied') {
-    // Can't re-enable from JS — show hint inside panel
-    const blockedRow = document.createElement('div'); blockedRow.className='settings-row'; blockedRow.style.cursor='default';
-    blockedRow.innerHTML=`<div class="settings-row-label" style="color:var(--text-soft);font-size:13px;padding:4px 0">Notifications are blocked. Go to your browser or phone settings to re-enable them.</div>`;
-    notifPanel.appendChild(blockedRow);
-    notifTopRow.onclick = () => {
+    // Tap action label = disable; tap chevron = expand
+    notifTopRow.onclick = (e) => {
+      // If they clicked the Disable text
+      if (e.target.closest('span') && e.target.closest('span').style.color.includes('danger') || (e.target.textContent||'').trim()==='Disable') {
+        disableNotifications(); return;
+      }
       const open = notifPanel.style.display !== 'none';
       notifPanel.style.display = open ? 'none' : 'block';
       const chevron = document.getElementById('notif-chevron');
       if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
     };
   } else {
-    // Not yet enabled — tap to enable
-    const enableRow = document.createElement('div'); enableRow.className='settings-row';
-    enableRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-row-label">Enable Notifications</div><div class="settings-row-arrow">›</div>`;
-    enableRow.onclick = () => enableNotifications();
-    notifPanel.appendChild(enableRow);
-    notifTopRow.onclick = () => {
+    notifTopRow.onclick = (e) => {
+      if ((e.target.textContent||'').trim()==='Enable' || e.target.closest('span[style*="16A34A"]')) {
+        if (Notification.permission === 'denied') { showToast('Go to browser/phone settings to unblock notifications'); return; }
+        enableNotifications(); return;
+      }
       const open = notifPanel.style.display !== 'none';
       notifPanel.style.display = open ? 'none' : 'block';
       const chevron = document.getElementById('notif-chevron');
       if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
     };
+    const hintRow = document.createElement('div'); hintRow.className='settings-row'; hintRow.style.cursor='default';
+    hintRow.innerHTML=`<div class="settings-row-label" style="color:var(--text-soft);font-size:13px">Tap "Enable" to turn on push notifications.</div>`;
+    notifPanel.appendChild(hintRow);
   }
 
   notifSec.appendChild(notifTopRow);
@@ -2736,15 +2734,11 @@ async function setupPushNotifications() {
 window.disableNotifications = async () => {
   try {
     const reg = await navigator.serviceWorker.getRegistration('/sw.js');
-    if (reg) {
-      const sub = await reg.pushManager.getSubscription();
-      if (sub) await sub.unsubscribe();
-    }
-    // Remove pushSub from Firestore so no more notifications get sent
+    if (reg) { const sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); }
     await setDoc(doc(db,'users',CU.uid), { pushSub: null }, {merge:true});
     showToast('Notifications disabled');
     loadSettings();
-  } catch(e) { showToast('Could not disable notifications'); }
+  } catch(e) { console.error(e); showToast('Could not disable notifications'); }
 };
 
 window.enableNotifications = async () => {
