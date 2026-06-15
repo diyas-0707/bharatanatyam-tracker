@@ -1456,6 +1456,7 @@ window.saveAttendance = async () => {
 
 // ── POST ACTIONS ──
 window.postAnnouncement = async () => {
+  stopVoice();
   const body=$('announce-body').value.trim();
   const pinned=$('announce-pin').checked;
   if(!body) return;
@@ -1468,6 +1469,7 @@ window.postAnnouncement = async () => {
   switchClassTab('stream');
 };
 window.postAssignment = async () => {
+  stopVoice();
   const title=$('assign-title').value.trim(), body=$('assign-body').value.trim(), due=$('assign-due').value;
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
   await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
@@ -1654,6 +1656,7 @@ window.startEditComment = async (commentId, postId) => {
 };
 
 window.saveEditComment = async () => {
+  stopVoice();
   const text = $('edit-comment-text').value.trim();
   if (!text) return;
   await updateDoc(doc(db,'classes',currentClassId,'comments',editingCommentId), {text, editedAt:serverTimestamp()});
@@ -1937,6 +1940,7 @@ window.openEditAnnouncement = (id, body) => {
   openModal('edit-announce-modal');
 };
 window.saveEditAnnouncement = async () => {
+  stopVoice();
   const body = $('edit-announce-body').value.trim();
   if (!body) return;
   await updateDoc(doc(db,'classes',currentClassId,'announcements',editingAnnounceId), { body, editedAt:serverTimestamp() });
@@ -1965,6 +1969,7 @@ window.openEditAssignment = (id, title, body, due) => {
   openModal('edit-assign-modal');
 };
 window.saveEditAssignment = async () => {
+  stopVoice();
   const title=$('edit-assign-title').value.trim(), body=$('edit-assign-body').value.trim(), due=$('edit-assign-due').value;
   if(!title||!body){showToast('Please fill in title and instructions');return;}
   await updateDoc(doc(db,'classes',currentClassId,'assignments',editingAssignId), { title, body, due, editedAt:serverTimestamp() });
@@ -2087,6 +2092,7 @@ window.saveLogFeedback = async (logId, studentId) => {
 };
 
 window.saveFeedback = async () => {
+  stopVoice();
   const text=$('feedback-body').value.trim();
   if(!text) return;
   await setDoc(doc(db,'classes',currentClassId,'feedback',currentStudentId), { text, teacherId:CU.uid, teacherName:CU.displayName, studentId:currentStudentId, updatedAt:serverTimestamp() });
@@ -2194,6 +2200,7 @@ window.previewEditLogFiles = (input) => {
 };
 
 window.saveEditLog = async () => {
+  stopVoice();
   const text = $('edit-log-text').value.trim();
   if (!text) return;
   let files = [...editLogCurrentFiles];
@@ -2230,6 +2237,7 @@ window.previewLogFiles = (input) => {
 };
 
 window.saveLog = async () => {
+  stopVoice();
   const date=$('log-date').value, text=$('log-practice').value.trim(), status='completed';
   if(!date||!text){showToast('Please fill in all fields');return;}
   let files=[];
@@ -2439,6 +2447,7 @@ async function loadSettings() {
 }
 
 window.sendFeedback = async () => {
+  stopVoice();
   const text = $('feedback-text').value.trim();
   if (!text) { showToast('Please write a message first'); return; }
   const name = CU.displayName || 'Unknown';
