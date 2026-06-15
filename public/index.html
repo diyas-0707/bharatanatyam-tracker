@@ -639,6 +639,15 @@ button.rec:not(.btn) svg{stroke:#fff!important}
           <div id="class-join-code" style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--maroon-deep);letter-spacing:6px">------</div>
           <div style="font-size:11px;color:var(--text-soft);margin-top:4px">Share this code with students to join</div>
         </div>
+        <div class="field">
+          <label>Class Name</label>
+          <input id="cs-name-input" type="text" placeholder="Class name...">
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="cs-desc-input" rows="2" placeholder="Briefly describe this class..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveClassSettings()">Save Changes</button>
         <button class="btn btn-danger" onclick="deleteClass()">🗑 Delete this Class</button>
         <button class="btn btn-secondary" onclick="closeModal('class-settings-modal')">Cancel</button>
       </div>
@@ -894,6 +903,8 @@ window.openModal = async id => {
         await updateDoc(doc(db,'classes',currentClassId), {joinCode: code});
       }
       codeEl.textContent = code;
+      if ($('cs-name-input')) $('cs-name-input').value = cd.data().name||'';
+      if ($('cs-desc-input')) $('cs-desc-input').value = cd.data().description||'';
     }
   }
 };
@@ -1514,6 +1525,16 @@ window.leaveClass = async () => {
 };
 
 // ── DELETE CLASS ──
+window.saveClassSettings = async () => {
+  const name = $('cs-name-input').value.trim();
+  const description = $('cs-desc-input').value.trim();
+  if (!name) { showToast('Class name required'); return; }
+  await updateDoc(doc(db,'classes',currentClassId), {name, description});
+  closeModal('class-settings-modal');
+  showToast('Class updated ✓');
+  $('pd-title').textContent = name;
+};
+
 window.deleteClass = async () => {
   if(!confirm('Are you sure you want to permanently delete this class? This cannot be undone.')) return;
   if(!confirm('This will delete all assignments, announcements and attendance records. Really delete?')) return;
@@ -1709,7 +1730,7 @@ window.openSubmit = async (assignId, assignTitle) => {
 
   // Note/text box
   const noteLbl = document.createElement('div'); noteLbl.className='card-label'; noteLbl.style.marginTop='8px';
-  noteLbl.textContent = 'Add a Note (optional)';
+  noteLbl.textContent = 'Add a Note';
   body.appendChild(noteLbl);
   const noteWrap = document.createElement('div'); noteWrap.className='field-voice'; noteWrap.style.marginBottom='10px';
   const micNoteId = 'mic-sub-note';
@@ -1722,26 +1743,50 @@ window.openSubmit = async (assignId, assignTitle) => {
   uploadLbl.textContent = (sub.files||[]).length ? 'Add More Files' : 'Upload Files';
   body.appendChild(uploadLbl);
 
+  const filePreview = document.createElement('div'); filePreview.id='sub-file-preview'; filePreview.style.cssText='display:flex;flex-direction:column;gap:6px;margin-bottom:6px';
+  body.appendChild(filePreview);
+
   const fileInput = document.createElement('input');
   fileInput.type='file'; fileInput.multiple=true; fileInput.style.display='none';
-  fileInput.onchange = async () => {
+  fileInput.onchange = () => {
     const files = Array.from(fileInput.files);
-    if (!files.length) return;
-    const progWrap = document.createElement('div'); progWrap.className='upload-progress';
-    const bar = document.createElement('div'); bar.className='upload-bar'; bar.style.width='0%';
-    progWrap.appendChild(bar); body.appendChild(progWrap);
-    const statusLbl = document.createElement('div'); statusLbl.style.cssText='font-size:12px;color:var(--text-soft);margin-top:4px'; statusLbl.textContent='Uploading...';
-    body.appendChild(statusLbl);
-    const uploaded = [];
-    for (let i=0; i<files.length; i++) {
-      try {
-        const res = await uploadToCloudinary(files[i], pct => { bar.style.width = ((i/files.length + pct/100/files.length)*100)+'%'; });
-        uploaded.push({name:files[i].name, url:res.secure_url});
-      } catch(e) { showToast('Upload failed: '+e.message); return; }
-    }
-    const existing = sub.files||[];
+    filePreview.innerHTML = '';
+    files.forEach(f => {
+      const tag = document.createElement('div');
+      tag.style.cssText='font-size:12px;color:var(--text-mid);background:var(--surface);border-radius:6px;padding:4px 10px;border:.5px solid var(--border)';
+      tag.textContent='📎 '+f.name;
+      filePreview.appendChild(tag);
+    });
+  };
+
+  const uploadBtn = document.createElement('button');
+  uploadBtn.className='btn btn-secondary'; uploadBtn.style.marginTop='4px';
+  uploadBtn.textContent='📎 Choose Files to Upload';
+  uploadBtn.onclick = () => fileInput.click();
+  body.appendChild(uploadBtn);
+  body.appendChild(fileInput);
+
+  // Submit button
+  const submitBtn = document.createElement('button');
+  submitBtn.className='btn btn-primary'; submitBtn.style.marginTop='10px';
+  submitBtn.textContent='Submit';
+  submitBtn.onclick = async () => {
+    stopVoice();
+    submitBtn.disabled=true; submitBtn.textContent='Submitting...';
     const noteEl = document.getElementById('sub-note-text');
     const note = noteEl ? noteEl.value.trim() : '';
+    const newFiles = Array.from(fileInput.files);
+    const existing = sub.files||[];
+    const uploaded = [];
+    if (newFiles.length) {
+      showToast('Uploading files...');
+      for (const f of newFiles) {
+        try {
+          const res = await uploadToCloudinary(f);
+          uploaded.push({name:f.name, url:res.secure_url});
+        } catch(e) { showToast('Upload failed: '+e.message); submitBtn.disabled=false; submitBtn.textContent='Submit'; return; }
+      }
+    }
     await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
       assignId, studentId:CU.uid, studentName:CU.displayName,
       files:[...existing,...uploaded], note, submittedAt:serverTimestamp()
@@ -1751,13 +1796,7 @@ window.openSubmit = async (assignId, assignTitle) => {
     showToast('Submitted! ✓');
     switchClassTab('assignments');
   };
-
-  const uploadBtn = document.createElement('button');
-  uploadBtn.className='btn btn-primary'; uploadBtn.style.marginTop='4px';
-  uploadBtn.textContent='📎 Choose Files to Upload';
-  uploadBtn.onclick = () => fileInput.click();
-  body.appendChild(uploadBtn);
-  body.appendChild(fileInput);
+  body.appendChild(submitBtn);
 
   // Unsubmit button if already submitted
   if ((sub.files||[]).length > 0) {
@@ -2333,6 +2372,34 @@ async function loadSettings() {
   feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('app-feedback-modal'); };
   sec.appendChild(feedbackRow);
 
+  // Voice input toggle
+  const voiceRow = document.createElement('div'); voiceRow.className='settings-row'; voiceRow.style.cursor='default';
+  const micBg = voiceEnabled ? '#F0FDF4' : '#FFF4F4';
+  const micStroke = voiceEnabled ? '#16A34A' : 'var(--danger)';
+  const micActionLabel = voiceEnabled
+    ? `<span style="color:var(--danger);font-size:13px;font-weight:500">Disable</span>`
+    : `<span style="color:#16A34A;font-size:13px;font-weight:500">Enable</span>`;
+  voiceRow.innerHTML=`
+    <div class="settings-row-icon" style="background:${micBg}">
+      <svg viewBox="0 0 24 24" stroke="${micStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M19 10a7 7 0 01-14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+        ${!voiceEnabled ? '<line x1="1" y1="1" x2="23" y2="23"/>' : ''}
+      </svg>
+    </div>
+    <div class="settings-row-label">Voice Input (Mic)</div>
+    <div class="settings-row-value">${micActionLabel}</div>`;
+  voiceRow.onclick = () => {
+    voiceEnabled = !voiceEnabled;
+    localStorage.setItem('voiceEnabled', voiceEnabled);
+    if (!voiceEnabled) stopVoice();
+    applyVoiceState();
+    loadSettings();
+  };
+  sec.appendChild(voiceRow);
+
   c.appendChild(sec);
 
   // Notification preferences
@@ -2343,29 +2410,35 @@ async function loadSettings() {
 
   const notifSec = document.createElement('div'); notifSec.className='settings-section';
 
-  const notifTopRow = document.createElement('div'); notifTopRow.className='settings-row';
-  const bellBg = notifEnabled ? '#F0FDF4' : '#FFF4F4';
-  const bellStroke = notifEnabled ? '#16A34A' : 'var(--danger)';
-  const actionLabel = notifEnabled
-    ? `<span style="color:var(--danger);font-size:13px;font-weight:500">Disable</span>`
-    : `<span style="color:#16A34A;font-size:13px;font-weight:500">Enable</span>`;
+  const notifTopRow = document.createElement('div'); notifTopRow.className='settings-row'; notifTopRow.style.cursor='default';
   notifTopRow.innerHTML=`
-    <div class="settings-row-icon" style="background:${bellBg}">
-      <svg viewBox="0 0 24 24" stroke="${bellStroke}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <div class="settings-row-icon" style="background:#F0FDF4">
+      <svg viewBox="0 0 24 24" stroke="#16A34A" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
         <path d="M13.73 21a2 2 0 01-3.46 0"/>
-        ${!notifEnabled ? '<line x1="1" y1="1" x2="23" y2="23"/>' : ''}
       </svg>
     </div>
     <div class="settings-row-label">Notifications</div>
-    <div class="settings-row-value" style="display:flex;align-items:center;gap:10px">
-      ${actionLabel}
-      <span id="notif-chevron" style="color:var(--text-soft);transition:transform .25s;font-size:16px">›</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+        <input type="checkbox" id="notif-master-toggle" ${notifEnabled?'checked':''} style="opacity:0;width:0;height:0" onchange="toggleNotifications(this.checked)">
+        <span style="position:absolute;cursor:pointer;inset:0;background:${notifEnabled?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="notif-master-track"></span>
+        <span style="position:absolute;height:18px;width:18px;left:${notifEnabled?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="notif-master-thumb"></span>
+      </label>
+      <span id="notif-chevron" style="color:var(--text-soft);transition:transform .25s;font-size:16px;cursor:pointer">›</span>
     </div>`;
 
   const notifPanel = document.createElement('div');
   notifPanel.id = 'notif-panel';
   notifPanel.style.cssText = 'display:none;border-top:.5px solid var(--border)';
+
+  const toggleNotifPanel = () => {
+    const open = notifPanel.style.display !== 'none';
+    notifPanel.style.display = open ? 'none' : 'block';
+    const chevron = document.getElementById('notif-chevron');
+    if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+  };
+  notifTopRow.querySelector('#notif-chevron').addEventListener('click', toggleNotifPanel);
 
   if (notifEnabled) {
     const studentNotifs = [
@@ -2407,29 +2480,9 @@ async function loadSettings() {
     });
 
     // Tap action label = disable; tap chevron = expand
-    notifTopRow.onclick = (e) => {
-      // If they clicked the Disable text
-      if (e.target.closest('span') && e.target.closest('span').style.color.includes('danger') || (e.target.textContent||'').trim()==='Disable') {
-        disableNotifications(); return;
-      }
-      const open = notifPanel.style.display !== 'none';
-      notifPanel.style.display = open ? 'none' : 'block';
-      const chevron = document.getElementById('notif-chevron');
-      if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
-    };
   } else {
-    notifTopRow.onclick = (e) => {
-      if ((e.target.textContent||'').trim()==='Enable' || e.target.closest('span[style*="16A34A"]')) {
-        if (Notification.permission === 'denied') { showToast('Go to browser/phone settings to unblock notifications'); return; }
-        enableNotifications(); return;
-      }
-      const open = notifPanel.style.display !== 'none';
-      notifPanel.style.display = open ? 'none' : 'block';
-      const chevron = document.getElementById('notif-chevron');
-      if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
-    };
     const hintRow = document.createElement('div'); hintRow.className='settings-row'; hintRow.style.cursor='default';
-    hintRow.innerHTML=`<div class="settings-row-label" style="color:var(--text-soft);font-size:13px">Tap "Enable" to turn on push notifications.</div>`;
+    hintRow.innerHTML=`<div class="settings-row-label" style="color:var(--text-soft);font-size:13px">Toggle the switch to enable push notifications.</div>`;
     notifPanel.appendChild(hintRow);
   }
 
@@ -2693,12 +2746,21 @@ async function loadTeacherChatList(){
 
 // ── VOICE ──
 let activeRec=null, activeMicId=null;
+let voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false';
+
+function applyVoiceState() {
+  document.querySelectorAll('.mic-btn, button[id^="mic-"]').forEach(b => {
+    b.style.display = voiceEnabled ? '' : 'none';
+  });
+}
+
 function stopVoice(){
   if(activeRec){activeRec.stop();}
   if(activeMicId){const m=$(activeMicId);if(m)m.classList.remove('rec');}
   activeRec=null;activeMicId=null;
 }
 window.toggleVoice=(fieldId,micId)=>{
+  if(!voiceEnabled){showToast('Voice input is disabled in settings');return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast('Voice not supported in this browser');return;}
   if(activeRec&&activeMicId===micId){activeRec.stop();return;}
@@ -2743,6 +2805,24 @@ async function setupPushNotifications() {
   }
   // If denied or default, do nothing — let the settings button handle it
 }
+
+window.toggleNotifications = async (enabled) => {
+  // Animate toggle
+  const track = $('notif-master-track'); const thumb = $('notif-master-thumb');
+  if (track) track.style.background = enabled ? 'var(--maroon)' : '#ccc';
+  if (thumb) thumb.style.left = enabled ? '23px' : '3px';
+  if (enabled) {
+    if (Notification.permission === 'denied') {
+      showToast('Notifications are blocked — go to browser/phone settings to unblock');
+      if (track) track.style.background = '#ccc'; if (thumb) thumb.style.left = '3px';
+      const cb = $('notif-master-toggle'); if (cb) cb.checked = false;
+      return;
+    }
+    await enableNotifications();
+  } else {
+    await disableNotifications();
+  }
+};
 
 window.disableNotifications = async () => {
   try {
