@@ -1798,48 +1798,45 @@ window.openSubmit = async (assignId, assignTitle) => {
     };
     body.appendChild(submitBtn);
   } else {
-    // Already submitted — show Unsubmit button first
+    // Already submitted — show Resubmit + Unsubmit
+    const resubBtn = document.createElement('button');
+    resubBtn.className='btn btn-primary'; resubBtn.style.marginTop='8px';
+    resubBtn.textContent='Resubmit';
+    resubBtn.onclick = async () => {
+      stopVoice();
+      resubBtn.disabled=true; resubBtn.textContent='Resubmitting...';
+      const note = document.getElementById('sub-note-text')?.value.trim()||'';
+      const newFiles = Array.from(fileInput.files);
+      const uploaded = [];
+      if (newFiles.length) {
+        showToast('Uploading files...');
+        for (const f of newFiles) {
+          try { const res = await uploadToCloudinary(f); uploaded.push({name:f.name, url:res.secure_url}); }
+          catch(e) { showToast('Upload failed: '+e.message); resubBtn.disabled=false; resubBtn.textContent='Resubmit'; return; }
+        }
+      }
+      await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
+        assignId, studentId:CU.uid, studentName:CU.displayName,
+        files:[...(sub.files||[]),...uploaded], note, submittedAt:serverTimestamp()
+      }, {merge:true});
+      await notifyTeacher(currentClassId, `📝 ${CU.displayName} resubmitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
+      closeModal('submit-modal');
+      showToast('Resubmitted! ✓');
+      switchClassTab('assignments');
+    };
+    body.appendChild(resubBtn);
+
     const unsubBtn = document.createElement('button');
-    unsubBtn.className='btn btn-danger'; unsubBtn.style.marginTop='8px';
+    unsubBtn.className='btn btn-danger'; unsubBtn.style.marginTop='4px';
     unsubBtn.textContent='↩ Unsubmit';
     unsubBtn.onclick = async () => {
-      if (!confirm('Remove your submission? Your files will be deleted but you can resubmit anytime.')) return;
+      if (!confirm('Unsubmit this assignment?')) return;
       await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
         assignId, studentId:CU.uid, studentName:CU.displayName,
         files:[], note:'', submittedAt:null
       }, {merge:true});
-      // Swap unsubmit → resubmit button
       unsubBtn.remove();
-      const resubBtn = document.createElement('button');
-      resubBtn.className='btn btn-primary'; resubBtn.style.marginTop='8px';
-      resubBtn.textContent='Resubmit';
-      resubBtn.onclick = async () => {
-        stopVoice();
-        resubBtn.disabled=true; resubBtn.textContent='Resubmitting...';
-        const note = document.getElementById('sub-note-text')?.value.trim()||'';
-        const newFiles = Array.from(fileInput.files);
-        const uploaded = [];
-        if (newFiles.length) {
-          showToast('Uploading files...');
-          for (const f of newFiles) {
-            try { const res = await uploadToCloudinary(f); uploaded.push({name:f.name, url:res.secure_url}); }
-            catch(e) { showToast('Upload failed: '+e.message); resubBtn.disabled=false; resubBtn.textContent='Resubmit'; return; }
-          }
-        }
-        await setDoc(doc(db,'classes',currentClassId,'submissions',subId), {
-          assignId, studentId:CU.uid, studentName:CU.displayName,
-          files:uploaded, note, submittedAt:serverTimestamp()
-        }, {merge:true});
-        await notifyTeacher(currentClassId, `📝 ${CU.displayName} resubmitted an assignment`, $('submit-modal-title').textContent, 'studentSubmit', `/?screen=assignments&class=${currentClassId}`);
-        closeModal('submit-modal');
-        showToast('Resubmitted! ✓');
-        switchClassTab('assignments');
-      };
-      body.appendChild(resubBtn);
       showToast('Unsubmitted ✓');
-      // Clear existing file rows from body
-      body.querySelectorAll('.submission-file').forEach(el => el.remove());
-      body.querySelector('.card-label') && null; // keep labels
     };
     body.appendChild(unsubBtn);
   }
