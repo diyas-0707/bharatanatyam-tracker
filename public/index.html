@@ -455,7 +455,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
       <button class="panel-back" onclick="closeChatPanel()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="panel-title" id="chat-panel-name">Teacher</div>
     </div>
-    <div class="panel-body" id="chat-messages" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;justify-content:flex-end"></div>
+    <div class="panel-body" id="chat-messages" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
     <div class="chat-reply-bar" id="chat-reply-bar">
       <span id="chat-reply-preview">Replying to...</span>
       <button class="chat-reply-cancel" onclick="cancelReply()">✕</button>
