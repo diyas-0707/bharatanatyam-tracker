@@ -1055,16 +1055,23 @@ async function loadTeacherHome(c) {
 async function loadStudentHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
   const logsSnap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid)));
-  const done = logsSnap.docs.filter(d=>d.data().completed).length;
   const now = new Date();
   const ms = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
-  const thisMonth = logsSnap.docs.filter(d=>d.data().date&&d.data().date.startsWith(ms)&&d.data().completed).length;
-  const today = now.toISOString().split('T')[0];
-  const todayDone = logsSnap.docs.some(d=>d.data().date===today&&d.data().completed);
+  const logsThisMonth = logsSnap.docs.filter(d=>d.data().date&&d.data().date.startsWith(ms)&&!d.data().deleted).length;
 
   const activeClasses = snap.docs.filter(d=>!d.data().deleted);
+
+  // Count attendance ("present") days this month across all enrolled classes
+  let attendedThisMonth = 0;
+  for (const cd of activeClasses) {
+    const attSnap = await getDocs(collection(db,'classes',cd.id,'attendance'));
+    attSnap.docs.forEach(ad => {
+      if (ad.id.startsWith(ms) && ad.data()[CU.uid] === 'present') attendedThisMonth++;
+    });
+  }
+
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Total Sessions</div></div><div class="stat-box"><div class="stat-num">${thisMonth}</div><div class="stat-label">This Month</div></div><div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">Classes</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${attendedThisMonth}</div><div class="stat-label">Sessions This Month</div></div><div class="stat-box"><div class="stat-num">${logsThisMonth}</div><div class="stat-label">Logs This Month</div></div><div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">Classes</div></div>`;
   c.appendChild(sr);
 
   // Latest assignment
@@ -1101,13 +1108,6 @@ async function loadStudentHome(c) {
     fb.innerHTML=`<div class="card-label">Latest Teacher Feedback</div><div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-mid);line-height:1.65;font-style:italic">${latestFeedback.text}</div><div style="font-size:11px;color:var(--text-soft);margin-top:8px">From ${latestFeedback.teacherName||'your teacher'}</div>`;
     c.appendChild(fb);
   }
-
-  const pb = document.createElement('button');
-  pb.className = 'btn '+(todayDone?'btn-secondary':'btn-primary');
-  pb.style.marginTop = '4px';
-  pb.textContent = todayDone ? '✓ Practiced Today' : '✓  Mark Today as Practiced';
-  pb.onclick = () => markPracticed(pb);
-  c.appendChild(pb);
 }
 
 async function loadParentHome(c) {
@@ -1134,15 +1134,6 @@ async function loadParentHome(c) {
   chatBtn.onclick = () => goScreen('chat');
   c.appendChild(chatBtn);
 }
-
-window.markPracticed = async btn => {
-  const today = new Date().toISOString().split('T')[0];
-  const s = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',CU.uid), where('date','==',today)));
-  if (!s.empty) { showToast('Already marked today!'); return; }
-  await addDoc(collection(db,'practiceLogs'), { studentId:CU.uid, studentName:CU.displayName, date:today, practiceText:'Daily practice', completed:true, createdAt:serverTimestamp() });
-  showToast('Practice marked! 🙏');
-  btn.textContent='✓ Practiced Today'; btn.className='btn btn-secondary';
-};
 
 // ── CLASSES ──
 async function loadClasses() {
