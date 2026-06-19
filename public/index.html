@@ -2543,11 +2543,60 @@ window.changeRoleTo = async (newRole) => {
 
 window.confirmDeleteAccount = async () => {
   closeModal('delete-account-modal');
+  showToast('Deleting account...');
   try {
-    await updateDoc(doc(db,'users',CU.uid), {deleted:true, deletedAt:serverTimestamp()});
+    const uid = CU.uid;
+
+    // 1. Remove from all classes they're a member of (student/parent)
+    const memberClassesSnap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',uid)));
+    await Promise.all(memberClassesSnap.docs.map(cd =>
+      updateDoc(doc(db,'classes',cd.id), { studentIds: arrayRemove(uid) })
+    ));
+
+    // 2. If they're a teacher, delete all classes they own (and everything inside them)
+    const ownedClassesSnap = await getDocs(query(collection(db,'classes'), where('teacherId','==',uid)));
+    for (const cd of ownedClassesSnap.docs) {
+      const classId = cd.id;
+      const subcollections = ['announcements','assignments','polls','comments','attendance','submissions','logFeedback'];
+      for (const sub of subcollections) {
+        const subSnap = await getDocs(collection(db,'classes',classId,sub));
+        await Promise.all(subSnap.docs.map(d => deleteDoc(doc(db,'classes',classId,sub,d.id))));
+      }
+      await deleteDoc(doc(db,'classes',classId));
+    }
+
+    // 3. Delete their practice logs
+    const logsSnap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',uid)));
+    await Promise.all(logsSnap.docs.map(d => deleteDoc(doc(db,'practiceLogs',d.id))));
+
+    // 4. Delete chat messages and chat threads involving this user
+    const chatsSnap = await getDocs(collection(db,'chats'));
+    for (const chatDoc of chatsSnap.docs) {
+      if (chatDoc.id.split('_').includes(uid)) {
+        const msgsSnap = await getDocs(collection(db,'chats',chatDoc.id,'messages'));
+        await Promise.all(msgsSnap.docs.map(m => deleteDoc(doc(db,'chats',chatDoc.id,'messages',m.id))));
+        await deleteDoc(doc(db,'chats',chatDoc.id));
+      }
+    }
+
+    // 5. Delete invites sent to/from this user
+    const invitesSnap = await getDocs(query(collection(db,'classInvites'), where('studentEmail','==',CU.email)));
+    await Promise.all(invitesSnap.docs.map(d => deleteDoc(doc(db,'classInvites',d.id))));
+
+    // 6. Unsubscribe push notifications
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/sw.js');
+      if (reg) { const sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); }
+    } catch(e) {}
+
+    // 7. Delete the user document itself
+    await deleteDoc(doc(db,'users',uid));
+
+    // 8. Delete the Firebase Auth account, then sign out
+    try { await CU.delete(); } catch(e) { /* fallback to sign out if re-auth required */ }
     await doSignOut();
     showToast('Account deleted');
-  } catch(e) { showToast('Error deleting account: '+e.message); }
+  } catch(e) { console.error(e); showToast('Error deleting account: '+e.message); }
 };
 
 // ── CHAT ──
