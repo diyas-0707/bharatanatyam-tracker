@@ -589,7 +589,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
         <div class="field"><label>Instructions</label>
           <div class="field-voice"><textarea id="assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-assign" onclick="toggleVoice('assign-body','mic-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
-        <div class="field"><label>Due Date (optional)</label><input type="date" id="assign-due"></div>
+        <div class="field"><label>Due Date (optional)</label><div style="display:flex;gap:8px"><input type="date" id="assign-due" style="flex:1.3"><input type="time" id="assign-due-time" style="flex:1"></div></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('post-assign-modal')">Cancel</button>
@@ -699,7 +699,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
         <div class="field"><label>Instructions</label>
           <div class="field-voice"><textarea id="edit-assign-body" placeholder="Detailed instructions..." rows="4"></textarea><button class="mic-btn" id="mic-edit-assign" onclick="toggleVoice('edit-assign-body','mic-edit-assign')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
-        <div class="field"><label>Due Date (optional)</label><input type="date" id="edit-assign-due"></div>
+        <div class="field"><label>Due Date (optional)</label><div style="display:flex;gap:8px"><input type="date" id="edit-assign-due" style="flex:1.3"><input type="time" id="edit-assign-due-time" style="flex:1"></div></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-assign-modal')">Cancel</button>
@@ -718,7 +718,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
           <div class="field-voice"><textarea id="poll-question" placeholder="Ask your class something..." rows="2"></textarea><button class="mic-btn" id="mic-poll" onclick="toggleVoice('poll-question','mic-poll')"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div>
         </div>
         <div class="field"><label>Options (one per line, min 2)</label><textarea id="poll-options" placeholder="Option A&#10;Option B&#10;Option C" rows="4" style="min-height:100px"></textarea></div>
-        <div class="field"><label>Poll closes on (optional)</label><input type="date" id="poll-closes"></div>
+        <div class="field"><label>Poll closes on (optional)</label><div style="display:flex;gap:8px"><input type="date" id="poll-closes" style="flex:1.3"><input type="time" id="poll-closes-time" style="flex:1"></div></div>
       </div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('poll-modal')">Cancel</button>
@@ -914,6 +914,25 @@ const $ = id => document.getElementById(id);
 function pluralize(count, singular, plural) {
   return count === 1 ? singular : (plural || singular + 's');
 }
+let use24Hour = localStorage.getItem('use24Hour') === 'true';
+
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  if (use24Hour) return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2,'0')} ${period}`;
+}
+// Kept for any stale references
+function formatTime12(timeStr) { return formatTime(timeStr); }
+
+function getTimezoneAbbr() {
+  try {
+    return new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(new Date()).find(p => p.type === 'timeZoneName')?.value || '';
+  } catch(e) { return ''; }
+}
+const TZ_ABBR = getTimezoneAbbr();
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
 window.openModal = async id => {
   $(id).classList.add('open');
@@ -997,6 +1016,13 @@ function setupMain() {
   $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
   goScreen('home');
   setupPushNotifications();
+  // Sync time format preference
+  getDoc(doc(db,'users',CU.uid)).then(udoc => {
+    if (udoc.exists() && typeof udoc.data().use24Hour === 'boolean') {
+      use24Hour = udoc.data().use24Hour;
+      localStorage.setItem('use24Hour', use24Hour);
+    }
+  }).catch(()=>{});
 }
 
 // ── NAVIGATION ──
@@ -1343,8 +1369,14 @@ async function renderAssignments(body) {
       } else if (ROLE==='teacher') {
         subBtn = `<div style="padding:0 20px 14px"><button onclick="viewSubmissions('${d.id}','${(a.title||'').replace(/'/g,"\\'")}');" style="background:none;border:none;color:var(--maroon);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">View submissions</button></div>`;
       }
-      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${a.due?' · Due '+a.due:''}</div></div>${ROLE==='teacher'?`<button onclick="openEditAssignment('${d.id}','${(a.title||'').replace(/'/g,"\\'")}','${(a.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}','${a.due||''}')" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${(a.body||'').replace(/\n/g,'<br>')}</div>${subBtn}`;
+      const dueLabel = a.due ? (a.dueTime ? `${a.due} at ${formatTime(a.dueTime)} ${TZ_ABBR}` : a.due) : '';
+      const safeBody = (a.body||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      el.innerHTML=`<div class="assign-card-top" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div><div class="assign-card-top-title">${a.title||'Assignment'}</div><div class="assign-card-top-date">Posted ${dt}${dueLabel?' · Due '+dueLabel:''}</div></div>${ROLE==='teacher'?`<button class="edit-assign-btn" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:500">✏ Edit</button>`:''}</div><div class="assign-card-body">${safeBody}</div>${subBtn}`;
       wrap.appendChild(el);
+      const editAssignBtn = el.querySelector('.edit-assign-btn');
+      if (editAssignBtn) {
+        editAssignBtn.addEventListener('click', () => openEditAssignment(d.id, a.title||'', a.body||'', a.due||'', a.dueTime||''));
+      }
     }
   }
   body.appendChild(wrap);
@@ -1562,12 +1594,13 @@ window.postAnnouncement = async () => {
 };
 window.postAssignment = async () => {
   stopVoice();
-  const title=$('assign-title').value.trim(), body=$('assign-body').value.trim(), due=$('assign-due').value;
+  const title=$('assign-title').value.trim(), body=$('assign-body').value.trim(), due=$('assign-due').value, dueTime=$('assign-due-time').value;
   if(!title||!body) { showToast('Please fill in title and instructions'); return; }
-  await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  const dueLabel = due ? (dueTime ? `${due} at ${formatTime(dueTime)} ${TZ_ABBR}` : due) : '';
+  await addDoc(collection(db,'classes',currentClassId,'assignments'), { title, body, due, dueTime, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
-  await notifyClassMembers(currentClassId, `📝 New Assignment`, `${title} — due ${due}`, 'assignments', `/?screen=assignments&class=${currentClassId}`);
-  $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value='';
+  await notifyClassMembers(currentClassId, `📝 New Assignment`, `${title}${dueLabel?` — due ${dueLabel}`:''}`, 'assignments', `/?screen=assignments&class=${currentClassId}`);
+  $('assign-title').value=''; $('assign-body').value=''; $('assign-due').value=''; $('assign-due-time').value='';
   closeModal('post-assign-modal');
   showToast('Assignment posted ✓');
   switchClassTab('assignments');
@@ -1974,26 +2007,33 @@ window.togglePin = async (annId, pin) => {
 // ── POLLS ──
 let editingPollId = null;
 
+function getPollCloseDate(poll) {
+  if (!poll.closes) return null;
+  return new Date(`${poll.closes}T${poll.closesTime || '23:59'}`);
+}
+
 function buildPollCard(poll, isT) {
   const wrap = document.createElement('div');
-  wrap.className = 'poll-card' + (poll.closes && new Date(poll.closes) < new Date() ? ' poll-closed' : '');
+  const closeDate = getPollCloseDate(poll);
+  wrap.className = 'poll-card' + (closeDate && closeDate < new Date() ? ' poll-closed' : '');
   const totalVotes = Object.keys(poll.votes||{}).length;
   const userVote = (poll.votes||{})[CU.uid];
   const optCounts = {};
   Object.values(poll.votes||{}).forEach(v => { optCounts[v] = (optCounts[v]||0)+1; });
-  const closed = poll.closes && new Date(poll.closes) < new Date();
+  const closed = closeDate && closeDate < new Date();
   const dt = poll.createdAt ? new Date(poll.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+  const closesLabel = poll.closes ? (poll.closesTime ? `${poll.closes} at ${formatTime(poll.closesTime)} ${TZ_ABBR}` : poll.closes) : '';
 
   let html = `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
     <div class="poll-question">${poll.question}</div>
-    ${isT ? `<div style="display:flex;gap:6px;flex-shrink:0"><button onclick="openEditPoll('${poll._id}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏ Edit</button><button onclick="deletePoll('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button></div>` : ''}
+    ${isT ? `<div style="display:flex;gap:6px;flex-shrink:0">${!closed?`<button onclick="openEditPoll('${poll._id}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏ Edit</button>`:''}<button onclick="deletePoll('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button></div>` : ''}
   </div>`;
 
   (poll.options||[]).forEach(opt => {
     const votes = optCounts[opt]||0;
     const pct = totalVotes ? Math.round(votes/totalVotes*100) : 0;
     const isVoted = userVote === opt;
-    html += `<div class="poll-option${isVoted?' voted':''}" onclick="castVote('${poll._id}','${opt.replace(/'/g,"\'")}','${poll.closes||''}')">
+    html += `<div class="poll-option${isVoted?' voted':''}" onclick="castVote('${poll._id}','${opt.replace(/'/g,"\'")}')">
       <div class="poll-bar" style="width:${pct}%"></div>
       <span class="poll-option-text">${opt}</span>
       <span class="poll-pct">${pct}% (${votes})</span>
@@ -2001,7 +2041,7 @@ function buildPollCard(poll, isT) {
     </div>`;
   });
 
-  html += `<div class="poll-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>📊 ${totalVotes} vote${totalVotes!==1?'s':''} · ${closed ? 'Poll closed' : poll.closes ? `Closes ${poll.closes}` : 'No closing date'} · Posted ${dt}</span>${userVote && !closed ? `<button onclick="removeVote('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif">Remove vote</button>` : ''}</div>`;
+  html += `<div class="poll-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>📊 ${totalVotes} ${pluralize(totalVotes,'vote')} · ${closed ? 'Poll closed' : closesLabel ? `Closes ${closesLabel}` : 'No closing date'} · Posted ${dt}</span>${userVote && !closed ? `<button onclick="removeVote('${poll._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:var(--danger);cursor:pointer;font-family:'DM Sans',sans-serif">Remove vote</button>` : ''}</div>`;
   wrap.innerHTML = html;
   return wrap;
 }
@@ -2013,6 +2053,7 @@ window.openCreatePoll = () => {
   $('poll-question').value = '';
   $('poll-options').value = '';
   $('poll-closes').value = '';
+  $('poll-closes-time').value = '';
   openModal('poll-modal');
 };
 
@@ -2025,6 +2066,7 @@ window.openEditPoll = async (pollId) => {
   $('poll-question').value = p.question||'';
   $('poll-options').value = (p.options||[]).join('\n');
   $('poll-closes').value = p.closes||'';
+  $('poll-closes-time').value = p.closesTime||'';
   openModal('poll-modal');
 };
 
@@ -2032,17 +2074,18 @@ window.savePoll = async () => {
   const question = $('poll-question').value.trim();
   const options = $('poll-options').value.split('\n').map(o=>o.trim()).filter(Boolean);
   const closes = $('poll-closes').value;
+  const closesTime = $('poll-closes-time').value;
   if (!question) { showToast('Please enter a question'); return; }
   if (options.length < 2) { showToast('Please enter at least 2 options'); return; }
   if (editingPollId) {
-    await updateDoc(doc(db,'classes',currentClassId,'polls',editingPollId), { question, options, closes, updatedAt:serverTimestamp() });
+    await updateDoc(doc(db,'classes',currentClassId,'polls',editingPollId), { question, options, closes, closesTime, updatedAt:serverTimestamp() });
     showToast('Poll updated ✓');
   } else {
-    await addDoc(collection(db,'classes',currentClassId,'polls'), { question, options, closes, votes:{}, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+    await addDoc(collection(db,'classes',currentClassId,'polls'), { question, options, closes, closesTime, votes:{}, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
     await notifyClassMembers(currentClassId, `📊 New Poll`, `${CU.displayName}: ${question.substring(0,80)}`, 'polls', `/?screen=stream&class=${currentClassId}`);
     showToast('Poll posted ✓');
   }
-  $('poll-question').value=''; $('poll-options').value=''; $('poll-closes').value='';
+  $('poll-question').value=''; $('poll-options').value=''; $('poll-closes').value=''; $('poll-closes-time').value='';
   closeModal('poll-modal');
   switchClassTab('stream');
 };
@@ -2063,11 +2106,13 @@ window.removeVote = async (pollId) => {
   switchClassTab('stream');
 };
 
-window.castVote = async (pollId, option, closes) => {
-  if (closes && new Date(closes) < new Date()) { showToast('This poll is closed'); return; }
+window.castVote = async (pollId, option) => {
   const pollRef = doc(db,'classes',currentClassId,'polls',pollId);
   const pd = await getDoc(pollRef);
-  const votes = {...(pd.data().votes||{})};
+  const pollData = pd.data();
+  const closeDate = getPollCloseDate(pollData);
+  if (closeDate && closeDate < new Date()) { showToast('This poll is closed'); return; }
+  const votes = {...(pollData.votes||{})};
   votes[CU.uid] = option;
   await updateDoc(pollRef, {votes});
   switchClassTab('stream');
@@ -2102,18 +2147,19 @@ window.deleteAssignment = async (id) => {
   switchClassTab('assignments');
 };
 
-window.openEditAssignment = (id, title, body, due) => {
+window.openEditAssignment = (id, title, body, due, dueTime) => {
   editingAssignId = id;
   $('edit-assign-title').value = title;
-  $('edit-assign-body').value = body.replace(/\\n/g,'\n');
-  $('edit-assign-due').value = due;
+  $('edit-assign-body').value = body;
+  $('edit-assign-due').value = due||'';
+  $('edit-assign-due-time').value = dueTime||'';
   openModal('edit-assign-modal');
 };
 window.saveEditAssignment = async () => {
   stopVoice();
-  const title=$('edit-assign-title').value.trim(), body=$('edit-assign-body').value.trim(), due=$('edit-assign-due').value;
+  const title=$('edit-assign-title').value.trim(), body=$('edit-assign-body').value.trim(), due=$('edit-assign-due').value, dueTime=$('edit-assign-due-time').value;
   if(!title||!body){showToast('Please fill in title and instructions');return;}
-  await updateDoc(doc(db,'classes',currentClassId,'assignments',editingAssignId), { title, body, due, editedAt:serverTimestamp() });
+  await updateDoc(doc(db,'classes',currentClassId,'assignments',editingAssignId), { title, body, due, dueTime, editedAt:serverTimestamp() });
   closeModal('edit-assign-modal');
   showToast('Assignment updated ✓');
   switchClassTab('assignments');
@@ -2495,6 +2541,21 @@ async function loadSettings() {
   signOutRow.onclick = () => doSignOut();
   sec.appendChild(signOutRow);
 
+  // Time format toggle (12hr / 24hr)
+  const timeFormatRow = document.createElement('div'); timeFormatRow.className='settings-row'; timeFormatRow.style.cursor='default';
+  timeFormatRow.innerHTML=`
+    <div class="settings-row-icon" style="background:var(--gold-pale)"><svg viewBox="0 0 24 24" stroke="var(--gold)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <div class="settings-row-label">Time Format</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;color:var(--text-soft)">${use24Hour ? '24-hour' : '12-hour'}</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
+        <input type="checkbox" id="time-format-toggle" ${use24Hour?'checked':''} style="opacity:0;width:0;height:0" onchange="saveTimeFormat(this.checked)">
+        <span style="position:absolute;cursor:pointer;inset:0;background:${use24Hour?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="time-format-track"></span>
+        <span style="position:absolute;height:18px;width:18px;left:${use24Hour?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="time-format-thumb"></span>
+      </label>
+    </div>`;
+  sec.appendChild(timeFormatRow);
+
   // Feedback
   const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
   feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
@@ -2769,7 +2830,7 @@ async function openChatWith(otherId,otherName){
         const isMine=m.senderId===CU.uid;
         const wrap=document.createElement('div');
         wrap.style.cssText=`display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'};margin-bottom:4px`;
-        const time=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'';
+        const time=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:!use24Hour}):'';
         let replyHtml='';
         if(m.replyTo&&allMsgs[m.replyTo]&&!allMsgs[m.replyTo].deleted){
           const orig=allMsgs[m.replyTo];
@@ -3006,6 +3067,17 @@ window.enableNotifications = async () => {
     showToast('Notifications enabled ✓');
     loadSettings(); // refresh to show updated status
   } catch(e) { console.warn('Push setup failed:', e); showToast('Could not enable notifications'); }
+};
+
+window.saveTimeFormat = async (checked) => {
+  use24Hour = checked;
+  localStorage.setItem('use24Hour', checked);
+  // Animate toggle
+  const track = $('time-format-track'); const thumb = $('time-format-thumb');
+  if (track) track.style.background = checked ? 'var(--maroon)' : '#ccc';
+  if (thumb) thumb.style.left = checked ? '23px' : '3px';
+  if (CU) { try { await setDoc(doc(db,'users',CU.uid), { use24Hour: checked }, {merge:true}); } catch(e) {} }
+  loadSettings();
 };
 
 window.saveNotifPref = async (key, enabled) => {
