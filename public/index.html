@@ -1273,8 +1273,8 @@ async function renderStream(body) {
   const pollSnap = await getDocs(query(collection(db,'classes',currentClassId,'polls'), orderBy('createdAt','desc')));
 
   const items = [
-    ...annSnap.docs.map(d=>({...d.data(), _type:'announce', _id:d.id})),
-    ...assSnap.docs.map(d=>({...d.data(), _type:'assign', _id:d.id})),
+    ...annSnap.docs.filter(d=>!d.data().deleted).map(d=>({...d.data(), _type:'announce', _id:d.id})),
+    ...assSnap.docs.filter(d=>!d.data().deleted).map(d=>({...d.data(), _type:'assign', _id:d.id})),
     ...pollSnap.docs.filter(d=>!d.data().deleted).map(d=>({...d.data(), _type:'poll', _id:d.id}))
   ].sort((a,b)=>{
     if(a.pinned&&!b.pinned) return -1;
@@ -1331,9 +1331,10 @@ async function renderAssignments(body) {
     wrap.appendChild(btn);
   }
   const snap = await getDocs(query(collection(db,'classes',currentClassId,'assignments'), orderBy('createdAt','desc')));
-  if (snap.empty) { wrap.innerHTML += '<div class="empty">No assignments yet.</div>'; }
+  const activeAssignDocs = snap.docs.filter(d=>!d.data().deleted);
+  if (!activeAssignDocs.length) { wrap.innerHTML += '<div class="empty">No assignments yet.</div>'; }
   else {
-    for (const d of snap.docs) {
+    for (const d of activeAssignDocs) {
       const a=d.data();
       const dt=a.createdAt?new Date(a.createdAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
       const el=document.createElement('div'); el.className='assign-card';
