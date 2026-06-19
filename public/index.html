@@ -1386,16 +1386,40 @@ async function renderPeople(body) {
   }
 
   // Students
-  const lbl2=document.createElement('div'); lbl2.className='section-label'; lbl2.style.marginTop='4px'; lbl2.textContent=`People (${studentIds.length})`;
+  const lbl2=document.createElement('div'); lbl2.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-top:4px';
+  const lbl2Text = document.createElement('div'); lbl2Text.className='section-label'; lbl2Text.style.margin='0'; lbl2Text.textContent=`People (${studentIds.length})`;
+  lbl2.appendChild(lbl2Text);
+
+  if (studentIds.length > 1) {
+    const sortWrap = document.createElement('select');
+    sortWrap.id = 'people-sort-select';
+    sortWrap.style.cssText = 'font-size:12px;font-family:"DM Sans",sans-serif;color:var(--text-mid);background:var(--card-bg);border:.5px solid var(--border);border-radius:8px;padding:5px 8px;outline:none';
+    sortWrap.innerHTML = `<option value="first">Sort: First Name</option><option value="last">Sort: Last Name</option>`;
+    sortWrap.value = localStorage.getItem('peopleSortOrder') || 'first';
+    sortWrap.onchange = () => { localStorage.setItem('peopleSortOrder', sortWrap.value); switchClassTab('people'); };
+    lbl2.appendChild(sortWrap);
+  }
   wrap.appendChild(lbl2);
 
   if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.style.padding='20px 0'; e.textContent='No students yet.'; wrap.appendChild(e); }
   else {
     const sdocs = await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
+    const sortOrder = localStorage.getItem('peopleSortOrder') || 'first';
+    function getFirstLast(data) {
+      let first = data.firstName, last = data.lastName;
+      if (!first && !last && data.name) {
+        const parts = data.name.trim().split(/\s+/);
+        first = parts[0] || '';
+        last = parts.slice(1).join(' ') || '';
+      }
+      return { first: (first||'').toLowerCase(), last: (last||'').toLowerCase() };
+    }
     const sortedDocs = sdocs.filter(d=>d.exists()).sort((a,b) => {
-      const nameA = (a.data().name||'').trim().toLowerCase();
-      const nameB = (b.data().name||'').trim().toLowerCase();
-      return nameA.localeCompare(nameB);
+      const A = getFirstLast(a.data()), B = getFirstLast(b.data());
+      if (sortOrder === 'last') {
+        return A.last.localeCompare(B.last) || A.first.localeCompare(B.first);
+      }
+      return A.first.localeCompare(B.first) || A.last.localeCompare(B.last);
     });
     sortedDocs.forEach(d => {
       const s=d.data();
@@ -1488,10 +1512,22 @@ async function loadAttendanceRows(container, date) {
   const existing=attDoc.exists()?attDoc.data():{};
   attState={...existing};
   const sdocs=await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
+  const attSortOrder = localStorage.getItem('peopleSortOrder') || 'first';
+  function getAttFirstLast(data) {
+    let first = data.firstName, last = data.lastName;
+    if (!first && !last && data.name) {
+      const parts = data.name.trim().split(/\s+/);
+      first = parts[0] || '';
+      last = parts.slice(1).join(' ') || '';
+    }
+    return { first: (first||'').toLowerCase(), last: (last||'').toLowerCase() };
+  }
   const sortedStudentDocs = sdocs.filter(d=>d.exists() && d.data().role !== 'parent').sort((a,b) => {
-    const nameA = (a.data().name||'').trim().toLowerCase();
-    const nameB = (b.data().name||'').trim().toLowerCase();
-    return nameA.localeCompare(nameB);
+    const A = getAttFirstLast(a.data()), B = getAttFirstLast(b.data());
+    if (attSortOrder === 'last') {
+      return A.last.localeCompare(B.last) || A.first.localeCompare(B.first);
+    }
+    return A.first.localeCompare(B.first) || A.last.localeCompare(B.last);
   });
   sortedStudentDocs.forEach(d=>{
     const s=d.data(); const status=existing[d.id]||'none';
@@ -2243,15 +2279,27 @@ window.loadLog = async () => {
   $('ls-days').textContent=uniqueDays;
   const list=$('log-list'); list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">No entries this month.</div>';return;}
+
+  // Fetch feedback for these logs across all classes this student is in
+  const classSnap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
+  const classIds = classSnap.docs.map(d=>d.id);
+  const feedbackMap = {};
+  await Promise.all(classIds.map(async classId => {
+    const fbSnap = await getDocs(collection(db,'classes',classId,'logFeedback'));
+    fbSnap.docs.forEach(fd => { feedbackMap[fd.id] = fd.data(); });
+  }));
+
   filtered.forEach(e=>{
     const d=new Date(e.date+'T00:00:00');
-    const el=document.createElement('div'); el.className='log-entry';
+    const el=document.createElement('div'); el.className='log-entry'; el.style.cssText='flex-direction:column;gap:8px;align-items:stretch';
     // Files
     let filesHtml='';
     if((e.files||[]).length){
       filesHtml='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">'+(e.files.map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);background:var(--gold-pale);border-radius:6px;padding:2px 8px;text-decoration:none">📎 ${f.name}</a>`).join(''))+'</div>';
     }
-    el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div>${filesHtml}<div style="display:flex;gap:8px;margin-top:6px"><button onclick="editLog('${e._id}','${(e.practiceText||'').replace(/'/g,"\\'")}')" style="font-size:11px;color:var(--text-soft);background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button><button onclick="deleteLog('${e._id}')" style="font-size:11px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✕ Delete</button></div></div>`;
+    const fb = feedbackMap[e._id];
+    const feedbackHtml = fb && fb.text ? `<div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;border:.5px solid rgba(201,146,42,.2);margin-top:6px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:3px">⭐ Feedback from ${fb.teacherName||'Teacher'}</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${fb.text}</div></div>` : '';
+    el.innerHTML=`<div style="display:flex;gap:12px;align-items:flex-start"><div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div>${filesHtml}<div style="display:flex;gap:8px;margin-top:6px"><button onclick="editLog('${e._id}','${(e.practiceText||'').replace(/'/g,"\\'")}')" style="font-size:11px;color:var(--text-soft);background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✏ Edit</button><button onclick="deleteLog('${e._id}')" style="font-size:11px;color:var(--danger);background:var(--danger-bg);border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif">✕ Delete</button></div></div></div>${feedbackHtml}`;
     list.appendChild(el);
   });
 };
