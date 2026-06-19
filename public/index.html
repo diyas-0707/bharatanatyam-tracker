@@ -914,17 +914,13 @@ const $ = id => document.getElementById(id);
 function pluralize(count, singular, plural) {
   return count === 1 ? singular : (plural || singular + 's');
 }
-let use24Hour = localStorage.getItem('use24Hour') === 'true';
-
 function formatTime(timeStr) {
   if (!timeStr) return '';
   const [h, m] = timeStr.split(':').map(Number);
-  if (use24Hour) return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-  const period = h >= 12 ? 'PM' : 'AM';
-  const h12 = h % 12 || 12;
-  return `${h12}:${m.toString().padStart(2,'0')} ${period}`;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
-// Kept for any stale references
 function formatTime12(timeStr) { return formatTime(timeStr); }
 
 function getTimezoneAbbr() {
@@ -1016,13 +1012,6 @@ function setupMain() {
   $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
   goScreen('home');
   setupPushNotifications();
-  // Sync time format preference
-  getDoc(doc(db,'users',CU.uid)).then(udoc => {
-    if (udoc.exists() && typeof udoc.data().use24Hour === 'boolean') {
-      use24Hour = udoc.data().use24Hour;
-      localStorage.setItem('use24Hour', use24Hour);
-    }
-  }).catch(()=>{});
 }
 
 // ── NAVIGATION ──
@@ -1320,13 +1309,21 @@ async function renderStream(body) {
         const editDeleteBtns = isT ? `<div style="display:flex;gap:6px;margin-left:auto;align-items:center">
           ${item._type==='announce' ? pinBtn : ''}
           <button class="edit-announce-btn" data-id="${item._id}" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏</button>
-          <button onclick="deleteAnnouncement('${item._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button>
+          <button class="delete-item-btn" data-id="${item._id}" data-type="${item._type}" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button>
         </div>` : '';
         const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
         const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
         const safeBody = (item.body||item.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${safeBody}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const safeTitle = (item.title||'Assignment').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${safeTitle}</strong><br>`:''} ${safeBody}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const deleteBtn = post.querySelector('.delete-item-btn');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', () => {
+            if (deleteBtn.dataset.type === 'assign') deleteAssignment(deleteBtn.dataset.id);
+            else deleteAnnouncement(deleteBtn.dataset.id);
+          });
+        }
         if (item._type === 'announce') {
           const commSec = await buildCommentsSection(item._id);
           post.appendChild(commSec);
@@ -1334,7 +1331,10 @@ async function renderStream(body) {
         wrap.appendChild(post);
         const editBtn = post.querySelector('.edit-announce-btn');
         if (editBtn) {
-          editBtn.addEventListener('click', () => openEditAnnouncement(item._id, item.body || ''));
+          editBtn.addEventListener('click', () => {
+            if (item._type === 'assign') openEditAssignment(item._id, item.title||'', item.body||'', item.due||'', item.dueTime||'');
+            else openEditAnnouncement(item._id, item.body || '');
+          });
         }
       }
     }
@@ -2541,21 +2541,6 @@ async function loadSettings() {
   signOutRow.onclick = () => doSignOut();
   sec.appendChild(signOutRow);
 
-  // Time format toggle (12hr / 24hr)
-  const timeFormatRow = document.createElement('div'); timeFormatRow.className='settings-row'; timeFormatRow.style.cursor='default';
-  timeFormatRow.innerHTML=`
-    <div class="settings-row-icon" style="background:var(--gold-pale)"><svg viewBox="0 0 24 24" stroke="var(--gold)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-    <div class="settings-row-label">Time Format</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:13px;color:var(--text-soft)">${use24Hour ? '24-hour' : '12-hour'}</span>
-      <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0">
-        <input type="checkbox" id="time-format-toggle" ${use24Hour?'checked':''} style="opacity:0;width:0;height:0" onchange="saveTimeFormat(this.checked)">
-        <span style="position:absolute;cursor:pointer;inset:0;background:${use24Hour?'var(--maroon)':'#ccc'};border-radius:24px;transition:.2s" id="time-format-track"></span>
-        <span style="position:absolute;height:18px;width:18px;left:${use24Hour?'23px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.2s" id="time-format-thumb"></span>
-      </label>
-    </div>`;
-  sec.appendChild(timeFormatRow);
-
   // Feedback
   const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
   feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
@@ -2830,7 +2815,7 @@ async function openChatWith(otherId,otherName){
         const isMine=m.senderId===CU.uid;
         const wrap=document.createElement('div');
         wrap.style.cssText=`display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'};margin-bottom:4px`;
-        const time=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:!use24Hour}):'';
+        const time=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'';
         let replyHtml='';
         if(m.replyTo&&allMsgs[m.replyTo]&&!allMsgs[m.replyTo].deleted){
           const orig=allMsgs[m.replyTo];
@@ -3067,17 +3052,6 @@ window.enableNotifications = async () => {
     showToast('Notifications enabled ✓');
     loadSettings(); // refresh to show updated status
   } catch(e) { console.warn('Push setup failed:', e); showToast('Could not enable notifications'); }
-};
-
-window.saveTimeFormat = async (checked) => {
-  use24Hour = checked;
-  localStorage.setItem('use24Hour', checked);
-  // Animate toggle
-  const track = $('time-format-track'); const thumb = $('time-format-thumb');
-  if (track) track.style.background = checked ? 'var(--maroon)' : '#ccc';
-  if (thumb) thumb.style.left = checked ? '23px' : '3px';
-  if (CU) { try { await setDoc(doc(db,'users',CU.uid), { use24Hour: checked }, {merge:true}); } catch(e) {} }
-  loadSettings();
 };
 
 window.saveNotifPref = async (key, enabled) => {
