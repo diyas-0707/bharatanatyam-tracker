@@ -422,8 +422,8 @@ button.rec:not(.btn) svg{stroke:#fff!important}
     </div>
     <div id="log-stats-row" style="padding:0 20px 10px">
       <div class="stat-row">
-        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-done">0</div><div class="stat-label">Completed Logs</div></div>
-        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-days">0</div><div class="stat-label">Days Practiced This Month</div></div>
+        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-done">0</div><div class="stat-label" id="ls-done-label">Completed Logs</div></div>
+        <div class="stat-box" style="flex:1"><div class="stat-num" id="ls-days">0</div><div class="stat-label" id="ls-days-label">Days Practiced This Month</div></div>
       </div>
     </div>
     <div class="ornament">✦</div>
@@ -911,6 +911,9 @@ let attState = {};
 
 // ── UTILS ──
 const $ = id => document.getElementById(id);
+function pluralize(count, singular, plural) {
+  return count === 1 ? singular : (plural || singular + 's');
+}
 window.showToast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); };
 window.openModal = async id => {
   $(id).classList.add('open');
@@ -941,7 +944,7 @@ window.openModal = async id => {
     }
   }
 };
-window.closeModal = id => $(id).classList.remove('open');
+window.closeModal = id => { stopVoice(); $(id).classList.remove('open'); };
 
 // ── AUTH ──
 window.signInGoogle = async () => {
@@ -1010,7 +1013,7 @@ window.goScreen = scr => {
 };
 
 window.openPanel = id => { $(id).classList.add('open'); };
-window.closePanel = id => { $(id).classList.remove('open'); };
+window.closePanel = id => { stopVoice(); $(id).classList.remove('open'); };
 
 // ── HOME ──
 async function loadHome() {
@@ -1042,7 +1045,7 @@ async function loadTeacherHome(c) {
   let students = 0;
   activeDocs.forEach(d => students += (d.data().studentIds||[]).length);
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${activeDocs.length}</div><div class="stat-label">Classes</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">Students</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${activeDocs.length}</div><div class="stat-label">${pluralize(activeDocs.length,'Class','Classes')}</div></div><div class="stat-box"><div class="stat-num">${students}</div><div class="stat-label">${pluralize(students,'Student')}</div></div>`;
   c.appendChild(sr);
   const dismissed = localStorage.getItem('hideTeacherQuickStart');
   if (!dismissed) {
@@ -1071,7 +1074,7 @@ async function loadStudentHome(c) {
   }
 
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${attendedThisMonth}</div><div class="stat-label">Sessions This Month</div></div><div class="stat-box"><div class="stat-num">${logsThisMonth}</div><div class="stat-label">Logs This Month</div></div><div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">Classes</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${attendedThisMonth}</div><div class="stat-label">${pluralize(attendedThisMonth,'Session')} This Month</div></div><div class="stat-box"><div class="stat-num">${logsThisMonth}</div><div class="stat-label">${pluralize(logsThisMonth,'Log')} This Month</div></div><div class="stat-box"><div class="stat-num">${activeClasses.length}</div><div class="stat-label">${pluralize(activeClasses.length,'Class','Classes')}</div></div>`;
   c.appendChild(sr);
 
   // Latest assignment
@@ -1113,19 +1116,20 @@ async function loadStudentHome(c) {
 async function loadParentHome(c) {
   const snap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">Classes</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${snap.size}</div><div class="stat-label">${pluralize(snap.size,'Class','Classes')}</div></div>`;
   c.appendChild(sr);
-  // Latest assignment
-  let latestAssign = null;
+  // Latest announcement
+  let latestAnnounce = null;
   for (const cd of snap.docs) {
-    if (!latestAssign) {
-      const as = await getDocs(query(collection(db,'classes',cd.id,'assignments'), orderBy('createdAt','desc')));
-      if (!as.empty) latestAssign = {...as.docs[0].data(), className: cd.data().name};
+    if (!latestAnnounce) {
+      const an = await getDocs(query(collection(db,'classes',cd.id,'announcements'), orderBy('createdAt','desc')));
+      const activeAnn = an.docs.filter(d=>!d.data().deleted);
+      if (activeAnn.length) latestAnnounce = {...activeAnn[0].data(), className: cd.data().name};
     }
   }
-  if (latestAssign) {
+  if (latestAnnounce) {
     const a = document.createElement('div'); a.className='home-hero';
-    a.innerHTML=`<div class="label">Latest Assignment · ${latestAssign.className}</div><h2>${latestAssign.title||'Assignment'}</h2><p>${(latestAssign.body||'').replace(/\n/g,'<br>')}</p>${latestAssign.due?`<p style="margin-top:8px;font-size:12px;opacity:.7">Due: ${latestAssign.due}</p>`:''}`;
+    a.innerHTML=`<div class="label">Latest Announcement · ${latestAnnounce.className}</div><h2>${latestAnnounce.teacherName||'Teacher'}</h2><p>${(latestAnnounce.body||'').replace(/\n/g,'<br>')}</p>`;
     c.appendChild(a);
   }
   const chatBtn = document.createElement('button');
@@ -2181,7 +2185,7 @@ window.openStudentDetail = async (sid, sname, semail) => {
     const filtered = allLogs.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     const done = filtered.filter(e=>e.completed).length;
     const uniqueDays = new Set(filtered.filter(e=>e.completed).map(e=>e.date)).size;
-    statsRow.innerHTML=`<div class="stat-box" style="flex:1"><div class="stat-num">${done}</div><div class="stat-label">Completed Logs</div></div><div class="stat-box" style="flex:1"><div class="stat-num">${uniqueDays}</div><div class="stat-label">Days Practiced This Month</div></div>`;
+    statsRow.innerHTML=`<div class="stat-box" style="flex:1"><div class="stat-num">${done}</div><div class="stat-label">Completed ${pluralize(done,'Log')}</div></div><div class="stat-box" style="flex:1"><div class="stat-num">${uniqueDays}</div><div class="stat-label">${pluralize(uniqueDays,'Day','Days')} Practiced This Month</div></div>`;
     logLbl.textContent = 'Practice Log — ' + filtered.length + ' entries';
     logContainer.innerHTML = '';
     if (!filtered.length) {
@@ -2268,6 +2272,8 @@ window.loadLog = async () => {
   const uniqueDays=new Set(filtered.filter(e=>e.completed).map(e=>e.date)).size;
   $('ls-done').textContent=done;
   $('ls-days').textContent=uniqueDays;
+  $('ls-done-label').textContent = `Completed ${pluralize(done,'Log')}`;
+  $('ls-days-label').textContent = `${pluralize(uniqueDays,'Day','Days')} Practiced This Month`;
   const list=$('log-list'); list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">No entries this month.</div>';return;}
 
@@ -2920,7 +2926,7 @@ window.toggleVoice=(fieldId,micId)=>{
 
 // ── MODAL CLOSE ON BACKDROP ──
 document.querySelectorAll('.modal').forEach(m=>{
-  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+  m.addEventListener('click',e=>{if(e.target===m){stopVoice();m.classList.remove('open');}});
 });
 
 // ── PUSH NOTIFICATIONS ──
