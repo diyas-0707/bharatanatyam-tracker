@@ -756,7 +756,8 @@ button.rec:not(.btn) svg{stroke:#fff!important}
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">Change Display Name</div>
-      <div class="field"><label>New Name</label><input id="new-display-name" placeholder="Your name"></div>
+      <div class="field"><label>First Name</label><input id="new-first-name" placeholder="First name"></div>
+      <div class="field" style="margin-top:10px"><label>Last Name</label><input id="new-last-name" placeholder="Last name"></div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-name-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveDisplayName()">Save</button>
@@ -2421,7 +2422,20 @@ async function loadSettings() {
   // Change name
   const nameRow = document.createElement('div'); nameRow.className='settings-row';
   nameRow.innerHTML=`<div class="settings-row-icon" style="background:var(--gold-pale)"><svg viewBox="0 0 24 24" stroke="var(--gold)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="settings-row-label">Display Name</div><div class="settings-row-value">${CU.displayName||''}</div><div class="settings-row-arrow">›</div>`;
-  nameRow.onclick = () => { $('new-display-name').value = CU.displayName||''; openModal('edit-name-modal'); };
+  nameRow.onclick = async () => {
+    const udoc = await getDoc(doc(db,'users',CU.uid));
+    const data = udoc.exists() ? udoc.data() : {};
+    let first = data.firstName || '';
+    let last = data.lastName || '';
+    if (!first && !last && CU.displayName) {
+      const parts = CU.displayName.trim().split(/\s+/);
+      first = parts[0] || '';
+      last = parts.slice(1).join(' ') || '';
+    }
+    $('new-first-name').value = first;
+    $('new-last-name').value = last;
+    openModal('edit-name-modal');
+  };
   sec.appendChild(nameRow);
 
   // Change role
@@ -2565,11 +2579,13 @@ window.sendFeedback = async () => {
 };
 
 window.saveDisplayName = async () => {
-  const name = $('new-display-name').value.trim();
-  if (!name) return;
+  const first = $('new-first-name').value.trim();
+  const last = $('new-last-name').value.trim();
+  if (!first || !last) { showToast('Please enter both first and last name'); return; }
+  const name = `${first} ${last}`;
   const { updateProfile } = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js');
   await updateProfile(CU, {displayName: name});
-  await updateDoc(doc(db,'users',CU.uid), {name});
+  await updateDoc(doc(db,'users',CU.uid), {name, firstName:first, lastName:last});
   closeModal('edit-name-modal');
   showToast('Name updated ✓');
   loadSettings();
