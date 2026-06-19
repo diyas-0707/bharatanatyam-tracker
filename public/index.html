@@ -756,8 +756,8 @@ button.rec:not(.btn) svg{stroke:#fff!important}
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <div class="modal-title">Change Display Name</div>
-      <div class="field"><label>First Name</label><input id="new-first-name" placeholder="First name"></div>
-      <div class="field" style="margin-top:10px"><label>Last Name</label><input id="new-last-name" placeholder="Last name"></div>
+      <div class="field"><label>First Name</label><div class="field-voice"><input id="new-first-name" placeholder="First name" style="padding-right:48px"><button class="mic-btn" id="mic-first-name" onclick="toggleVoice('new-first-name','mic-first-name')" style="top:50%;bottom:auto;transform:translateY(-50%)"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div></div>
+      <div class="field" style="margin-top:10px"><label>Last Name</label><div class="field-voice"><input id="new-last-name" placeholder="Last name" style="padding-right:48px"><button class="mic-btn" id="mic-last-name" onclick="toggleVoice('new-last-name','mic-last-name')" style="top:50%;bottom:auto;transform:translateY(-50%)"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button></div></div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('edit-name-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveDisplayName()">Save</button>
@@ -2919,7 +2919,7 @@ window.toggleVoice=(fieldId,micId)=>{
   if(activeRec){activeRec.stop();$(activeMicId).classList.remove('rec');}
   const rec=new SR(); rec.lang='en-IN'; rec.continuous=true; rec.interimResults=true;
   const field=$(fieldId); const base=field.value;
-  rec.onresult=ev=>{let f='',i='';for(let x=ev.resultIndex;x<ev.results.length;x++){if(ev.results[x].isFinal)f+=ev.results[x][0].transcript;else i+=ev.results[x][0].transcript;}field.value=(base+(base?'\n':'')+f+i).trim();};
+  rec.onresult=ev=>{let f='',i='';for(let x=ev.resultIndex;x<ev.results.length;x++){if(ev.results[x].isFinal)f+=ev.results[x][0].transcript;else i+=ev.results[x][0].transcript;}const sep=field.tagName==='INPUT'?' ':'\n';field.value=(base+(base?sep:'')+f+i).trim();};
   rec.onerror=rec.onend=()=>{$(micId).classList.remove('rec');activeRec=null;activeMicId=null;};
   rec.start(); activeRec=rec; activeMicId=micId; $(micId).classList.add('rec');
 };
