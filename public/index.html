@@ -1541,8 +1541,6 @@ window.inviteByEmail = async () => {
 window.removeStudent = async (sid, sname) => {
   if(!confirm(`Remove ${sname} from this class?`)) return;
   await updateDoc(doc(db,'classes',currentClassId), {studentIds:arrayRemove(sid)});
-  // Post to stream so teacher sees it
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body:`${sname} was removed from the class.`, teacherId:CU.uid, teacherName:'System', _system:true, createdAt:serverTimestamp() });
   showToast(sname+' removed');
   switchClassTab('people');
 };
@@ -1550,8 +1548,6 @@ window.removeStudent = async (sid, sname) => {
 window.leaveClass = async () => {
   if(!confirm('Leave this class?')) return;
   await updateDoc(doc(db,'classes',currentClassId), {studentIds:arrayRemove(CU.uid)});
-  // Notify teacher via stream
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body:`${CU.displayName} left the class.`, teacherId:'system', teacherName:'System', _system:true, createdAt:serverTimestamp() });
   showToast('You left the class');
   closePanel('panel-class');
   loadClasses();
