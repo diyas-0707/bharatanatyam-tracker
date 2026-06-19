@@ -1297,18 +1297,23 @@ async function renderStream(body) {
         const pinBtn = (isT && item._type==='announce') ? `<button onclick="togglePin('${item._id}',${!item.pinned})" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px" title="${item.pinned?'Unpin':'Pin'}">${item.pinned?'📌':'📍'}</button>` : '';
         const editDeleteBtns = isT ? `<div style="display:flex;gap:6px;margin-left:auto;align-items:center">
           ${item._type==='announce' ? pinBtn : ''}
-          <button onclick="openEditAnnouncement('${item._id}','${(item.body||'').replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏</button>
+          <button class="edit-announce-btn" data-id="${item._id}" style="background:var(--gold-pale);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--maroon-deep);cursor:pointer;font-weight:500">✏</button>
           <button onclick="deleteAnnouncement('${item._id}')" style="background:var(--danger-bg);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--danger);cursor:pointer">✕</button>
         </div>` : '';
         const teacherPhotoSnap = await getDoc(doc(db,'users',item.teacherId||'x'));
         const teacherPhoto = teacherPhotoSnap.exists() ? teacherPhotoSnap.data().photo : null;
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
-        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${(item.body||item.text||'').replace(/\n/g,'<br>')}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const safeBody = (item.body||item.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${item.title||'Assignment'}</strong><br>`:''} ${safeBody}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
         if (item._type === 'announce') {
           const commSec = await buildCommentsSection(item._id);
           post.appendChild(commSec);
         }
         wrap.appendChild(post);
+        const editBtn = post.querySelector('.edit-announce-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => openEditAnnouncement(item._id, item.body || ''));
+        }
       }
     }
   }
