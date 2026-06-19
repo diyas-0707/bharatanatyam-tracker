@@ -1391,7 +1391,12 @@ async function renderPeople(body) {
   if (!studentIds.length) { const e=document.createElement('div'); e.className='empty'; e.style.padding='20px 0'; e.textContent='No students yet.'; wrap.appendChild(e); }
   else {
     const sdocs = await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
-    sdocs.filter(d=>d.exists()).forEach(d => {
+    const sortedDocs = sdocs.filter(d=>d.exists()).sort((a,b) => {
+      const nameA = (a.data().name||'').trim().toLowerCase();
+      const nameB = (b.data().name||'').trim().toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+    sortedDocs.forEach(d => {
       const s=d.data();
       const row=document.createElement('div'); row.className='student-row';
       const sAvImg=s.photo?`<img src="${s.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="s-avatar">${(s.name||'?')[0]}</div>`;
@@ -1482,7 +1487,12 @@ async function loadAttendanceRows(container, date) {
   const existing=attDoc.exists()?attDoc.data():{};
   attState={...existing};
   const sdocs=await Promise.all(studentIds.map(id=>getDoc(doc(db,'users',id))));
-  sdocs.filter(d=>d.exists() && d.data().role !== 'parent').forEach(d=>{
+  const sortedStudentDocs = sdocs.filter(d=>d.exists() && d.data().role !== 'parent').sort((a,b) => {
+    const nameA = (a.data().name||'').trim().toLowerCase();
+    const nameB = (b.data().name||'').trim().toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+  sortedStudentDocs.forEach(d=>{
     const s=d.data(); const status=existing[d.id]||'none';
     const row=document.createElement('div'); row.className='att-row'; row.style.marginBottom='10px';
     const sPhoto = s.photo || null;
