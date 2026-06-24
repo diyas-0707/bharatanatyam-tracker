@@ -2695,13 +2695,17 @@ async function loadSettings() {
   if (ROLE === 'student') {
     const udoc2 = await getDoc(doc(db,'users',CU.uid));
     const linkedParents = udoc2.exists() ? (udoc2.data().linkedParents||[]) : [];
-    const pendingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
-    const pendingCount = pendingSnap.size;
+    // Incoming (parent initiated, toId = student)
+    const incomingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
+    // Outgoing (student initiated, fromId = student)
+    const outgoingSnap = await getDocs(query(collection(db,'familyRequests'), where('fromId','==',CU.uid), where('status','==','pending')));
+    const allPending = [...incomingSnap.docs, ...outgoingSnap.docs];
+    const pendingCount = allPending.length;
     const totalCount = linkedParents.length + pendingCount;
 
     const linkParentRow = document.createElement('div'); linkParentRow.className='settings-row';
     linkParentRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" stroke="#3B82F6" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="settings-row-label">Linked Parents</div><div class="settings-row-value">${totalCount > 0 ? totalCount : ''}${pendingCount > 0 ? ` · <span style="color:var(--gold)">${pendingCount} pending</span>` : ''}</div><div class="settings-row-arrow">›</div>`;
-    linkParentRow.onclick = () => openLinkedParentsModal(linkedParents, pendingSnap.docs);
+    linkParentRow.onclick = () => openLinkedParentsModal(linkedParents, incomingSnap.docs, outgoingSnap.docs);
     sec.appendChild(linkParentRow);
   }
 
@@ -3277,9 +3281,9 @@ window.linkFamilyMember = async () => {
     if (targetData.role !== 'parent') { showToast('That user is not a parent'); return; }
     const myDoc = await getDoc(doc(db,'users',CU.uid));
     if ((myDoc.data().linkedParents||[]).includes(targetId)) { showToast('Already linked to this parent'); return; }
-    await setDoc(doc(db,'familyRequests',`${targetId}_${CU.uid}`), {
-      fromId: targetId, fromName: targetData.name||'', fromEmail: targetData.email||'', fromRole: 'parent',
-      toId: CU.uid, toName: CU.displayName||'', toRole: 'student',
+    await setDoc(doc(db,'familyRequests',`${CU.uid}_${targetId}`), {
+      fromId: CU.uid, fromName: CU.displayName||'', fromEmail: CU.email||'', fromRole: 'student',
+      toId: targetId, toName: targetData.name||'', toRole: 'parent',
       status: 'pending', createdAt: serverTimestamp()
     });
     await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your student`, 'Go to the Family tab to accept or decline.', 'familyRequest', '/?screen=family');
@@ -3370,17 +3374,17 @@ window.openFamilyDetail = async (studentId, studentName) => {
   }
 };
 
-window.openLinkedParentsModal = async (linkedParents, pendingDocs) => {
+window.openLinkedParentsModal = async (linkedParents, incomingDocs, outgoingDocs) => {
   const body = $('linked-parents-body');
   body.innerHTML = '';
 
-  // Pending requests
-  for (const rd of pendingDocs) {
+  // Incoming requests (parent initiated — student can accept/decline)
+  for (const rd of (incomingDocs||[])) {
     const r = rd.data();
     const row = document.createElement('div'); row.style.cssText='background:var(--gold-pale);border-radius:12px;padding:12px 14px;border:.5px solid rgba(201,146,42,.2)';
-    row.innerHTML=`<div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:6px">⏳ Pending Request</div>
+    row.innerHTML=`<div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:6px">⏳ Request from Parent</div>
       <div style="font-size:14px;font-weight:500;color:var(--text-dark)">${r.fromName||'Parent'}</div>
-      <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px">${r.fromEmail||''} wants to link</div>
+      <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px">${r.fromEmail||''}</div>
       <div style="display:flex;gap:8px">
         <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true);closeModal('linked-parents-modal')" class="btn btn-primary" style="flex:1;padding:8px">✓ Accept</button>
         <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false);closeModal('linked-parents-modal')" class="btn btn-secondary" style="flex:1;padding:8px;color:var(--danger)">✗ Decline</button>
@@ -3388,8 +3392,17 @@ window.openLinkedParentsModal = async (linkedParents, pendingDocs) => {
     body.appendChild(row);
   }
 
+  // Outgoing requests (student initiated — awaiting parent confirmation)
+  for (const rd of (outgoingDocs||[])) {
+    const r = rd.data();
+    const row = document.createElement('div'); row.style.cssText='background:var(--surface);border-radius:12px;padding:12px 14px;border:.5px solid var(--border)';
+    row.innerHTML=`<div style="font-size:12px;color:var(--text-soft);font-weight:500;margin-bottom:4px">⏳ Awaiting confirmation</div>
+      <div style="font-size:14px;color:var(--text-dark)">${r.toName||'Parent'}</div>`;
+    body.appendChild(row);
+  }
+
   // Linked parents
-  for (const pid of linkedParents) {
+  for (const pid of (linkedParents||[])) {
     const pdoc = await getDoc(doc(db,'users',pid));
     if (!pdoc.exists()) continue;
     const p = pdoc.data();
@@ -3399,7 +3412,7 @@ window.openLinkedParentsModal = async (linkedParents, pendingDocs) => {
     body.appendChild(row);
   }
 
-  if (!linkedParents.length && !pendingDocs.length) {
+  if (!(incomingDocs||[]).length && !(outgoingDocs||[]).length && !(linkedParents||[]).length) {
     body.innerHTML = '<div class="empty" style="padding:10px 0">No parents linked yet.</div>';
   }
 
@@ -3628,16 +3641,17 @@ window.respondFamilyRequest = async (requestId, fromId, accept) => {
     const reqDoc = await getDoc(doc(db,'familyRequests',requestId));
     if (!reqDoc.exists()) { showToast('Request no longer exists'); return; }
     const req = reqDoc.data();
+    // parentId/studentId based on roles, not who was from/to
     const parentId = req.fromRole === 'parent' ? req.fromId : req.toId;
     const studentId = req.fromRole === 'student' ? req.fromId : req.toId;
     await setDoc(doc(db,'users',parentId), { linkedStudents: arrayUnion(studentId) }, {merge:true});
     await setDoc(doc(db,'users',studentId), { linkedParents: arrayUnion(parentId) }, {merge:true});
     await updateDoc(doc(db,'familyRequests',requestId), { status: 'accepted' });
-    await pushToUser(fromId, '✓ Family link confirmed', `${CU.displayName} accepted your link request.`, 'announcements', ROLE==='student'?'/?screen=settings':'/?screen=family');
+    await pushToUser(fromId, '✓ Family link confirmed', `${CU.displayName} accepted your link request.`, 'familyRequest', req.fromRole==='student' ? '/?screen=settings' : '/?screen=family');
     showToast('Linked ✓');
   } else {
     await updateDoc(doc(db,'familyRequests',requestId), { status: 'declined' });
-    await pushToUser(fromId, '✗ Family link declined', `${CU.displayName} declined your link request.`, 'announcements', '');
+    await pushToUser(fromId, '✗ Family link declined', `${CU.displayName} declined your link request.`, 'familyRequest', '');
     showToast('Request declined');
   }
   if (ROLE === 'student') loadSettings();
