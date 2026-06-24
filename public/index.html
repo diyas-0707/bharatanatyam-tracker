@@ -2679,13 +2679,22 @@ async function loadSettings() {
     parentHeader.textContent='Linked Parents';
     parentSec.appendChild(parentHeader);
 
+    // Pending requests sent to this student
+    const pendingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
+    for (const rd of pendingSnap.docs) {
+      const r = rd.data();
+      const reqRow = document.createElement('div'); reqRow.className='settings-row'; reqRow.style.cursor='default';
+      reqRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF;font-size:18px">👨‍👩‍👧</div><div class="settings-row-label" style="flex:1"><div style="font-size:14px">${r.fromName||'Parent'}</div><div style="font-size:12px;color:var(--text-soft)">${r.fromEmail||''} wants to link</div></div><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true)" style="background:var(--maroon);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">✓ Accept</button><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false)" style="background:var(--danger-bg);color:var(--danger);border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;margin-left:6px">✗ Decline</button>`;
+      parentSec.appendChild(reqRow);
+    }
+
     for (const pid of linkedParents) {
       const pdoc = await getDoc(doc(db,'users',pid));
       if (!pdoc.exists()) continue;
       const p = pdoc.data();
       const pRow = document.createElement('div'); pRow.className='settings-row'; pRow.style.cursor='default';
       const photo = p.photo ? `<img src="${p.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:none">` : `<div class="settings-row-icon" style="background:var(--gold-pale);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--maroon)">${(p.name||'P')[0]}</div>`;
-      pRow.innerHTML=`${photo}<div class="settings-row-label">${p.name||'Parent'}<div style="font-size:12px;color:var(--text-soft);font-weight:400">${p.email||''}</div></div>`;
+      pRow.innerHTML=`${photo}<div class="settings-row-label" style="flex:1">${p.name||'Parent'}<div style="font-size:12px;color:var(--text-soft);font-weight:400">${p.email||''}</div></div><button onclick="unlinkFamilyMember('${pid}','${(p.name||'Parent').replace(/'/g,"\\'")}','parent')" class="icon-btn danger" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
       parentSec.appendChild(pRow);
     }
 
@@ -2927,23 +2936,46 @@ window.closeChatPanel = () => {
 
 async function loadChatList() {
   const list=$('chat-list'); list.innerHTML='<div class="empty">Loading...</div>';
-  const snap=await getDocs(query(collection(db,'classes'),where('studentIds','array-contains',CU.uid)));
-  if(snap.empty){list.innerHTML='<div class="empty">Not enrolled in any classes yet.</div>';return;}
   list.innerHTML='';
   const seen=new Set();
+
+  // Teachers from enrolled classes
+  const snap=await getDocs(query(collection(db,'classes'),where('studentIds','array-contains',CU.uid)));
   for(const cd of snap.docs){
     const data=cd.data(); const tid=data.teacherId;
     if(seen.has(tid))continue; seen.add(tid);
     const chatId=getChatId(CU.uid,tid);
     const msgSnap=await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
     const lastMsg=msgSnap.empty?null:msgSnap.docs[0].data();
-    const el=document.createElement('div'); el.className='chat-list-item';
     const tDoc=await getDoc(doc(db,'users',tid));
     const tPhoto=tDoc.exists()?tDoc.data().photo:null;
+    const el=document.createElement('div'); el.className='chat-list-item';
     el.innerHTML=`<div class="chat-av">${tPhoto?`<img src="${tPhoto}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:( data.teacherName||'T')[0]}</div><div class="chat-info"><div class="chat-name">${data.teacherName||'Teacher'} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">Teacher</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
     el.onclick=()=>openChatWith(tid,data.teacherName||'Teacher');
     list.appendChild(el);
   }
+
+  // Linked family members (parents see their students, students see their parents)
+  const udoc = await getDoc(doc(db,'users',CU.uid));
+  const familyIds = udoc.exists()
+    ? (ROLE==='parent' ? (udoc.data().linkedStudents||[]) : (udoc.data().linkedParents||[]))
+    : [];
+  for (const fid of familyIds) {
+    if (seen.has(fid)) continue; seen.add(fid);
+    const fdoc = await getDoc(doc(db,'users',fid));
+    if (!fdoc.exists()) continue;
+    const f = fdoc.data();
+    const chatId = getChatId(CU.uid, fid);
+    const msgSnap = await getDocs(query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','desc')));
+    const lastMsg = msgSnap.empty ? null : msgSnap.docs[0].data();
+    const roleLabel = f.role==='parent' ? 'Parent' : 'Student';
+    const el = document.createElement('div'); el.className='chat-list-item';
+    el.innerHTML=`<div class="chat-av">${f.photo?`<img src="${f.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:(f.name||'?')[0]}</div><div class="chat-info"><div class="chat-name">${f.name||roleLabel} <span style="font-size:10px;color:var(--text-soft);background:var(--surface);padding:1px 6px;border-radius:10px;margin-left:4px">${roleLabel}</span></div><div class="chat-preview">${lastMsg&&!lastMsg.deleted?lastMsg.text:'Start a conversation...'}</div></div>`;
+    el.onclick=()=>openChatWith(fid, f.name||roleLabel);
+    list.appendChild(el);
+  }
+
+  if (!list.children.length) list.innerHTML='<div class="empty">No contacts yet.</div>';
 }
 
 async function openChatWith(otherId,otherName){
@@ -3144,6 +3176,19 @@ window.loadFamilyScreen = async () => {
     const linkedStudents = udoc.exists() ? (udoc.data().linkedStudents || []) : [];
 
     c.innerHTML = '';
+    // Pending requests for parent (student sent them a request)
+    const pendingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
+    if (pendingSnap.size > 0) {
+      const pendingLbl = document.createElement('div'); pendingLbl.className='section-label'; pendingLbl.textContent='Pending Requests';
+      c.appendChild(pendingLbl);
+      for (const rd of pendingSnap.docs) {
+        const r = rd.data();
+        const reqCard = document.createElement('div'); reqCard.className='card'; reqCard.style.cssText='display:flex;align-items:center;gap:12px';
+        reqCard.innerHTML=`<div class="s-avatar">${(r.fromName||'S')[0]}</div><div class="s-info" style="flex:1"><div class="s-name">${r.fromName||'Student'}</div><div class="s-email">${r.fromEmail||''} wants to link as your student</div></div><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true)" class="btn btn-primary" style="padding:6px 12px;font-size:12px;flex-shrink:0">✓</button><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false)" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;flex-shrink:0;color:var(--danger)">✗</button>`;
+        c.appendChild(reqCard);
+      }
+    }
+
     // Link button
     const linkBtn = document.createElement('button');
     linkBtn.className = 'btn btn-primary';
@@ -3162,14 +3207,15 @@ window.loadFamilyScreen = async () => {
       e.textContent = "No students linked yet. Enter a student's email to connect.";
       c.appendChild(e);
     } else {
+      const linkedLbl = document.createElement('div'); linkedLbl.className='section-label'; linkedLbl.style.marginTop='8px'; linkedLbl.textContent='Linked Students';
+      c.appendChild(linkedLbl);
       for (const sid of linkedStudents) {
         const sdoc = await getDoc(doc(db,'users',sid));
         if (!sdoc.exists()) continue;
         const s = sdoc.data();
         const row = document.createElement('div'); row.className='student-row'; row.style.cursor='pointer';
         const photo = s.photo ? `<img src="${s.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover">` : `<div class="s-avatar">${(s.name||'S')[0]}</div>`;
-        row.innerHTML=`${photo}<div class="s-info"><div class="s-name">${s.name||'Student'}</div><div class="s-email">${s.email||''}</div></div><div class="settings-row-arrow">›</div>`;
-        row.onclick = () => openFamilyDetail(sid, s.name||'Student');
+        row.innerHTML=`${photo}<div class="s-info"><div class="s-name">${s.name||'Student'}</div><div class="s-email">${s.email||''}</div></div><div style="display:flex;gap:6px"><button onclick="event.stopPropagation();openFamilyDetail('${sid}','${(s.name||'Student').replace(/'/g,"\\'")}')" class="icon-btn primary" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="event.stopPropagation();unlinkFamilyMember('${sid}','${(s.name||'Student').replace(/'/g,"\\'")}','student')" class="icon-btn danger" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
         c.appendChild(row);
       }
     }
@@ -3202,30 +3248,42 @@ window.linkFamilyMember = async () => {
   const email = $('link-family-email').value.trim().toLowerCase();
   if (!email) { showToast('Please enter an email'); return; }
 
-  // Find the user by email
   const usersSnap = await getDocs(query(collection(db,'users'), where('email','==',email)));
   if (usersSnap.empty) { showToast('No user found with that email'); return; }
   const targetDoc = usersSnap.docs[0];
   const targetId = targetDoc.id;
   const targetData = targetDoc.data();
 
+  if (targetId === CU.uid) { showToast("You can't link yourself"); return; }
+
   if (ROLE === 'parent') {
     if (targetData.role !== 'student') { showToast('That user is not a student'); return; }
-    if (targetId === CU.uid) { showToast("You can't link yourself"); return; }
-    // Add to parent's linkedStudents and student's linkedParents
-    await setDoc(doc(db,'users',CU.uid), { linkedStudents: arrayUnion(targetId) }, {merge:true});
-    await setDoc(doc(db,'users',targetId), { linkedParents: arrayUnion(CU.uid) }, {merge:true});
-    showToast(`${targetData.name||'Student'} linked ✓`);
+    // Check not already linked
+    const myDoc = await getDoc(doc(db,'users',CU.uid));
+    if ((myDoc.data().linkedStudents||[]).includes(targetId)) { showToast('Already linked to this student'); return; }
+    // Send pending request to student
+    await setDoc(doc(db,'familyRequests',`${CU.uid}_${targetId}`), {
+      fromId: CU.uid, fromName: CU.displayName||'', fromEmail: CU.email||'', fromRole: 'parent',
+      toId: targetId, toName: targetData.name||'', toRole: 'student',
+      status: 'pending', createdAt: serverTimestamp()
+    });
+    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your parent`, 'Go to Settings to accept or decline.', 'announcements', '/?screen=settings');
+    showToast('Request sent! Waiting for student to confirm.');
   } else if (ROLE === 'student') {
     if (targetData.role !== 'parent') { showToast('That user is not a parent'); return; }
-    if (targetId === CU.uid) { showToast("You can't link yourself"); return; }
-    await setDoc(doc(db,'users',CU.uid), { linkedParents: arrayUnion(targetId) }, {merge:true});
-    await setDoc(doc(db,'users',targetId), { linkedStudents: arrayUnion(CU.uid) }, {merge:true});
-    showToast(`${targetData.name||'Parent'} linked ✓`);
+    const myDoc = await getDoc(doc(db,'users',CU.uid));
+    if ((myDoc.data().linkedParents||[]).includes(targetId)) { showToast('Already linked to this parent'); return; }
+    await setDoc(doc(db,'familyRequests',`${targetId}_${CU.uid}`), {
+      fromId: targetId, fromName: targetData.name||'', fromEmail: targetData.email||'', fromRole: 'parent',
+      toId: CU.uid, toName: CU.displayName||'', toRole: 'student',
+      status: 'pending', createdAt: serverTimestamp()
+    });
+    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your student`, 'Go to the Family tab to accept or decline.', 'announcements', '/?screen=family');
+    showToast('Request sent! Waiting for parent to confirm.');
   }
 
   closeModal('link-family-modal');
-  loadFamilyScreen();
+  loadSettings();
 };
 
 window.openFamilyDetail = async (studentId, studentName) => {
@@ -3516,6 +3574,41 @@ window.openSummaryResponses = async (month) => {
     body.appendChild(card);
   });
 };
+window.respondFamilyRequest = async (requestId, fromId, accept) => {
+  if (accept) {
+    const reqDoc = await getDoc(doc(db,'familyRequests',requestId));
+    if (!reqDoc.exists()) { showToast('Request no longer exists'); return; }
+    const req = reqDoc.data();
+    const parentId = req.fromRole === 'parent' ? req.fromId : req.toId;
+    const studentId = req.fromRole === 'student' ? req.fromId : req.toId;
+    await setDoc(doc(db,'users',parentId), { linkedStudents: arrayUnion(studentId) }, {merge:true});
+    await setDoc(doc(db,'users',studentId), { linkedParents: arrayUnion(parentId) }, {merge:true});
+    await updateDoc(doc(db,'familyRequests',requestId), { status: 'accepted' });
+    await pushToUser(fromId, '✓ Family link confirmed', `${CU.displayName} accepted your link request.`, 'announcements', ROLE==='student'?'/?screen=settings':'/?screen=family');
+    showToast('Linked ✓');
+  } else {
+    await updateDoc(doc(db,'familyRequests',requestId), { status: 'declined' });
+    await pushToUser(fromId, '✗ Family link declined', `${CU.displayName} declined your link request.`, 'announcements', '');
+    showToast('Request declined');
+  }
+  if (ROLE === 'student') loadSettings();
+  else loadFamilyScreen();
+};
+
+window.unlinkFamilyMember = async (otherId, otherName, otherRole) => {
+  if (!confirm(`Remove ${otherName} as a linked ${otherRole}?`)) return;
+  if (ROLE === 'parent') {
+    await setDoc(doc(db,'users',CU.uid), { linkedStudents: arrayRemove(otherId) }, {merge:true});
+    await setDoc(doc(db,'users',otherId), { linkedParents: arrayRemove(CU.uid) }, {merge:true});
+    loadFamilyScreen();
+  } else {
+    await setDoc(doc(db,'users',CU.uid), { linkedParents: arrayRemove(otherId) }, {merge:true});
+    await setDoc(doc(db,'users',otherId), { linkedStudents: arrayRemove(CU.uid) }, {merge:true});
+    loadSettings();
+  }
+  showToast(`${otherName} removed`);
+};
+
 document.querySelectorAll('.modal').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m){stopVoice();m.classList.remove('open');}});
 });
