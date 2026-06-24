@@ -599,7 +599,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label>Send on day of month</label><input type="number" id="summary-day" min="1" max="28" placeholder="e.g. 1" style="width:80px"></div>
         <div class="field"><label>Send at time</label><input type="time" id="summary-time"></div>
-        <div class="field"><label>PayPal / Payment Link (optional)</label><input id="summary-paypal" type="url" placeholder="https://paypal.me/..."></div>
+        <div class="field"><label>Payment Link (optional)</label><input id="summary-paypal" type="url" placeholder="https://paypal.me/..."></div>
         <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-dark);cursor:pointer">
           <input type="checkbox" id="summary-save-paypal" style="width:16px;height:16px">
           Save this payment link for future summaries
@@ -1134,7 +1134,7 @@ function setupMain() {
   $('btab-log').style.display = ROLE==='student' ? 'flex' : 'none';
   if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
   $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
-  $('btab-family').style.display = (ROLE==='student' || isParent) ? 'flex' : 'none';
+  $('btab-family').style.display = isParent ? 'flex' : 'none';
   $('btab-summary').style.display = (isT || isParent) ? 'flex' : 'none';
   goScreen('home');
   setupPushNotifications();
@@ -2671,8 +2671,26 @@ async function loadSettings() {
 
   // Link parent (students only)
   if (ROLE === 'student') {
+    const udoc2 = await getDoc(doc(db,'users',CU.uid));
+    const linkedParents = udoc2.exists() ? (udoc2.data().linkedParents||[]) : [];
+    const parentSec = document.createElement('div'); parentSec.className='settings-section';
+    const parentHeader = document.createElement('div');
+    parentHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
+    parentHeader.textContent='Linked Parents';
+    parentSec.appendChild(parentHeader);
+
+    for (const pid of linkedParents) {
+      const pdoc = await getDoc(doc(db,'users',pid));
+      if (!pdoc.exists()) continue;
+      const p = pdoc.data();
+      const pRow = document.createElement('div'); pRow.className='settings-row'; pRow.style.cursor='default';
+      const photo = p.photo ? `<img src="${p.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:none">` : `<div class="settings-row-icon" style="background:var(--gold-pale);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--maroon)">${(p.name||'P')[0]}</div>`;
+      pRow.innerHTML=`${photo}<div class="settings-row-label">${p.name||'Parent'}<div style="font-size:12px;color:var(--text-soft);font-weight:400">${p.email||''}</div></div>`;
+      parentSec.appendChild(pRow);
+    }
+
     const linkParentRow = document.createElement('div'); linkParentRow.className='settings-row';
-    linkParentRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" stroke="#3B82F6" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="settings-row-label">Link a Parent</div><div class="settings-row-arrow">›</div>`;
+    linkParentRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" stroke="#3B82F6" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="settings-row-label">Link a Parent</div><div class="settings-row-arrow">›</div>`;
     linkParentRow.onclick = () => {
       $('link-family-title').textContent = 'Link a Parent';
       $('link-family-sub').textContent = "Enter your parent's email address to connect with them.";
@@ -2680,7 +2698,8 @@ async function loadSettings() {
       $('link-family-email').value = '';
       openModal('link-family-modal');
     };
-    sec.appendChild(linkParentRow);
+    parentSec.appendChild(linkParentRow);
+    c.appendChild(parentSec);
   }
 
   // Feedback
