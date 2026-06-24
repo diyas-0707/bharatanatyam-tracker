@@ -594,7 +594,7 @@ button.rec:not(.btn) svg{stroke:#fff!important}
       <div class="modal-handle"></div>
       <div class="modal-title" id="link-family-title">Link a Student</div>
       <p style="font-size:13px;color:var(--text-soft);margin-bottom:14px;line-height:1.6" id="link-family-sub">Enter the email address of the student you'd like to connect with.</p>
-      <div class="field"><label id="link-family-label">Student's Email</label><input id="link-family-email" type="email" placeholder="student@email.com"></div>
+      <div class="field"><label id="link-family-label">Student's Email</label><input id="link-family-email" type="email" placeholder="student@email.com" autocomplete="off"></div>
       <div class="modal-btns" style="margin-top:16px">
         <button class="btn btn-secondary" onclick="closeModal('link-family-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="linkFamilyMember()">Connect</button>
@@ -3191,8 +3191,21 @@ window.loadFamilyScreen = async () => {
       c.appendChild(pendingLbl);
       for (const rd of pendingSnap.docs) {
         const r = rd.data();
-        const reqCard = document.createElement('div'); reqCard.className='card'; reqCard.style.cssText='display:flex;align-items:center;gap:12px';
-        reqCard.innerHTML=`<div class="s-avatar">${(r.fromName||'S')[0]}</div><div class="s-info" style="flex:1"><div class="s-name">${r.fromName||'Student'}</div><div class="s-email">${r.fromEmail||''} wants to link as your student</div></div><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true)" class="btn btn-primary" style="padding:6px 12px;font-size:12px;flex-shrink:0">✓</button><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false)" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;flex-shrink:0;color:var(--danger)">✗</button>`;
+        const reqCard = document.createElement('div'); reqCard.className='card';
+        const photo = r.fromPhoto ? `<img src="${r.fromPhoto}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:none">` : `<div class="s-avatar">${(r.fromName||'?')[0]}</div>`;
+        reqCard.innerHTML=`
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            ${photo}
+            <div>
+              <div style="font-size:15px;font-weight:500;color:var(--text-dark)">${r.fromName||'Student'}</div>
+              <div style="font-size:12px;color:var(--text-soft)">${r.fromEmail||''}</div>
+              <div style="font-size:12px;color:var(--gold);margin-top:2px">Wants to link as your student</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true)" class="btn btn-primary" style="flex:1">✓ Accept</button>
+            <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false)" class="btn btn-secondary" style="flex:1;color:var(--danger)">✗ Decline</button>
+          </div>`;
         c.appendChild(reqCard);
       }
     }
