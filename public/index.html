@@ -1131,11 +1131,24 @@ function setupMain() {
   $('cls-ornament').textContent = isT ? '✦ Teacher Portal ✦' : '✦ My Classes ✦';
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
+  // Tab visibility and order per role
+  // Student:  Home(1) Classes(2) Log(3) Chat(4) Settings(5)
+  // Parent:   Home(1) Classes(2) Family(3) Summary(4) Chat(5) Settings(6)
+  // Teacher:  Home(1) Classes(2) Summary(3) Chat(4) Settings(5)
+  $('btab-home').style.order = '1';
+  $('btab-classes').style.order = '2';
+  $('btab-log').style.order = isT ? '99' : isParent ? '99' : '3';
+  $('btab-family').style.order = isParent ? '3' : '99';
+  $('btab-summary').style.order = isT ? '3' : isParent ? '4' : '99';
+  $('btab-chat').style.order = isT ? '4' : isParent ? '5' : '4';
+  $('btab-settings').style.order = isT ? '5' : isParent ? '6' : '5';
+
   $('btab-log').style.display = ROLE==='student' ? 'flex' : 'none';
-  if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
-  $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
   $('btab-family').style.display = isParent ? 'flex' : 'none';
   $('btab-summary').style.display = (isT || isParent) ? 'flex' : 'none';
+  $('btab-chat').style.display = (isParent || isT || ROLE==='student') ? 'flex' : 'none';
+  $('btab-classes').style.display = 'flex';
+  if($('join-code-btn')) $('join-code-btn').style.display = (ROLE==='student'||ROLE==='parent') ? 'block' : 'none';
   goScreen('home');
   setupPushNotifications();
 }
@@ -2765,6 +2778,7 @@ async function loadSettings() {
       { key:'comments',      label:'Comments on Posts', icon:'💬' },
       { key:'chat',          label:'Chat Messages',     icon:'✉️' },
       { key:'logFeedback',   label:'Log Feedback',      icon:'⭐' },
+      { key:'familyRequest', label:'Family Link Requests', icon:'👨‍👩‍👧' },
     ];
     const teacherNotifs = [
       { key:'teacherComments', label:'Comments on Posts',          icon:'💬' },
@@ -2772,13 +2786,16 @@ async function loadSettings() {
       { key:'studentLog',      label:'Student Logs Practice',       icon:'⭐' },
       { key:'chat',            label:'Chat Messages',               icon:'✉️' },
       { key:'studentJoin',     label:'New Student/Parent Joins',    icon:'🎉' },
+      { key:'summaryResponse', label:'Monthly Summary Response',    icon:'📋' },
     ];
     const parentNotifs = [
-      { key:'announcements', label:'New Announcements', icon:'📢' },
-      { key:'assignments',   label:'New Assignments',   icon:'📝' },
-      { key:'polls',         label:'New Polls',         icon:'📊' },
-      { key:'comments',      label:'Comments on Posts', icon:'💬' },
-      { key:'chat',          label:'Chat Messages',     icon:'✉️' },
+      { key:'announcements',  label:'New Announcements',       icon:'📢' },
+      { key:'assignments',    label:'New Assignments',         icon:'📝' },
+      { key:'polls',          label:'New Polls',               icon:'📊' },
+      { key:'comments',       label:'Comments on Posts',       icon:'💬' },
+      { key:'chat',           label:'Chat Messages',           icon:'✉️' },
+      { key:'familyRequest',  label:'Family Link Requests',    icon:'👨‍👩‍👧' },
+      { key:'summaryOpen',    label:'Monthly Summary Open',    icon:'📋' },
     ];
     const allNotifTypes = ROLE==='teacher' ? teacherNotifs : ROLE==='parent' ? parentNotifs : studentNotifs;
 
@@ -3267,7 +3284,7 @@ window.linkFamilyMember = async () => {
       toId: targetId, toName: targetData.name||'', toRole: 'student',
       status: 'pending', createdAt: serverTimestamp()
     });
-    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your parent`, 'Go to Settings to accept or decline.', 'announcements', '/?screen=settings');
+    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your parent`, 'Go to Settings to accept or decline.', 'familyRequest', '/?screen=settings');
     showToast('Request sent! Waiting for student to confirm.');
   } else if (ROLE === 'student') {
     if (targetData.role !== 'parent') { showToast('That user is not a parent'); return; }
@@ -3278,7 +3295,7 @@ window.linkFamilyMember = async () => {
       toId: CU.uid, toName: CU.displayName||'', toRole: 'student',
       status: 'pending', createdAt: serverTimestamp()
     });
-    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your student`, 'Go to the Family tab to accept or decline.', 'announcements', '/?screen=family');
+    await pushToUser(targetId, `👨‍👩‍👧 ${CU.displayName} wants to link as your student`, 'Go to the Family tab to accept or decline.', 'familyRequest', '/?screen=family');
     showToast('Request sent! Waiting for parent to confirm.');
   }
 
@@ -3498,7 +3515,7 @@ window.sendMonthlySummaryNow = async () => {
     for (const uid of memberIds) {
       const udoc = await getDoc(doc(db,'users',uid));
       if (udoc.exists() && udoc.data().role === 'parent') {
-        await pushToUser(uid, '📋 Monthly Summary', `${CU.displayName} has sent the monthly summary for ${cd.data().name}. Please fill it out within 24 hours.`, 'announcements', '/?screen=summary');
+        await pushToUser(uid, '📋 Monthly Summary', `${CU.displayName} has sent the monthly summary for ${cd.data().name}. Please fill it out within 24 hours.`, 'summaryOpen', '/?screen=summary');
         count++;
       }
     }
@@ -3544,7 +3561,7 @@ window.submitSummaryResponse = async () => {
     submittedAt: serverTimestamp(), month: summaryKey.split('_')[0]
   });
   // Notify teacher
-  await pushToUser(teacherId, `📋 ${CU.displayName} responded to monthly summary`, `Payment: ${summaryPaymentSelection==='yes'?'✓ Paid':'✗ Not paid'}`, 'teacherComments', '/?screen=summary');
+  await pushToUser(teacherId, `📋 ${CU.displayName} responded to monthly summary`, `Payment: ${summaryPaymentSelection==='yes'?'✓ Paid':'✗ Not paid'}`, 'summaryResponse', '/?screen=summary');
   closeModal('summary-respond-modal');
   showToast('Response saved ✓');
   loadSummaryScreen();
