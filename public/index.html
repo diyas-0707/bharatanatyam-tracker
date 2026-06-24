@@ -577,6 +577,17 @@ button.rec:not(.btn) svg{stroke:#fff!important}
 
   <!-- ══ MODALS ══ -->
 
+  <!-- Linked Parents (student view) -->
+  <div class="modal" id="linked-parents-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Linked Parents</div>
+      <div id="linked-parents-body" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+      <button class="btn btn-primary" onclick="openLinkParentForm()">+ Link a Parent</button>
+      <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('linked-parents-modal')">Close</button>
+    </div>
+  </div>
+
   <!-- Link Student (parent enters student email) / Link Parent (student enters parent email) -->
   <div class="modal" id="link-family-modal">
     <div class="modal-sheet">
@@ -1006,7 +1017,11 @@ const fbApp = initializeApp(cfg);
 const CLOUD_NAME = 'do0xkyypc';
 const UPLOAD_PRESET = 's7xoqxzt';
 
+const MAX_FILE_SIZE_MB = 50;
 async function uploadToCloudinary(file, onProgress) {
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    throw new Error(`File "${file.name}" is too large. Maximum size is ${MAX_FILE_SIZE_MB}MB. For videos, please upload to Google Drive or YouTube and paste the link instead.`);
+  }
   return new Promise((resolve, reject) => {
     const fd = new FormData();
     fd.append('file', file);
@@ -2676,53 +2691,25 @@ async function loadSettings() {
   roleRow.onclick = () => openModal('change-role-modal');
   sec.appendChild(roleRow);
 
+  // Link parent row (students only) — inside main sec, between Role and Sign Out
+  if (ROLE === 'student') {
+    const udoc2 = await getDoc(doc(db,'users',CU.uid));
+    const linkedParents = udoc2.exists() ? (udoc2.data().linkedParents||[]) : [];
+    const pendingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
+    const pendingCount = pendingSnap.size;
+    const totalCount = linkedParents.length + pendingCount;
+
+    const linkParentRow = document.createElement('div'); linkParentRow.className='settings-row';
+    linkParentRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" stroke="#3B82F6" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="settings-row-label">Linked Parents</div><div class="settings-row-value">${totalCount > 0 ? totalCount : ''}${pendingCount > 0 ? ` · <span style="color:var(--gold)">${pendingCount} pending</span>` : ''}</div><div class="settings-row-arrow">›</div>`;
+    linkParentRow.onclick = () => openLinkedParentsModal(linkedParents, pendingSnap.docs);
+    sec.appendChild(linkParentRow);
+  }
+
   // Sign out
   const signOutRow = document.createElement('div'); signOutRow.className='settings-row';
   signOutRow.innerHTML=`<div class="settings-row-icon" style="background:var(--surface)"><svg viewBox="0 0 24 24" stroke="var(--text-soft)"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="settings-row-label">Sign Out</div><div class="settings-row-arrow">›</div>`;
   signOutRow.onclick = () => doSignOut();
   sec.appendChild(signOutRow);
-
-  // Link parent (students only)
-  if (ROLE === 'student') {
-    const udoc2 = await getDoc(doc(db,'users',CU.uid));
-    const linkedParents = udoc2.exists() ? (udoc2.data().linkedParents||[]) : [];
-    const parentSec = document.createElement('div'); parentSec.className='settings-section';
-    const parentHeader = document.createElement('div');
-    parentHeader.style.cssText='padding:16px 20px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
-    parentHeader.textContent='Linked Parents';
-    parentSec.appendChild(parentHeader);
-
-    // Pending requests sent to this student
-    const pendingSnap = await getDocs(query(collection(db,'familyRequests'), where('toId','==',CU.uid), where('status','==','pending')));
-    for (const rd of pendingSnap.docs) {
-      const r = rd.data();
-      const reqRow = document.createElement('div'); reqRow.className='settings-row'; reqRow.style.cursor='default';
-      reqRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF;font-size:18px">👨‍👩‍👧</div><div class="settings-row-label" style="flex:1"><div style="font-size:14px">${r.fromName||'Parent'}</div><div style="font-size:12px;color:var(--text-soft)">${r.fromEmail||''} wants to link</div></div><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true)" style="background:var(--maroon);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">✓ Accept</button><button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false)" style="background:var(--danger-bg);color:var(--danger);border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;margin-left:6px">✗ Decline</button>`;
-      parentSec.appendChild(reqRow);
-    }
-
-    for (const pid of linkedParents) {
-      const pdoc = await getDoc(doc(db,'users',pid));
-      if (!pdoc.exists()) continue;
-      const p = pdoc.data();
-      const pRow = document.createElement('div'); pRow.className='settings-row'; pRow.style.cursor='default';
-      const photo = p.photo ? `<img src="${p.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:none">` : `<div class="settings-row-icon" style="background:var(--gold-pale);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--maroon)">${(p.name||'P')[0]}</div>`;
-      pRow.innerHTML=`${photo}<div class="settings-row-label" style="flex:1">${p.name||'Parent'}<div style="font-size:12px;color:var(--text-soft);font-weight:400">${p.email||''}</div></div><button onclick="unlinkFamilyMember('${pid}','${(p.name||'Parent').replace(/'/g,"\\'")}','parent')" class="icon-btn danger" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-      parentSec.appendChild(pRow);
-    }
-
-    const linkParentRow = document.createElement('div'); linkParentRow.className='settings-row';
-    linkParentRow.innerHTML=`<div class="settings-row-icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" stroke="#3B82F6" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="settings-row-label">Link a Parent</div><div class="settings-row-arrow">›</div>`;
-    linkParentRow.onclick = () => {
-      $('link-family-title').textContent = 'Link a Parent';
-      $('link-family-sub').textContent = "Enter your parent's email address to connect with them.";
-      $('link-family-label').textContent = "Parent's Email";
-      $('link-family-email').value = '';
-      openModal('link-family-modal');
-    };
-    parentSec.appendChild(linkParentRow);
-    c.appendChild(parentSec);
-  }
 
   // Feedback
   const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
@@ -3381,6 +3368,51 @@ window.openFamilyDetail = async (studentId, studentName) => {
       body.appendChild(row);
     });
   }
+};
+
+window.openLinkedParentsModal = async (linkedParents, pendingDocs) => {
+  const body = $('linked-parents-body');
+  body.innerHTML = '';
+
+  // Pending requests
+  for (const rd of pendingDocs) {
+    const r = rd.data();
+    const row = document.createElement('div'); row.style.cssText='background:var(--gold-pale);border-radius:12px;padding:12px 14px;border:.5px solid rgba(201,146,42,.2)';
+    row.innerHTML=`<div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:6px">⏳ Pending Request</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text-dark)">${r.fromName||'Parent'}</div>
+      <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px">${r.fromEmail||''} wants to link</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',true);closeModal('linked-parents-modal')" class="btn btn-primary" style="flex:1;padding:8px">✓ Accept</button>
+        <button onclick="respondFamilyRequest('${rd.id}','${r.fromId}',false);closeModal('linked-parents-modal')" class="btn btn-secondary" style="flex:1;padding:8px;color:var(--danger)">✗ Decline</button>
+      </div>`;
+    body.appendChild(row);
+  }
+
+  // Linked parents
+  for (const pid of linkedParents) {
+    const pdoc = await getDoc(doc(db,'users',pid));
+    if (!pdoc.exists()) continue;
+    const p = pdoc.data();
+    const row = document.createElement('div'); row.className='student-row'; row.style.cursor='default';
+    const photo = p.photo ? `<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:none">` : `<div class="s-avatar">${(p.name||'P')[0]}</div>`;
+    row.innerHTML=`${photo}<div class="s-info"><div class="s-name">${p.name||'Parent'}</div><div class="s-email">${p.email||''}</div></div><button onclick="unlinkFamilyMember('${pid}','${(p.name||'Parent').replace(/'/g,"\\'")}','parent')" class="icon-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    body.appendChild(row);
+  }
+
+  if (!linkedParents.length && !pendingDocs.length) {
+    body.innerHTML = '<div class="empty" style="padding:10px 0">No parents linked yet.</div>';
+  }
+
+  openModal('linked-parents-modal');
+};
+
+window.openLinkParentForm = () => {
+  closeModal('linked-parents-modal');
+  $('link-family-title').textContent = 'Link a Parent';
+  $('link-family-sub').textContent = "Enter your parent's email address to connect with them.";
+  $('link-family-label').textContent = "Parent's Email";
+  $('link-family-email').value = '';
+  openModal('link-family-modal');
 };
 
 // ── MONTHLY SUMMARY ──
