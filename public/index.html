@@ -3313,78 +3313,118 @@ window.openFamilyDetail = async (studentId, studentName) => {
   body.innerHTML = '<div class="empty">Loading...</div>';
   openPanel('panel-family-detail');
 
-  // Load student's practice logs
   const logsSnap = await getDocs(query(collection(db,'practiceLogs'), where('studentId','==',studentId)));
   const allLogs = logsSnap.docs.map(d=>({...d.data(),_id:d.id})).filter(e=>!e.deleted);
   const now = new Date();
   const ms = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
-  const logsThisMonth = allLogs.filter(e=>e.date&&e.date.startsWith(ms));
 
-  // Load attendance across all shared classes
+  // Load all attendance across shared classes
   const classSnap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',studentId)));
-  let attendedThisMonth = 0;
+  const allAttendance = []; // {date, status, className}
   for (const cd of classSnap.docs) {
     const attSnap = await getDocs(collection(db,'classes',cd.id,'attendance'));
     attSnap.docs.forEach(ad => {
-      if (ad.id.startsWith(ms) && ad.data()[studentId] === 'present') attendedThisMonth++;
+      const status = ad.data()[studentId];
+      if (status) allAttendance.push({date: ad.id, status, className: cd.data().name});
     });
   }
 
   body.innerHTML = '';
 
-  // Stats
+  // Stats row
+  const logsThisMonth = allLogs.filter(e=>e.date&&e.date.startsWith(ms));
+  const attThisMonth = allAttendance.filter(a=>a.date.startsWith(ms));
+  const presentCount = attThisMonth.filter(a=>a.status==='present').length;
+  const attRate = attThisMonth.length ? Math.round(presentCount/attThisMonth.length*100) : null;
+
   const sr = document.createElement('div'); sr.className='stat-row';
-  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${attendedThisMonth}</div><div class="stat-label">${pluralize(attendedThisMonth,'Session')} This Month</div></div><div class="stat-box"><div class="stat-num">${logsThisMonth.length}</div><div class="stat-label">${pluralize(logsThisMonth.length,'Log')} This Month</div></div>`;
+  sr.innerHTML=`<div class="stat-box"><div class="stat-num">${presentCount}</div><div class="stat-label">${pluralize(presentCount,'Session')} This Month</div></div><div class="stat-box"><div class="stat-num">${logsThisMonth.length}</div><div class="stat-label">${pluralize(logsThisMonth.length,'Log')} This Month</div></div>${attRate!==null?`<div class="stat-box"><div class="stat-num">${attRate}%</div><div class="stat-label">Attendance Rate</div></div>`:''}`;
   body.appendChild(sr);
 
-  // Month selector
+  // Controls row: month selector + view dropdown
+  const controlsRow = document.createElement('div'); controlsRow.style.cssText='display:flex;gap:8px';
+  const selStyle = 'flex:1;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--text-dark)';
+
   const months = [];
   for (let i=0; i<6; i++) {
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     const val = d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');
     months.push({val, label: d.toLocaleString('en',{month:'long',year:'numeric'})});
   }
-  const monthSel = document.createElement('select');
-  monthSel.style.cssText='width:100%;appearance:none;background:var(--card-bg);border:.5px solid var(--border);border-radius:10px;padding:9px 14px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--text-dark)';
+  const monthSel = document.createElement('select'); monthSel.style.cssText=selStyle;
   months.forEach(m => { const opt=document.createElement('option'); opt.value=m.val; opt.textContent=m.label; monthSel.appendChild(opt); });
-  body.appendChild(monthSel);
 
-  const logContainer = document.createElement('div'); logContainer.style.cssText='display:flex;flex-direction:column;gap:10px;margin-top:8px';
-  body.appendChild(logContainer);
+  const viewSel = document.createElement('select'); viewSel.style.cssText=selStyle;
+  ['All','Logs','Attendance'].forEach(v => { const opt=document.createElement('option'); opt.value=v.toLowerCase(); opt.textContent=v; viewSel.appendChild(opt); });
 
-  function renderParentLogs(month) {
-    const filtered = allLogs.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
-    logContainer.innerHTML = '';
-    if (!filtered.length) { logContainer.innerHTML='<div class="empty" style="padding:16px 0">No logs this month.</div>'; return; }
-    filtered.forEach(e => {
-      const d = new Date(e.date+'T00:00:00');
-      const el = document.createElement('div'); el.className='log-entry';
-      const filesHtml = (e.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);text-decoration:none">📎 ${f.name}</a>`).join(' ');
-      el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div>${filesHtml?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${filesHtml}</div>`:''}</div>`;
-      logContainer.appendChild(el);
-    });
+  controlsRow.appendChild(monthSel);
+  controlsRow.appendChild(viewSel);
+  body.appendChild(controlsRow);
+
+  const contentArea = document.createElement('div'); contentArea.style.cssText='display:flex;flex-direction:column;gap:10px';
+  body.appendChild(contentArea);
+
+  function renderAll(month, view) {
+    contentArea.innerHTML = '';
+
+    if (view === 'all' || view === 'logs') {
+      const filtered = allLogs.filter(e=>e.date&&e.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+      if (view === 'all') {
+        const lbl = document.createElement('div'); lbl.className='section-label'; lbl.textContent=`Practice ${pluralize(filtered.length,'Log')}`;
+        contentArea.appendChild(lbl);
+      }
+      if (!filtered.length) {
+        const e=document.createElement('div');e.className='empty';e.style.padding='8px 0';e.textContent='No logs this month.';contentArea.appendChild(e);
+      } else {
+        filtered.forEach(e => {
+          const d = new Date(e.date+'T00:00:00');
+          const el = document.createElement('div'); el.className='log-entry';
+          const filesHtml = (e.files||[]).map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);text-decoration:none">📎 ${f.name}</a>`).join(' ');
+          el.innerHTML=`<div class="log-date-col"><div class="log-day">${d.getDate()}</div><div class="log-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div class="log-body"><div class="log-text">${e.practiceText||'Practice'}</div>${filesHtml?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">${filesHtml}</div>`:''}</div>`;
+          contentArea.appendChild(el);
+        });
+      }
+    }
+
+    if (view === 'all' || view === 'attendance') {
+      const attFiltered = allAttendance.filter(a=>a.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+      const present = attFiltered.filter(a=>a.status==='present').length;
+      const rate = attFiltered.length ? Math.round(present/attFiltered.length*100) : null;
+
+      if (view === 'all') {
+        const lbl = document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='8px';
+        lbl.textContent=`Attendance${rate!==null?' — '+rate+'% rate':''}`;
+        contentArea.appendChild(lbl);
+      } else if (view === 'attendance' && rate !== null) {
+        const rateLbl = document.createElement('div'); rateLbl.style.cssText='font-size:13px;color:var(--text-soft);margin-top:4px';
+        rateLbl.textContent=`${present} of ${attFiltered.length} ${pluralize(attFiltered.length,'session')} — ${rate}% attendance rate`;
+        contentArea.appendChild(rateLbl);
+      }
+
+      if (!attFiltered.length) {
+        const e=document.createElement('div');e.className='empty';e.style.padding='8px 0';e.textContent='No attendance records this month.';contentArea.appendChild(e);
+      } else {
+        // Group by class name
+        const byClass = {};
+        attFiltered.forEach(a => { (byClass[a.className]=byClass[a.className]||[]).push(a); });
+        Object.entries(byClass).forEach(([cls, records]) => {
+          if (Object.keys(byClass).length > 1) {
+            const clsLbl = document.createElement('div'); clsLbl.style.cssText='font-size:12px;font-weight:500;color:var(--text-soft);margin-bottom:4px'; clsLbl.textContent=cls;
+            contentArea.appendChild(clsLbl);
+          }
+          records.forEach(a => {
+            const row = document.createElement('div'); row.style.cssText='display:flex;justify-content:space-between;align-items:center;background:var(--card-bg);border-radius:10px;padding:10px 14px;border:.5px solid var(--border)';
+            row.innerHTML=`<span style="font-size:13px;color:var(--text-dark)">${a.date}</span><span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:${a.status==='present'?'var(--success-bg)':'var(--danger-bg)'};color:${a.status==='present'?'var(--success)':'var(--danger)'}">${a.status==='present'?'Present':'Absent'}</span>`;
+            contentArea.appendChild(row);
+          });
+        });
+      }
+    }
   }
 
-  monthSel.addEventListener('change', () => renderParentLogs(monthSel.value));
-  renderParentLogs(ms);
-
-  // Attendance section
-  const attLbl = document.createElement('div'); attLbl.className='section-label'; attLbl.style.marginTop='12px'; attLbl.textContent='Attendance This Month';
-  body.appendChild(attLbl);
-  for (const cd of classSnap.docs) {
-    const attSnap = await getDocs(collection(db,'classes',cd.id,'attendance'));
-    const classAttRows = attSnap.docs.filter(d=>d.id.startsWith(ms)).sort((a,b)=>b.id.localeCompare(a.id));
-    if (!classAttRows.length) continue;
-    const classLbl = document.createElement('div'); classLbl.style.cssText='font-size:12px;font-weight:500;color:var(--text-soft);margin-bottom:4px'; classLbl.textContent=cd.data().name;
-    body.appendChild(classLbl);
-    classAttRows.forEach(ad => {
-      const status = ad.data()[studentId];
-      if (!status) return;
-      const row = document.createElement('div'); row.style.cssText='display:flex;justify-content:space-between;align-items:center;background:var(--card-bg);border-radius:10px;padding:10px 14px;border:.5px solid var(--border);margin-bottom:6px';
-      row.innerHTML=`<span style="font-size:13px;color:var(--text-dark)">${ad.id}</span><span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:${status==='present'?'var(--success-bg)':'var(--danger-bg)'};color:${status==='present'?'var(--success)':'var(--danger)'}">${status==='present'?'Present':'Absent'}</span>`;
-      body.appendChild(row);
-    });
-  }
+  monthSel.addEventListener('change', () => renderAll(monthSel.value, viewSel.value));
+  viewSel.addEventListener('change', () => renderAll(monthSel.value, viewSel.value));
+  renderAll(ms, 'all');
 };
 
 window.openLinkedParentsModal = async (linkedParents, incomingDocs, outgoingDocs) => {
