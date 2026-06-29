@@ -3494,16 +3494,14 @@ window.loadSummaryScreen = async () => {
     $('summary-sub').textContent = 'Send monthly surveys to all parents';
     c.innerHTML = '';
 
-    // Load teacher's summary settings
     const udoc = await getDoc(doc(db,'users',CU.uid));
     const settings = udoc.exists() ? (udoc.data().summarySettings||{}) : {};
 
-    // Setup card
     const setupCard = document.createElement('div'); setupCard.className='card';
     setupCard.innerHTML=`<div class="card-label">Schedule</div>
       ${settings.day ? `<div style="font-size:15px;color:var(--text-dark);margin-bottom:8px">Sends on day <strong>${settings.day}</strong> of each month at <strong>${settings.time ? formatTime(settings.time) : 'N/A'}</strong></div>` : '<div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">Not scheduled yet</div>'}
-      ${settings.paypalLink ? `<div style="font-size:12px;color:var(--text-soft)">💳 Payment link saved</div>` : ''}`;
-    const setupBtn = document.createElement('button'); setupBtn.className='btn btn-primary'; setupBtn.style.marginTop='12px'; setupBtn.textContent='⚙ Configure Summary';
+      ${settings.paypalLink ? `<div style="font-size:12px;color:var(--text-soft)">Payment link saved</div>` : ''}`;
+    const setupBtn = document.createElement('button'); setupBtn.className='btn btn-primary'; setupBtn.style.marginTop='12px'; setupBtn.textContent='Configure Summary';
     setupBtn.onclick = async () => {
       $('summary-day').value = settings.day||'';
       $('summary-time').value = settings.time||'';
@@ -3514,24 +3512,21 @@ window.loadSummaryScreen = async () => {
     setupCard.appendChild(setupBtn);
     c.appendChild(setupCard);
 
-    // Send now button
-    const sendBtn = document.createElement('button'); sendBtn.className='btn btn-secondary'; sendBtn.textContent='📤 Send Summary Now';
+    const sendBtn = document.createElement('button'); sendBtn.className='btn btn-secondary'; sendBtn.textContent='Send Summary Now';
     sendBtn.onclick = () => sendMonthlySummaryNow();
     c.appendChild(sendBtn);
 
-    // View responses by month
     const lbl = document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='8px'; lbl.textContent='Responses by Month';
     c.appendChild(lbl);
 
-    // List months that have responses
     const responsesSnap = await getDocs(collection(db,'monthlySummary'));
-    const months = [...new Set(responsesSnap.docs.map(d=>d.id.split('_')[0]))].sort().reverse();
+    const months = [...new Set(responsesSnap.docs.map(d=>d.data().month||d.id.split('_')[0]))].filter(Boolean).sort().reverse();
     if (!months.length) {
       const e=document.createElement('div');e.className='empty';e.textContent='No responses yet.';c.appendChild(e);
     } else {
       months.forEach(m => {
         const mRow = document.createElement('div'); mRow.className='settings-row'; mRow.style.cssText='background:var(--card-bg);border-radius:14px;border:.5px solid var(--border)';
-        const d = new Date(m+'-01');
+        const d = new Date(m+'-02');
         mRow.innerHTML=`<div class="settings-row-label">${d.toLocaleString('en',{month:'long',year:'numeric'})}</div><div class="settings-row-arrow">›</div>`;
         mRow.onclick = () => openSummaryResponses(m);
         c.appendChild(mRow);
@@ -3540,51 +3535,68 @@ window.loadSummaryScreen = async () => {
 
   } else if (ROLE === 'parent') {
     $('summary-title').textContent = 'Monthly Summary';
-    $('summary-sub').textContent = 'Respond to your teacher\'s monthly survey';
+    $('summary-sub').textContent = "Respond to your teacher's monthly survey";
     c.innerHTML = '';
 
-    // Find which classes the parent is in and get teacher summarySettings
     const classSnap = await getDocs(query(collection(db,'classes'), where('studentIds','array-contains',CU.uid)));
-    if (classSnap.empty) {
-      c.innerHTML='<div class="empty">Join a class to see monthly summaries.</div>';
-      return;
-    }
+    if (classSnap.empty) { c.innerHTML='<div class="empty">Join a class to see monthly summaries.</div>'; return; }
 
     const now = new Date();
     const ms = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
+    let hasActive = false;
 
     for (const cd of classSnap.docs) {
       const classData = cd.data();
       const teacherDoc = await getDoc(doc(db,'users',classData.teacherId));
       const teacherSettings = teacherDoc.exists() ? (teacherDoc.data().summarySettings||{}) : {};
-
-      if (!teacherSettings.day) continue; // teacher hasn't set up yet
+      if (!teacherSettings.day) continue;
 
       const sendDate = new Date(`${ms}-${teacherSettings.day.toString().padStart(2,'0')}T${teacherSettings.time||'09:00'}`);
       const windowEnd = new Date(sendDate.getTime() + 24*60*60*1000);
-      const now2 = new Date();
-      const isOpen = now2 >= sendDate && now2 < windowEnd;
+      const isOpen = now >= sendDate && now < windowEnd;
 
       const summaryKey = `${ms}_${cd.id}_${CU.uid}`;
       const existingDoc = await getDoc(doc(db,'monthlySummary',summaryKey));
       const existing = existingDoc.exists() ? existingDoc.data() : null;
 
+      const lastSentAt = teacherSettings.lastSentAt;
+      const needsNewResponse = isOpen && lastSentAt && existing && existing.submittedAt &&
+        lastSentAt.seconds > existing.submittedAt.seconds;
+
+      hasActive = true;
       const card = document.createElement('div'); card.className='card';
-      card.innerHTML=`<div class="card-label">${classData.name} · ${sendDate.toLocaleString('en',{month:'long',year:'numeric'})}</div>
-        ${existing ? `<div style="font-size:13px;color:var(--success);margin-bottom:8px">✓ Response saved</div>` : isOpen ? `<div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">Survey is open for ${Math.round((windowEnd-now2)/3600000)} more hour(s)</div>` : `<div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">Survey opens on the ${teacherSettings.day}${['st','nd','rd'][teacherSettings.day-1]||'th'} of each month</div>`}`;
+      const monthLabel = sendDate.toLocaleString('en',{month:'long',year:'numeric'});
+      card.innerHTML=`<div class="card-label">${classData.name} · ${monthLabel}</div>
+        ${(existing && !needsNewResponse) ? `<div style="font-size:13px;color:var(--success);margin-bottom:8px">Response saved</div>` :
+          isOpen ? `<div style="font-size:13px;color:var(--gold);margin-bottom:8px">Survey is open — ${Math.round((windowEnd-now)/3600000)} hour(s) remaining</div>` :
+          `<div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">Opens on the ${teacherSettings.day}${teacherSettings.day===1?'st':teacherSettings.day===2?'nd':teacherSettings.day===3?'rd':'th'} of each month</div>`}`;
 
       if (isOpen) {
-        const btn = document.createElement('button'); btn.className='btn btn-primary';
-        btn.textContent = existing ? '✏ Edit Response' : '+ Fill Out Survey';
-        btn.onclick = () => openSummaryRespond(summaryKey, existing, teacherSettings.paypalLink||'', classData.teacherId);
+        const btn = document.createElement('button'); btn.className='btn btn-primary'; btn.style.marginBottom='8px';
+        btn.textContent = (existing && !needsNewResponse) ? 'Edit Response' : 'Fill Out Survey';
+        btn.onclick = () => openSummaryRespond(summaryKey, needsNewResponse ? null : existing, teacherSettings.paypalLink||'', classData.teacherId);
         card.appendChild(btn);
       }
+
+      if (existing && existing.teacherComment) {
+        const commentBox = document.createElement('div'); commentBox.style.cssText='background:var(--gold-pale);border-radius:8px;padding:10px 12px;border:.5px solid rgba(201,146,42,.2);margin-top:8px';
+        commentBox.innerHTML=`<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">Teacher Comment</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${existing.teacherComment}</div>`;
+        card.appendChild(commentBox);
+      }
+
+      const allSnap = await getDocs(collection(db,'monthlySummary'));
+      const pastResponses = allSnap.docs.filter(d => d.id.includes(`_${cd.id}_${CU.uid}`) && d.data().submittedAt).sort((a,b)=>(b.data().submittedAt?.seconds||0) - (a.data().submittedAt?.seconds||0));
+      if (pastResponses.length > 0) {
+        const histBtn = document.createElement('button'); histBtn.className='btn btn-secondary'; histBtn.style.marginTop='8px'; histBtn.style.fontSize='12px';
+        histBtn.textContent=`View Past Responses (${pastResponses.length})`;
+        histBtn.onclick = () => openParentSummaryHistory(pastResponses, classData.name);
+        card.appendChild(histBtn);
+      }
+
       c.appendChild(card);
     }
 
-    if (!c.children.length || (c.children.length === 1 && c.children[0].classList.contains('empty'))) {
-      c.innerHTML='<div class="empty">No active surveys yet — your teacher hasn\'t set up a monthly summary.</div>';
-    }
+    if (!hasActive) c.innerHTML='<div class="empty">No active surveys yet.</div>';
   }
 };
 
@@ -3597,28 +3609,29 @@ window.saveSummarySettings = async () => {
   if (!time) { showToast('Please select a time'); return; }
   const settings = { day, time, savePaypal };
   if (savePaypal && paypalLink) settings.paypalLink = paypalLink;
-  else if (!savePaypal) settings.paypalLink = paypalLink; // use but don't save permanently
+  else if (!savePaypal) settings.paypalLink = paypalLink;
   await setDoc(doc(db,'users',CU.uid), { summarySettings: settings }, {merge:true});
   closeModal('summary-setup-modal');
-  showToast('Summary settings saved ✓');
+  showToast('Summary settings saved');
   loadSummaryScreen();
 };
 
 window.sendMonthlySummaryNow = async () => {
-  if (!confirm('Send monthly summary notification to all parents in your classes now?')) return;
+  if (!confirm('Send monthly summary notification to all parents now?')) return;
   const classSnap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
   let count = 0;
   for (const cd of classSnap.docs) {
-    const memberIds = cd.data().studentIds||[];
-    for (const uid of memberIds) {
+    for (const uid of cd.data().studentIds||[]) {
       const udoc = await getDoc(doc(db,'users',uid));
       if (udoc.exists() && udoc.data().role === 'parent') {
-        await pushToUser(uid, '📋 Monthly Summary', `${CU.displayName} has sent the monthly summary for ${cd.data().name}. Please fill it out within 24 hours.`, 'summaryOpen', '/?screen=summary');
+        await pushToUser(uid, 'Monthly Summary', `${CU.displayName} sent the monthly summary for ${cd.data().name}. Fill it out within 24 hours.`, 'summaryOpen', '/?screen=summary');
         count++;
       }
     }
   }
-  showToast(`Sent to ${count} ${pluralize(count,'parent')} ✓`);
+  await setDoc(doc(db,'users',CU.uid), { summarySettings: { lastSentAt: serverTimestamp() } }, {merge:true});
+  showToast(`Sent to ${count} ${pluralize(count,'parent')}`);
+  loadSummaryScreen();
 };
 
 window.openSummaryRespond = (summaryKey, existing, paypalLink, teacherId) => {
@@ -3653,42 +3666,81 @@ window.submitSummaryResponse = async () => {
   const summaryKey = $('summary-respond-modal').dataset.key;
   const teacherId = $('summary-respond-modal').dataset.teacher;
   if (!summaryPaymentSelection) { showToast('Please answer the payment question'); return; }
+  const now = new Date();
+  const month = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
   await setDoc(doc(db,'monthlySummary',summaryKey), {
     parentId: CU.uid, parentName: CU.displayName, parentEmail: CU.email,
     payment: summaryPaymentSelection, practice, feedback,
-    submittedAt: serverTimestamp(), month: summaryKey.split('_')[0]
-  });
-  // Notify teacher
-  await pushToUser(teacherId, `📋 ${CU.displayName} responded to monthly summary`, `Payment: ${summaryPaymentSelection==='yes'?'✓ Paid':'✗ Not paid'}`, 'summaryResponse', '/?screen=summary');
+    submittedAt: serverTimestamp(), month
+  }, {merge:true});
+  await pushToUser(teacherId, `${CU.displayName} responded to monthly summary`, `Payment: ${summaryPaymentSelection==='yes'?'Paid':'Not paid'}`, 'summaryResponse', '/?screen=summary');
   closeModal('summary-respond-modal');
-  showToast('Response saved ✓');
+  showToast('Response saved');
   loadSummaryScreen();
 };
 
 window.openSummaryResponses = async (month) => {
-  $('summary-responses-title').textContent = new Date(month+'-01').toLocaleString('en',{month:'long',year:'numeric'});
+  const d = new Date(month+'-02');
+  $('summary-responses-title').textContent = d.toLocaleString('en',{month:'long',year:'numeric'});
   const body = $('summary-responses-body');
   body.innerHTML = '<div class="empty">Loading...</div>';
   openPanel('panel-summary-responses');
 
   const snap = await getDocs(collection(db,'monthlySummary'));
-  const responses = snap.docs.filter(d=>d.id.startsWith(month)).map(d=>d.data());
+  const responses = snap.docs.filter(d=>d.data().month===month).map(d=>({id:d.id,...d.data()}));
   body.innerHTML = '';
-
   if (!responses.length) { body.innerHTML='<div class="empty">No responses yet.</div>'; return; }
 
-  responses.forEach(r => {
-    const card = document.createElement('div'); card.className='card';
-    card.innerHTML=`<div style="font-size:15px;font-weight:500;color:var(--text-dark);margin-bottom:10px">${r.parentName||'Parent'} <span style="font-size:11px;color:var(--text-soft)">${r.parentEmail||''}</span></div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:${r.payment==='yes'?'var(--success-bg)':'var(--danger-bg)'};color:${r.payment==='yes'?'var(--success)':'var(--danger)'}">💳 ${r.payment==='yes'?'Paid':'Not paid'}</span>
-      </div>
+  for (const r of responses) {
+    const card = document.createElement('div'); card.className='card'; card.style.marginBottom='12px';
+    const submitDate = r.submittedAt ? new Date(r.submittedAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+    card.innerHTML=`
+      <div style="font-size:15px;font-weight:500;color:var(--text-dark);margin-bottom:10px">${r.parentName||'Parent'} <span style="font-size:11px;color:var(--text-soft)">${r.parentEmail||''}</span></div>
+      <div style="margin-bottom:10px"><span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:${r.payment==='yes'?'var(--success-bg)':'var(--danger-bg)'};color:${r.payment==='yes'?'var(--success)':'var(--danger)'}">💳 ${r.payment==='yes'?'Paid':'Not paid'}</span></div>
       ${r.practice?`<div style="margin-bottom:8px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);margin-bottom:3px">Practice</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.practice}</div></div>`:''}
-      ${r.feedback?`<div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);margin-bottom:3px">Feedback</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.feedback}</div></div>`:''}
-      <div style="font-size:11px;color:var(--text-soft);margin-top:8px">${r.submittedAt ? new Date(r.submittedAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : ''}</div>`;
+      ${r.feedback?`<div style="margin-bottom:8px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);margin-bottom:3px">Feedback</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.feedback}</div></div>`:''}
+      <div style="font-size:11px;color:var(--text-soft);margin-bottom:12px">${submitDate}</div>
+      <div style="background:var(--gold-pale);border-radius:8px;padding:10px 12px;border:.5px solid rgba(201,146,42,.2)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:6px">Your Comment</div>
+        <div class="field-voice" style="position:relative">
+          <textarea id="tc-${r.id}" style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-mid);resize:none;line-height:1.5;padding-right:40px" rows="2" placeholder="Add a comment for this parent...">${r.teacherComment||''}</textarea>
+          <button class="mic-btn" id="mic-tc-${r.id}" onclick="toggleVoice('tc-${r.id}','mic-tc-${r.id}')" style="bottom:8px;right:4px"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 01-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button onclick="saveTeacherSummaryComment('${r.id}','${r.parentId}')" style="background:var(--maroon);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px">Save Comment</button>
+      </div>`;
+    body.appendChild(card);
+  }
+};
+
+window.saveTeacherSummaryComment = async (docId, parentId) => {
+  const text = document.getElementById('tc-'+docId)?.value.trim();
+  if (text === undefined) return;
+  await setDoc(doc(db,'monthlySummary',docId), { teacherComment: text }, {merge:true});
+  if (text && parentId) await pushToUser(parentId, 'Teacher commented on your monthly summary', text.substring(0,80), 'summaryOpen', '/?screen=summary');
+  showToast('Comment saved');
+};
+
+window.openParentSummaryHistory = (responseDocs, className) => {
+  $('summary-responses-title').textContent = `${className} — History`;
+  const body = $('summary-responses-body');
+  body.innerHTML = '';
+  openPanel('panel-summary-responses');
+  if (!responseDocs.length) { body.innerHTML='<div class="empty">No past responses.</div>'; return; }
+  responseDocs.forEach(d => {
+    const r = d.data();
+    const month = r.month ? new Date(r.month+'-02').toLocaleString('en',{month:'long',year:'numeric'}) : '';
+    const submitDate = r.submittedAt ? new Date(r.submittedAt.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+    const card = document.createElement('div'); card.className='card'; card.style.marginBottom='12px';
+    card.innerHTML=`
+      <div style="font-size:13px;font-weight:500;color:var(--text-soft);margin-bottom:8px">${month} · ${submitDate}</div>
+      <span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:${r.payment==='yes'?'var(--success-bg)':'var(--danger-bg)'};color:${r.payment==='yes'?'var(--success)':'var(--danger)'}">💳 ${r.payment==='yes'?'Paid':'Not paid'}</span>
+      ${r.practice?`<div style="margin-top:10px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);margin-bottom:3px">Practice</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.practice}</div></div>`:''}
+      ${r.feedback?`<div style="margin-top:8px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);margin-bottom:3px">Feedback</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.feedback}</div></div>`:''}
+      ${r.teacherComment?`<div style="background:var(--gold-pale);border-radius:8px;padding:8px 10px;margin-top:10px;border:.5px solid rgba(201,146,42,.2)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:3px">Teacher Comment</div><div style="font-size:13px;color:var(--text-mid);line-height:1.5">${r.teacherComment}</div></div>`:''}`;
     body.appendChild(card);
   });
 };
+
 window.respondFamilyRequest = async (requestId, fromId, accept) => {
   if (accept) {
     const reqDoc = await getDoc(doc(db,'familyRequests',requestId));
