@@ -3551,21 +3551,22 @@ window.loadSummaryScreen = async () => {
       const teacherSettings = teacherDoc.exists() ? (teacherDoc.data().summarySettings||{}) : {};
       if (!teacherSettings.day) continue;
 
-      const sendDate = new Date(`${ms}-${teacherSettings.day.toString().padStart(2,'0')}T${teacherSettings.time||'09:00'}`);
-      const windowEnd = new Date(sendDate.getTime() + 24*60*60*1000);
-      const isOpen = now >= sendDate && now < windowEnd;
+      const lastSentAt = teacherSettings.lastSentAt;
+      // Window is 24hrs from when teacher actually sent, not the scheduled date
+      const windowStart = lastSentAt ? new Date(lastSentAt.seconds * 1000) : sendDate;
+      const windowEnd = new Date(windowStart.getTime() + 24*60*60*1000);
+      const isOpen = now >= windowStart && now < windowEnd;
 
       const summaryKey = `${ms}_${cd.id}_${CU.uid}`;
       const existingDoc = await getDoc(doc(db,'monthlySummary',summaryKey));
       const existing = existingDoc.exists() ? existingDoc.data() : null;
 
-      const lastSentAt = teacherSettings.lastSentAt;
       const needsNewResponse = isOpen && lastSentAt && existing && existing.submittedAt &&
         lastSentAt.seconds > existing.submittedAt.seconds;
 
       hasActive = true;
       const card = document.createElement('div'); card.className='card';
-      const monthLabel = sendDate.toLocaleString('en',{month:'long',year:'numeric'});
+      const monthLabel = windowStart.toLocaleString('en',{month:'long',year:'numeric'});
       card.innerHTML=`<div class="card-label">${classData.name} · ${monthLabel}</div>
         ${(existing && !needsNewResponse) ? `<div style="font-size:13px;color:var(--success);margin-bottom:8px">Response saved</div>` :
           isOpen ? `<div style="font-size:13px;color:var(--gold);margin-bottom:8px">Survey is open — ${Math.round((windowEnd-now)/3600000)} hour(s) remaining</div>` :
