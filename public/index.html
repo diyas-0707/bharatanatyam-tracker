@@ -3604,7 +3604,8 @@ window.loadSummaryScreen = async () => {
 window.saveSummarySettings = async () => {
   const day = parseInt($('summary-day').value);
   const time = $('summary-time').value;
-  const paypalLink = $('summary-paypal').value.trim();
+  const rawLink = $('summary-paypal').value.trim();
+  const paypalLink = rawLink && !rawLink.startsWith('http') ? 'https://'+rawLink : rawLink;
   const savePaypal = $('summary-save-paypal').checked;
   if (!day || day < 1 || day > 28) { showToast('Enter a day between 1 and 28'); return; }
   if (!time) { showToast('Please select a time'); return; }
@@ -3644,7 +3645,10 @@ window.openSummaryRespond = (summaryKey, existing, paypalLink, teacherId) => {
   $('payment-no-btn').style.background = summaryPaymentSelection==='no' ? 'var(--danger)' : '';
   $('payment-no-btn').style.color = summaryPaymentSelection==='no' ? '#fff' : '';
   $('payment-link-row').style.display = (summaryPaymentSelection==='no' && paypalLink) ? 'block' : 'none';
-  if (paypalLink) $('payment-link').href = paypalLink;
+  if (paypalLink) {
+    const fullLink = paypalLink.startsWith('http') ? paypalLink : 'https://'+paypalLink;
+    $('payment-link').href = fullLink;
+  }
   $('summary-respond-modal').dataset.key = summaryKey;
   $('summary-respond-modal').dataset.teacher = teacherId;
   $('summary-respond-modal').dataset.paypal = paypalLink;
