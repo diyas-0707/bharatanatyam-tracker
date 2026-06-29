@@ -29,6 +29,57 @@ img{border:none;display:block}
   --border:rgba(107,30,30,0.12);
   --shadow:0 2px 16px rgba(107,30,30,0.10);
 }
+
+<style id="theme-override"></style>
+
+<script>
+const THEMES = {
+  maroon: null, // default, no override needed
+  midnight: {
+    '--maroon':'#7B9CCA','--maroon-deep':'#2C3E6B','--maroon-soft':'#5B7AB0',
+    '--gold':'#A89CCC','--gold-light':'#C4B8E8','--gold-pale':'#1E2A4A',
+    '--cream':'#0F1629','--warm-white':'#141E35',
+    '--text-dark':'#E8EEF8','--text-mid':'#A0B0D0','--text-soft':'#6070A0',
+    '--card-bg':'#1A2540','--surface':'#1E2A4A',
+    '--border':'rgba(123,156,202,0.15)','--shadow':'0 2px 16px rgba(0,0,0,0.4)'
+  },
+  forest: {
+    '--maroon':'#2D6A4F','--maroon-deep':'#1B4332','--maroon-soft':'#40916C',
+    '--gold':'#B7950B','--gold-light':'#D4AC0D','--gold-pale':'#FEFDE7',
+    '--cream':'#F0F7EE','--warm-white':'#F6FBF4',
+    '--text-dark':'#0A1A0F','--text-mid':'#2D5A3D','--text-soft':'#7A9A82',
+    '--card-bg':'#FFFFFF','--surface':'#F0F7EE',
+    '--border':'rgba(45,106,79,0.15)','--shadow':'0 2px 16px rgba(45,106,79,0.10)'
+  },
+  rose: {
+    '--maroon':'#9B4F6B','--maroon-deep':'#6B2D47','--maroon-soft':'#B8708A',
+    '--gold':'#C4956A','--gold-light':'#DDB896','--gold-pale':'#FDF0E8',
+    '--cream':'#FDF5F0','--warm-white':'#FFFAF7',
+    '--text-dark':'#2A0F1A','--text-mid':'#6B3A50','--text-soft':'#A07080',
+    '--card-bg':'#FFFFFF','--surface':'#FDF5F0',
+    '--border':'rgba(155,79,107,0.12)','--shadow':'0 2px 16px rgba(155,79,107,0.10)'
+  },
+  ocean: {
+    '--maroon':'#1A6B7C','--maroon-deep':'#0D4A58','--maroon-soft':'#2E8FA0',
+    '--gold':'#E09B4A','--gold-light':'#F0B86A','--gold-pale':'#FEF6E8',
+    '--cream':'#EEF8FA','--warm-white':'#F5FBFC',
+    '--text-dark':'#0A1E24','--text-mid':'#2A5A66','--text-soft':'#6A96A0',
+    '--card-bg':'#FFFFFF','--surface':'#EEF8FA',
+    '--border':'rgba(26,107,124,0.15)','--shadow':'0 2px 16px rgba(26,107,124,0.10)'
+  }
+};
+
+function applyTheme(name) {
+  const vars = THEMES[name];
+  const el = document.getElementById('theme-override');
+  if (!vars) { if(el) el.textContent=''; return; }
+  el.textContent = ':root{' + Object.entries(vars).map(([k,v])=>`${k}:${v}`).join(';') + '}';
+}
+
+// Apply saved theme immediately on load
+const savedTheme = localStorage.getItem('appTheme')||'maroon';
+applyTheme(savedTheme);
+</script>
 html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text-dark);overflow:hidden;touch-action:manipulation}
 #app{max-width:430px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--warm-white);overflow:hidden}
 
@@ -2715,13 +2766,55 @@ async function loadSettings() {
   signOutRow.onclick = () => doSignOut();
   sec.appendChild(signOutRow);
 
+  c.appendChild(sec);
+
+  // Theme picker
+  const themeSec = document.createElement('div'); themeSec.className='settings-section';
+  const themeHeader = document.createElement('div');
+  themeHeader.style.cssText='padding:16px 20px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);font-weight:500';
+  themeHeader.textContent='Theme';
+  themeSec.appendChild(themeHeader);
+
+  const themeGrid = document.createElement('div');
+  themeGrid.style.cssText='display:flex;gap:12px;flex-wrap:wrap;padding:0 20px 16px';
+  const currentTheme = localStorage.getItem('appTheme')||'maroon';
+  const themeOptions = [
+    {id:'maroon', label:'Classic', color:'#6B1E1E', bg:'#FDF8F0'},
+    {id:'midnight', label:'Midnight', color:'#7B9CCA', bg:'#141E35'},
+    {id:'forest', label:'Forest', color:'#2D6A4F', bg:'#F0F7EE'},
+    {id:'rose', label:'Rose', color:'#9B4F6B', bg:'#FDF5F0'},
+    {id:'ocean', label:'Ocean', color:'#1A6B7C', bg:'#EEF8FA'},
+  ];
+  themeOptions.forEach(t => {
+    const btn = document.createElement('button');
+    btn.style.cssText=`display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0`;
+    const circle = document.createElement('div');
+    circle.style.cssText=`width:48px;height:48px;border-radius:50%;background:${t.bg};border:3px solid ${currentTheme===t.id?t.color:'transparent'};box-shadow:0 2px 8px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;transition:border .2s`;
+    const inner = document.createElement('div');
+    inner.style.cssText=`width:24px;height:24px;border-radius:50%;background:${t.color}`;
+    circle.appendChild(inner);
+    const lbl = document.createElement('div');
+    lbl.style.cssText=`font-size:11px;color:var(--text-soft);font-family:'DM Sans',sans-serif;font-weight:${currentTheme===t.id?'600':'400'}`;
+    lbl.textContent=t.label;
+    btn.appendChild(circle); btn.appendChild(lbl);
+    btn.onclick = () => {
+      localStorage.setItem('appTheme', t.id);
+      applyTheme(t.id);
+      loadSettings(); // refresh to show new active border
+    };
+    themeGrid.appendChild(btn);
+  });
+  themeSec.appendChild(themeGrid);
+  c.appendChild(themeSec);
+
+  const sec2 = document.createElement('div'); sec2.className='settings-section';
+
   // Feedback
   const feedbackRow = document.createElement('div'); feedbackRow.className='settings-row';
   feedbackRow.innerHTML=`<div class="settings-row-icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="settings-row-label">Give Feedback / Ask a Question</div><div class="settings-row-arrow">›</div>`;
   feedbackRow.onclick = () => { $('feedback-text').value=''; openModal('app-feedback-modal'); };
-  sec.appendChild(feedbackRow);
-
-  c.appendChild(sec);
+  sec2.appendChild(feedbackRow);
+  c.appendChild(sec2);
 
   // Notification preferences
   const notifPrefsDoc = await getDoc(doc(db,'users',CU.uid));
