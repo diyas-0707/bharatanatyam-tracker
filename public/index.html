@@ -3599,9 +3599,6 @@ window.loadSummaryScreen = async () => {
     setupCard.appendChild(setupBtn);
     c.appendChild(setupCard);
 
-    const sendBtn = document.createElement('button'); sendBtn.className='btn btn-secondary'; sendBtn.textContent='Send Summary Now';
-    sendBtn.onclick = () => sendMonthlySummaryNow();
-    c.appendChild(sendBtn);
 
     const lbl = document.createElement('div'); lbl.className='section-label'; lbl.style.marginTop='8px'; lbl.textContent='Responses by Month';
     c.appendChild(lbl);
