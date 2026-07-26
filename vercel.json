@@ -1,0 +1,19 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron-summary",
+      "schedule": "* * * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src *; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://www.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src * data: blob:; connect-src *; worker-src 'self' blob:;"
+        }
+      ]
+    }
+  ]
+}
