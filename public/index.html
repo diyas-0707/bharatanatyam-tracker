@@ -791,6 +791,11 @@ applyTheme(localStorage.getItem('appTheme')||'maroon');
         <input type="checkbox" id="announce-pin" style="width:16px;height:16px;accent-color:var(--maroon)">
         <label for="announce-pin" style="font-size:13px;color:var(--text-soft);cursor:pointer">📌 Pin this announcement</label>
       </div>
+      <div class="field" style="margin-top:12px"><label>Attach Files (optional)</label>
+        <div id="announce-files-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <button type="button" onclick="document.getElementById('announce-file-input').click()" class="btn btn-secondary" style="padding:9px;font-size:13px">📎 Choose Files</button>
+        <input type="file" id="announce-file-input" multiple style="display:none" onchange="previewAnnounceFiles(this)">
+      </div>
       <div class="modal-btns" style="margin-top:12px">
         <button class="btn btn-secondary" onclick="closeModal('post-announce-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="postAnnouncement()">Post</button>
@@ -1517,7 +1522,8 @@ async function renderStream(body) {
         const avatarHtml = teacherPhoto ? `<img src="${teacherPhoto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div class="stream-avatar">${(item.teacherName||'T')[0]}</div>`;
         const safeBody = (item.body||item.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         const safeTitle = (item.title||'Assignment').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${safeTitle}</strong><br>`:''} ${safeBody}</div><span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
+        const itemFilesHtml = (item.files||[]).length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${item.files.map(f=>`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--maroon);background:var(--gold-pale);border-radius:6px;padding:3px 9px;text-decoration:none">📎 ${f.name}</a>`).join('')}</div>` : '';
+        post.innerHTML=`<div class="stream-post-header">${avatarHtml}<div class="stream-meta"><div class="stream-author">${item.teacherName||'Teacher'}${pinnedBadge}</div><div class="stream-date">${dt}</div></div>${isT ? editDeleteBtns : ''}</div><div class="stream-body">${item._type==='assign'?`<strong>${safeTitle}</strong><br>`:''} ${safeBody}</div>${itemFilesHtml}<span class="stream-tag ${item._type==='announce'?'tag-announce':'tag-assign'}">${item._type==='announce'?'Announcement':'Assignment'}</span>`;
         const deleteBtn = post.querySelector('.delete-item-btn');
         if (deleteBtn) {
           deleteBtn.addEventListener('click', () => {
@@ -1780,15 +1786,39 @@ window.saveAttendance = async () => {
 };
 
 // ── POST ACTIONS ──
+let announceFilesToUpload = [];
+window.previewAnnounceFiles = (input) => {
+  announceFilesToUpload = Array.from(input.files);
+  const preview = $('announce-files-preview');
+  preview.innerHTML = '';
+  announceFilesToUpload.forEach(f => {
+    const tag = document.createElement('span');
+    tag.style.cssText='font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
+    tag.textContent='📎 '+f.name;
+    preview.appendChild(tag);
+  });
+};
+
 window.postAnnouncement = async () => {
   stopVoice();
   const body=$('announce-body').value.trim();
   const pinned=$('announce-pin').checked;
-  if(!body) return;
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+  if(!body && !announceFilesToUpload.length) return;
+  let files=[];
+  if(announceFilesToUpload.length){
+    showToast('Uploading files...');
+    for(const f of announceFilesToUpload){
+      try { const res=await uploadToCloudinary(f); files.push({name:f.name,url:res.secure_url}); }
+      catch(e){ showToast('Upload failed: '+e.message); return; }
+    }
+  }
+  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, files, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
   const memberIds = await getClassMemberIds(currentClassId);
   await notifyClassMembers(currentClassId, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
   $('announce-body').value=''; $('announce-pin').checked=false;
+  announceFilesToUpload=[];
+  if($('announce-files-preview'))$('announce-files-preview').innerHTML='';
+  if($('announce-file-input'))$('announce-file-input').value='';
   closeModal('post-announce-modal');
   showToast('Announcement posted ✓');
   switchClassTab('stream');
