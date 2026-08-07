@@ -1787,16 +1787,24 @@ window.saveAttendance = async () => {
 
 // ── POST ACTIONS ──
 let announceFilesToUpload = [];
-window.previewAnnounceFiles = (input) => {
-  announceFilesToUpload = Array.from(input.files);
+function renderAnnounceFilesPreview() {
   const preview = $('announce-files-preview');
   preview.innerHTML = '';
-  announceFilesToUpload.forEach(f => {
+  announceFilesToUpload.forEach((f, i) => {
     const tag = document.createElement('span');
-    tag.style.cssText='font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
-    tag.textContent='📎 '+f.name;
+    tag.style.cssText='display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--surface);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text-dark)';
+    tag.innerHTML = `📎 ${f.name}<button onclick="removeAnnounceFile(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:13px;padding:0 0 0 2px;line-height:1">✕</button>`;
     preview.appendChild(tag);
   });
+}
+window.previewAnnounceFiles = (input) => {
+  announceFilesToUpload = Array.from(input.files);
+  renderAnnounceFilesPreview();
+};
+window.removeAnnounceFile = (index) => {
+  announceFilesToUpload.splice(index, 1);
+  renderAnnounceFilesPreview();
+  if (!announceFilesToUpload.length) $('announce-file-input').value = '';
 };
 
 window.postAnnouncement = async () => {
