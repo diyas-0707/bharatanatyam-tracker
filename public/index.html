@@ -445,6 +445,7 @@ applyTheme(localStorage.getItem('appTheme')||'maroon');
       <div class="empty">Loading...</div>
     </div>
     <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-gold" id="announce-all-btn" style="display:none" onclick="openAnnounceAll()">📢 Announce to All Classes</button>
       <button class="btn btn-dashed" id="create-class-btn" style="display:none" onclick="openModal('create-class-modal')">+ Create New Class</button>
       <button class="btn btn-dashed" id="join-code-btn" style="display:none" onclick="openModal('join-code-modal')"># Join with Code</button>
     </div>
@@ -1196,6 +1197,7 @@ function setupMain() {
   $('cls-ornament').textContent = isT ? '✦ Teacher Portal ✦' : '✦ My Classes ✦';
   $('cls-title').textContent = isT ? 'My Classes' : 'Enrolled Classes';
   $('create-class-btn').style.display = isT ? 'block' : 'none';
+  $('announce-all-btn').style.display = isT ? 'block' : 'none';
   // Tab visibility and order per role
   // Student:  Home(1) Classes(2) Log(3) Chat(4) Settings(5)
   // Parent:   Home(1) Classes(2) Family(3) Summary(4) Chat(5) Settings(6)
@@ -1477,7 +1479,7 @@ async function renderStream(body) {
   if (isT) {
     const actions = document.createElement('div');
     actions.style.cssText='display:flex;gap:8px';
-    actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px" onclick="openModal('post-announce-modal')">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button><button class="btn btn-secondary" style="font-size:13px;padding:11px" onclick="openCreatePoll()">📊 Poll</button>`;
+    actions.innerHTML=`<button class="btn btn-primary" style="font-size:13px;padding:11px" onclick="openAnnounceOne()">+ Announce</button><button class="btn btn-gold" style="font-size:13px;padding:11px" onclick="openModal('post-assign-modal')">+ Assignment</button><button class="btn btn-secondary" style="font-size:13px;padding:11px" onclick="openCreatePoll()">📊 Poll</button>`;
     wrap.appendChild(actions);
   }
 
@@ -1807,6 +1809,20 @@ window.removeAnnounceFile = (index) => {
   if (!announceFilesToUpload.length) $('announce-file-input').value = '';
 };
 
+let announceToAll = false;
+window.openAnnounceOne = () => {
+  announceToAll = false;
+  const t = document.querySelector('#post-announce-modal .modal-title');
+  if (t) t.textContent = 'Post Announcement';
+  openModal('post-announce-modal');
+};
+window.openAnnounceAll = () => {
+  announceToAll = true;
+  const t = document.querySelector('#post-announce-modal .modal-title');
+  if (t) t.textContent = 'Announce to All Classes';
+  openModal('post-announce-modal');
+};
+
 window.postAnnouncement = async () => {
   stopVoice();
   const body=$('announce-body').value.trim();
@@ -1820,16 +1836,29 @@ window.postAnnouncement = async () => {
       catch(e){ showToast('Upload failed: '+e.message); return; }
     }
   }
-  await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, files, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
-  const memberIds = await getClassMemberIds(currentClassId);
-  await notifyClassMembers(currentClassId, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
+  if (announceToAll) {
+    const snap = await getDocs(query(collection(db,'classes'), where('teacherId','==',CU.uid)));
+    const activeClasses = snap.docs.filter(d=>!d.data().deleted);
+    if (!activeClasses.length) { showToast('No classes to announce to yet'); return; }
+    showToast(`Posting to ${activeClasses.length} ${pluralize(activeClasses.length,'class','classes')}...`);
+    for (const cd of activeClasses) {
+      await addDoc(collection(db,'classes',cd.id,'announcements'), { body, pinned, files, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+      await notifyClassMembers(cd.id, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${cd.id}`);
+    }
+    showToast(`Announcement posted to ${activeClasses.length} ${pluralize(activeClasses.length,'class','classes')} ✓`);
+  } else {
+    await addDoc(collection(db,'classes',currentClassId,'announcements'), { body, pinned, files, teacherId:CU.uid, teacherName:CU.displayName, createdAt:serverTimestamp() });
+    await notifyClassMembers(currentClassId, `📢 New Announcement`, `${CU.displayName}: ${body.substring(0,80)}`, 'announcements', `/?screen=stream&class=${currentClassId}`);
+    showToast('Announcement posted ✓');
+  }
   $('announce-body').value=''; $('announce-pin').checked=false;
   announceFilesToUpload=[];
   if($('announce-files-preview'))$('announce-files-preview').innerHTML='';
   if($('announce-file-input'))$('announce-file-input').value='';
   closeModal('post-announce-modal');
-  showToast('Announcement posted ✓');
-  switchClassTab('stream');
+  const wasAll = announceToAll;
+  announceToAll = false;
+  if (!wasAll && document.getElementById('panel-class').classList.contains('open')) switchClassTab('stream');
 };
 window.postAssignment = async () => {
   stopVoice();
